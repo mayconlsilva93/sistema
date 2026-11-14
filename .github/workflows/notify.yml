@@ -1,4 +1,4 @@
-name: notificações
+name: DROM · Notificações de mudança
 on:
   push:
     paths: ["*/d.json","*/subs.json"]

@@ -1,4 +1,4 @@
-name: avisos de agenda
+name: DROM · Hoje tem show e Shows da semana
 on:
   schedule:
     - cron: "50 11 * * *"   # 8:50 BRT → espera e envia "Hoje tem show!" às 9h

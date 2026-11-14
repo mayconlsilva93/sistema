@@ -1,4 +1,4 @@
-name: lembrete 1 hora antes
+name: DROM · Lembrete 1 hora antes
 on:
   schedule:
     - cron: "20 * * * *"

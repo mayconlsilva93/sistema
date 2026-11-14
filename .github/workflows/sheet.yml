@@ -1,4 +1,4 @@
-name: planilha → apps
+name: DROM · Planilha → apps
 on:
   workflow_dispatch:
     inputs:

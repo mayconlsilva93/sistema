@@ -1,4 +1,4 @@
-name: notificação de teste
+name: DROM · Notificação de teste
 on:
   workflow_dispatch:
     inputs:
