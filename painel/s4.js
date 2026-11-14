@@ -234,8 +234,10 @@ CTG=rows=>{var g={};rows.forEach(o=>(g[o.k]=g[o.k]||[]).push(o));return Object.k
  return{k:k,name:CTN[k]||top1(r.map(s=>s[18].trim())),phones:ds,phone:ds.map(PF).join(" · "),city:top1(r.map(s=>cu(s[3]||""))),tipo:top1(r.map(s=>s[16])),n:r.length,rows:r,venues:[...new Set(r.map(s=>s[17]))],events:[...new Set(r.map(s=>s[21]).filter(Boolean))],arts:[...new Set(r.map(s=>s[1]))],lk:l.t,fut:!isR(l.s)}})},
 CTS=CTG(CTR);
 var QN=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
-function QM(c,q){var T=QN(q).split(/[\s,;.\/()\-]+/).filter(Boolean);if(!T.length)return true;var nm=QN(c.name),ph=c.phones.join(" ");
- return T.every(t=>{var d=t.replace(/\D/g,"");return nm.includes(t)||(d.length>=2&&d===t&&ph.includes(d))})}
+function QM(c,q){var T=QN(q).split(/[\s,;()]+/).filter(Boolean);if(!T.length)return true;
+ if(!c._h){var ds=pad(c.lk%100)+"/"+pad((Math.floor(c.lk/100)-1)%12+1)+"/"+YF(Math.floor(c.lk/100));
+  c._h=QN([c.name,c.city,CAT[c.tipo],c.n+" contrataç",c.venues.join(" "),c.events.join(" "),c.arts.map(i=>AR[i]).join(" "),ds,c.fut?"a realizar":"",c.phones.map(PF).join(" ")].join(" | "));c._d=c.phones.join(" ").replace(/[^\d ]/g,"")}
+ return T.every(t=>{var d=t.replace(/\D/g,"");return c._h.includes(t)||(d.length>=2&&/^[\d+\-.()]+$/.test(t)&&c._d.replace(/ /g,"|").split("|").some(p=>p.includes(d)))})}
 function LMF(lk,v){if(!v)return true;var m=Math.floor(lk/100),d=new Date(YF(m),(m-1)%12,lk%100),T=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
  if(v[0]==="y")return d.getFullYear()===+v.slice(1);if(d>T)return false;var L=new Date(T);if(v[0]==="d")L.setDate(L.getDate()-+v.slice(1));else L.setMonth(L.getMonth()-+v.slice(1));return d>=L}
 function renderC(){
