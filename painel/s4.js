@@ -236,7 +236,7 @@ CTS=CTG(CTR);
 var QN=t=>(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 function QM(c,q){var T=QN(q).split(/[\s,;()]+/).filter(Boolean);if(!T.length)return true;
  if(!c._h){var ds=pad(c.lk%100)+"/"+pad((Math.floor(c.lk/100)-1)%12+1)+"/"+YF(Math.floor(c.lk/100));
-  c._h=QN([c.name,c.city,CAT[c.tipo],c.n+" contrataç",c.venues.join(" "),c.events.join(" "),c.arts.map(i=>AR[i]).join(" "),ds,c.fut?"a realizar":"",c.phones.map(PF).join(" ")].join(" | "));c._d=c.phones.join(" ").replace(/[^\d ]/g,"")}
+  c._h=QN([c.name,c.city,CAT[c.tipo],c.n+" contrataç",c.venues.join(" "),c.events.join(" "),c.arts.map(i=>AR[i]).join(" "),ds,c.fut?"a realizar":"",c.phones.map(PF).join(" "),(c.rows||[]).map(s=>[s[2],s[17],s[21],s[18]].join(" ")).join(" ")].join(" | "));c._d=c.phones.join(" ").replace(/[^\d ]/g,"")}
  return T.every(t=>{var d=t.replace(/\D/g,"");return c._h.includes(t)||(d.length>=2&&/^[\d+\-.()]+$/.test(t)&&c._d.replace(/ /g,"|").split("|").some(p=>p.includes(d)))})}
 function LMF(lk,v){if(!v)return true;var m=Math.floor(lk/100),d=new Date(YF(m),(m-1)%12,lk%100),T=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
  if(v[0]==="y")return d.getFullYear()===+v.slice(1);if(d>T)return false;var L=new Date(T);if(v[0]==="d")L.setDate(L.getDate()-+v.slice(1));else L.setMonth(L.getMonth()-+v.slice(1));return d>=L}
