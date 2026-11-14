@@ -33,6 +33,10 @@ async function go(c){CFG=c;$("lk").remove();document.body.classList.remove("lock
  draw();icons();
  await Promise.all(c.apps.map(async a=>{try{var r=await fetch(a.f+"/d.json",{cache:"no-store"}),d=await r.json();var dd=await dec(AK,d.iv,d.ct);DATA[a.f]={S:dd.S||[],OT:dd.OT||[],BK:dd.BK||[],up:d.up||""}}catch(e){DATA[a.f]={S:[],up:"",err:1}}}));
  notif();draw();if(TAB!=="h")hview();setTimeout(keepSub,1500)}
+/*RT*/var RTB=0,RTS={};async function hrt(){if(RTB||!AK||!CFG||!CFG.apps)return;RTB=1;try{var ch=0;await Promise.all(CFG.apps.map(async a=>{try{var r=await fetch(a.f+"/d.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;var d=await r.json(),g=d.iv+"|"+(d.up||"");if(RTS[a.f]===undefined){RTS[a.f]=g;if(DATA[a.f]&&DATA[a.f].up===(d.up||""))return}if(RTS[a.f]===g)return;RTS[a.f]=g;var dd=await dec(AK,d.iv,d.ct);DATA[a.f]={S:dd.S||[],OT:dd.OT||[],BK:dd.BK||[],up:d.up||""};ch=1}catch(e){}}));
+ if(ch){var y=scrollY;notif();draw();if(TAB!=="h")hview();scrollTo(0,y);if(!pn.hidden)pdraw()}}finally{RTB=0}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)hrt()});addEventListener("focus",hrt);setInterval(()=>{if(!document.hidden)hrt()},180000);setTimeout(hrt,3000);
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.drom==="push"){hrt();setTimeout(hrt,40000);setTimeout(hrt,120000)}});
 var HIDE=ls.g("hide")||false,fm=v=>Number(v||0).toFixed(2).replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
 var nm=a=>a.n.replace(/^DJ /,"");
 function st(a){var d=DATA[a.f];if(!d)return null;var now=Date.now(),y=a.old?null:2026,A=d.S.filter(s=>a.old||(s[19]>=37&&s[19]<=48)),v=A.reduce((x,s)=>x+(+s[15]||0),0),

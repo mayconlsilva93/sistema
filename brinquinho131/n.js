@@ -49,4 +49,5 @@ if(log.some(x=>!x.r&&x.ts===now)){var t=document.createElement("div");t.classNam
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},window.DROMKEY,new TextEncoder().encode(JSON.stringify(s)))),b6=u=>btoa(String.fromCharCode.apply(null,u));
  await fetch(SURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:location.pathname.split("/").filter(Boolean).pop(),iv:b6(iv),ct:b6(ct)})});
  ls.s("subok",s.endpoint);ls.s("subt",Date.now())}catch(e){}})();
+window.DROMNADD=function(L){var t=Date.now();(L||[]).forEach(x=>log.unshift({t:x.t,b:x.b,ts:t,r:0}));log=log.slice(0,50);ls.s("log",log);ls.s("snap",S);badge();if(!pn.hidden)draw()};
 })();
