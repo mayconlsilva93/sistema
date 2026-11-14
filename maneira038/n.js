@@ -18,7 +18,8 @@ lo.onclick=()=>{var m=document.createElement("div");m.className="lom";m.innerHTM
  document.body.appendChild(m);m.querySelector(".loc").onclick=()=>m.remove();m.onclick=e=>{if(e.target===m)m.remove()};
  m.querySelector(".loy").onclick=()=>{try{var r=indexedDB.open("drom",1);r.onsuccess=()=>{try{var tx=r.result.transaction("k","readwrite");tx.objectStore("k").delete("maneira");tx.oncomplete=()=>location.reload();tx.onerror=()=>location.reload()}catch(e){location.reload()}};r.onerror=()=>location.reload()}catch(e){location.reload()}}};
 var pn=document.createElement("div");pn.className="npn";pn.hidden=true;document.body.appendChild(pn);
-function badge(){var n=log.filter(x=>!x.r).length;bell.querySelector("i").textContent=n?n>9?"9+":n:"";bell.classList.toggle("on",n>0)}
+function RDS(L,kf){try{var R=JSON.parse(localStorage.getItem("drom_rd")||"[]"),S=new Set(R),ch=0,lc=0;(L||[]).forEach(x=>{var k=kf(x);if(!k)return;if(x.r){if(!S.has(k)){S.add(k);R.push(k);ch=1}}else if(S.has(k)){x.r=1;lc=1}});if(ch)localStorage.setItem("drom_rd",JSON.stringify(R.slice(-400)));return lc}catch(e){return 0}}
+function badge(){if(RDS(log,x=>"maneira038|"+x.t+"|"+x.b))ls.s("log",log);var n=log.filter(x=>!x.r).length;bell.querySelector("i").textContent=n?n>9?"9+":n:"";bell.classList.toggle("on",n>0)}
 var esc=t=>String(t).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);
 function fd(ts){var d=new Date(ts);return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
 function pushOk(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window}
@@ -49,5 +50,6 @@ if(log.some(x=>!x.r&&x.ts===now)){var t=document.createElement("div");t.classNam
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},window.DROMKEY,new TextEncoder().encode(JSON.stringify(s)))),b6=u=>btoa(String.fromCharCode.apply(null,u));
  await fetch(SURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:location.pathname.split("/").filter(Boolean).pop(),iv:b6(iv),ct:b6(ct)})});
  ls.s("subok",s.endpoint);ls.s("subt",Date.now())}catch(e){}})();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)badge()});
 window.DROMNADD=function(L){var t=Date.now();(L||[]).forEach(x=>log.unshift({t:x.t,b:x.b,ts:t,r:0}));log=log.slice(0,50);ls.s("log",log);ls.s("snap",S);badge();if(!pn.hidden)draw()};
 })();

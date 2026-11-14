@@ -35,7 +35,7 @@ async function go(c){CFG=c;$("lk").remove();document.body.classList.remove("lock
  notif();draw();if(TAB!=="h")hview();setTimeout(keepSub,1500)}
 /*RT*/var RTB=0,RTS={};async function hrt(){if(RTB||!AK||!CFG||!CFG.apps)return;RTB=1;try{var ch=0;await Promise.all(CFG.apps.map(async a=>{try{var r=await fetch(a.f+"/d.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;var d=await r.json(),g=d.iv+"|"+(d.up||"");if(RTS[a.f]===undefined){RTS[a.f]=g;if(DATA[a.f]&&DATA[a.f].up===(d.up||""))return}if(RTS[a.f]===g)return;RTS[a.f]=g;var dd=await dec(AK,d.iv,d.ct);DATA[a.f]={S:dd.S||[],OT:dd.OT||[],BK:dd.BK||[],up:d.up||""};ch=1}catch(e){}}));
  if(ch){var y=scrollY;notif();draw();if(TAB!=="h")hview();scrollTo(0,y);if(!pn.hidden)pdraw()}}finally{RTB=0}}
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)hrt()});addEventListener("focus",hrt);setInterval(()=>{if(!document.hidden)hrt()},180000);setTimeout(hrt,3000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){hrt();if(LOG){badge();draw()}}});addEventListener("focus",hrt);setInterval(()=>{if(!document.hidden)hrt()},180000);setTimeout(hrt,3000);
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.drom==="push"){hrt();setTimeout(hrt,40000);setTimeout(hrt,120000)}});
 var HIDE=ls.g("hide")||false,fm=v=>Number(v||0).toFixed(2).replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
 var nm=a=>a.n.replace(/^DJ /,"");
@@ -87,7 +87,8 @@ function notif(){var now=Date.now(),snap=ls.g("snap")||{},rm=ls.g("rem")||{};LOG
   0});
  LOG=LOG.slice(0,50);ls.s("snap",snap);ls.s("rem",rm);ls.s("log",LOG);badge();
  var q=LOG.filter(x=>!x.r&&x.ts===now).length;if(q){var t=document.createElement("div");t.className="ntoast";t.textContent=(q===1?"1 novidade":q+" novidades")+" — toque no sino";document.body.appendChild(t);setTimeout(()=>t.remove(),5000)}}
-function badge(){var n=(LOG||[]).filter(x=>!x.r).length,b=$("bell");b.querySelector("i").textContent=n?n>9?"9+":n:"";b.classList.toggle("on",n>0)}
+function RDS(L,kf){try{var R=JSON.parse(localStorage.getItem("drom_rd")||"[]"),S=new Set(R),ch=0,lc=0;(L||[]).forEach(x=>{var k=kf(x);if(!k)return;if(x.r){if(!S.has(k)){S.add(k);R.push(k);ch=1}}else if(S.has(k)){x.r=1;lc=1}});if(ch)localStorage.setItem("drom_rd",JSON.stringify(R.slice(-400)));return lc}catch(e){return 0}}
+function badge(){if(RDS(LOG,x=>x.f?x.f+"|"+x.t.replace(/^\[[^\]]*\] /,"")+"|"+x.b:""))ls.s("log",LOG);var n=(LOG||[]).filter(x=>!x.r).length,b=$("bell");b.querySelector("i").textContent=n?n>9?"9+":n:"";b.classList.toggle("on",n>0)}
 var esc=t=>String(t).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);
 function fd(ts){var d=new Date(ts),p=n=>String(n).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+" "+p(d.getHours())+":"+p(d.getMinutes())}
 function pushOk(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window}
