@@ -20,6 +20,7 @@ function dromDiff(A,Bn,B){
     var ch=F.filter(f=>String(o[f[0]]??"")!==String(s[f[0]]??"")).map(f=>f[1]+" "+v(f[0],o[f[0]])+" → "+v(f[0],s[f[0]]));
     if(ch.length)out.push({k:"alt",t:"Alteração em show!",b:L+": "+ch.join("; ")});
     if(!o[21]&&s[21]>0&&!s[18])out.push({k:"pag",t:"Sinal pago!",b:L+": "+s[21]+"% - "+dromBRL(s[15]*s[21]/100)});
+    if(s[16]>0&&+(o[16]||0)!==+s[16])out.push({k:"pag",t:"Custos lançados",b:L+": "+dromBRL(s[16])});
     if(!o[18]&&s[18])out.push({k:"pag",t:"Cachê pago!",b:L+": "+(s[24]?"valor pendente":dromBRL(s[15]))+(s[18]!=="pago"?" - pago em "+s[18]:"")});
   });
   Object.keys(a).forEach(k=>{if(!b[k])out.push({k:"rem",t:"Show cancelado!",b:dromLn(a[k],B)})});

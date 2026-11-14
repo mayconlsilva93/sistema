@@ -1,5 +1,5 @@
 /* DROM · Sena — cache offline + notificações push */
-var C="drom-sena-v23";
+var C="drom-sena-v24";
 self.addEventListener("install",e=>self.skipWaiting());
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;
