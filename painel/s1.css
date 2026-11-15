@@ -8,7 +8,7 @@ main{max-width:1000px;margin:0 auto;padding:16px}
 h1{font-size:22px;margin:0}h1+p{color:var(--mu);margin:2px 0 14px}
 h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin:24px 0 8px}
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
-@media(min-width:1000px){#kp,#ykp{grid-template-columns:repeat(6,1fr)}}
+@media(min-width:1000px){#kp,#ykp{grid-template-columns:.7fr repeat(5,1fr)}}
 .k,.p{background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:12px 14px}
 .k small{color:var(--mu);display:block;font-size:12px}.k b{font-size:21px}.k span{color:var(--mu);font-size:12px;display:block}
 .r.rn{grid-template-columns:34px minmax(120px,1.3fr) 2fr auto}.no{color:var(--mu);font-weight:600;font-size:13px}.r{display:grid;grid-template-columns:minmax(120px,1.3fr) 2fr auto;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}

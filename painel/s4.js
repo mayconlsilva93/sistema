@@ -37,7 +37,7 @@ function KP(S,R,C,pend,best,pr,cur){var n=C.length,B=sm(S,6),Br=sm(R,6),Bc=sm(C,
  +K("Maior cachê",f(mx?mx[6]:0),mx?("0"+mx[0]).slice(-2)+"/"+("0"+((mx[14]-1)%12+1)).slice(-2)+" "+AR[mx[1]]+" - "+(mx[21]||mx[17]||mx[2])+" - "+cu(mx[3]):"",t10)
  +K("Artista destaque",tp.length?tp[0][0]:"-",tp.length?f(tp[0][1])+tp.slice(1).map(function(t){return"<br>"+t[0]+" "+f(t[1])}).join(""):"sem shows")
  +K(best[0],best[1],best[2],best[3])
- +K("Propostas",pr[0]+pr[1],pr[0]+" shows · "+pr[1]+" outras",prt)
+ +K("Propostas",pr[0]+pr[1],pr[0]+" shows<br>"+pr[1]+" outras",prt)
  +K("Contratos",S.filter(function(x){return x[9]==="S"}).length+" sim",P3.length+(P3.length===1?" pendente":" pendentes"))
  +K("Comissão média",(B?(sm(S,8)/B*100).toFixed(1).replace(".",","):"0")+"%",f(sm(S,8)/Math.max(1,S.length))+" por show")
  +K("Cachê médio",f(avg(S)),n?"Realizados "+f(avg(R))+"<br>A realizar "+f(avg(C)):"por show")
