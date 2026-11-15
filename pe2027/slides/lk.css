@@ -1,0 +1,59 @@
+[hidden]{display:none!important}body.locked #pnw{display:none}
+#lk{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg,#f4f4f2);z-index:100;padding:24px}
+#lkf{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:100%;max-width:300px;text-align:center}
+#lkf .lav{width:96px;height:96px;border-radius:50%;align-self:center;margin:0 0 -2px}
+#lkf input,#lkf button{-webkit-appearance:none;appearance:none;display:block;margin:0;width:100%;box-sizing:border-box;height:50px;padding:0;font:inherit;font-size:18px;border:1px solid #e4e4e0;border-radius:12px;text-align:center;letter-spacing:0}
+#lkf input{background:#fff;color:#1b1b1b}#lkf #usr{text-transform:lowercase}#lkf #pin{-webkit-text-security:disc}
+#lkf button{background:#0000FF;border-color:#0000FF;color:#fff;font-weight:600;cursor:pointer}
+#lkm{margin:0;color:#d93025;font-size:14px}#lkm:empty{display:none}#lkf small{margin:-4px 0 0;color:#6b6b6b;font-size:12px}
+#bkl{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#6b6b6b;font:15px system-ui,sans-serif}
+
+
+/*LOAD*/body.locked #pnw{display:block!important;visibility:hidden}body.locked #pnw .brand{visibility:visible}body.locked.ld #pnw .hd2,body.locked.ld #pnw .tabs{visibility:visible}
+.pnlom{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px}
+.pnlom>div{background:#f4f4f2;border-radius:16px;padding:20px;max-width:320px;width:100%;text-align:center;font:15px system-ui,sans-serif;color:#1b1b1b}.pnlom b{font-size:18px}.pnlom p{color:#6b6b6b;font-size:14px;margin:8px 0 16px}
+.pnlob{display:flex;gap:10px}.pnlob button{flex:1;font:inherit;font-weight:600;padding:11px;border-radius:12px;cursor:pointer;border:1px solid #e4e4e0;background:#fff;color:#1b1b1b}.pnlob .y{background:#d93025;border-color:#d93025;color:#fff}
+
+/*TABFIT*/@media (max-width:600px){.tabs{gap:min(5px,1.1vw)!important;flex-wrap:nowrap!important;justify-content:center!important;overflow:visible!important}.tabs button{font-size:min(13.5px,3.25vw)!important;padding:7px min(8px,1.7vw)!important;min-width:0!important;flex:0 1 auto}.tabs #eye,.tabs #lo{width:min(36px,8.4vw)!important;height:min(36px,8.4vw)!important;min-width:0!important;flex:none!important;padding:0!important;display:inline-flex!important;align-items:center;justify-content:center}.tabs #eye svg,.tabs #lo svg{width:min(20px,4.8vw);height:min(20px,4.8vw)}}
+@media (max-width:600px){.tabs button:not(#eye):not(#lo){width:auto!important;white-space:nowrap;font-size:min(13.5px,3.05vw)!important;padding:7px min(9px,1.5vw)!important;letter-spacing:-.01em}}
+
+/*HDR2*/ /* topo igual ao Hub: barra fixa, coluna de 480px centralizada, Sair/Atualizar à esquerda, logo no centro, olho à direita */
+:root{--hdh:calc(70px + env(safe-area-inset-top,0px))}
+.hd2{position:fixed!important;top:0;left:0;right:0;z-index:40;height:var(--hdh);min-height:0!important;margin:0!important;padding:0!important;display:block!important;background:var(--bg);box-shadow:0 1px 0 var(--bd)}
+.hd2 .hlogo{position:absolute!important;left:50%;top:calc(31px + env(safe-area-inset-top,0px));transform:translateX(-50%);height:22px!important;width:auto!important;max-width:none!important;max-height:none!important}
+.hd2 .hdl{position:absolute;left:max(14px,calc(50% - 240px));top:calc(21px + env(safe-area-inset-top,0px));display:flex;gap:4px;transform:none}
+.hd2 #lo,.hd2 #rf{position:static!important;transform:none!important;margin:0!important;width:42px!important;height:42px!important}
+.hd2 #eye{position:absolute!important;right:max(14px,calc(50% - 240px));left:auto;top:calc(22px + env(safe-area-inset-top,0px))!important;transform:none!important;width:40px!important;height:40px!important;margin:0!important}
+#pnw main{padding-top:calc(var(--hdh) + 10px)!important}
+.tabs{top:var(--hdh)!important}
+.fb{top:calc(var(--hdh) + var(--tbh,0px))!important}
+.tabs button:not(#eye):not(#lo){padding-left:20px!important;padding-right:20px!important}
+@media (max-width:600px){.tabs button:not(#eye):not(#lo){padding-left:min(12px,2.6vw)!important;padding-right:min(12px,2.6vw)!important}}
+/*PPB2*/.ppb{background:#f8f8f8;border-color:#c4c4c4!important}.ppb>div,.ppb>div b{color:#6f6f6f}
+/*STK2*/ /* abas e filtros colados, fundo de ponta a ponta (sem vazamento) */
+.tabs{margin-bottom:0!important;box-shadow:0 0 0 100vmax var(--bg)!important;clip-path:inset(0 -100vmax)}
+.fb{margin-top:0!important;box-shadow:0 0 0 100vmax var(--bg)!important;clip-path:inset(0 -100vmax)}
+.hd2{box-shadow:none!important}
+
+/*HDR3*/ /* PC: ícones do topo nas margens do conteúdo (1000px), igual ao mobile */
+.hd2 .hdl{left:max(14px,calc(50% - 500px))!important}
+.hd2 #eye{right:max(14px,calc(50% - 500px))!important}
+/*TABS3*/ /* abas no rodapé (ícones), filtros colados no topo, menos espaço entre logo e fotos */
+.fb{top:var(--hdh)!important}
+#pnw main{padding-top:calc(var(--hdh) - 6px)!important;padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))!important}
+
+/*CTW*/ /* Contatos: selects longos não alargam a página (rodapé fixo ficava torto) */
+.fb select,#tc select{max-width:100%;min-width:0;text-overflow:ellipsis}
+html,body{overflow-x:clip}
+
+/*CTM2*/ /* Contatos no celular: filtros compactos e fixos; Limpar ao lado da busca; tabela como antes */
+@media (max-width:700px){
+#tc .fb{display:grid!important;grid-template-columns:repeat(6,1fr);gap:6px!important;padding:8px 0!important}
+#tc .fb>*{grid-column:span 3;width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;font-size:14px!important;height:38px;box-sizing:border-box}
+#tc .fb input{grid-column:1/span 4;grid-row:1}
+#tc .fb button{grid-column:5/span 2;grid-row:1;padding:0 6px!important;font-size:13px!important;white-space:nowrap}
+}
+/*CTS2*/ /* Contatos: quadro da tabela gruda abaixo dos filtros e vai até o rodapé; títulos fixos dentro dele */
+#tc #clist{position:sticky;top:calc(var(--hdh) + var(--fbc,120px) + 6px);height:calc(100vh - var(--hdh) - var(--fbc,120px) - 160px - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;box-sizing:border-box;margin-bottom:0}
+@supports (height:100dvh){#tc #clist{height:calc(100dvh - var(--hdh) - var(--fbc,120px) - 160px - env(safe-area-inset-bottom,0px))}}
+#tc #clist .tw{flex:1;min-height:0;max-height:none!important;overflow:auto!important}
