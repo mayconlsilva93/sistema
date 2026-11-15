@@ -11,6 +11,7 @@ async function chk(){if(busy||!window.DROMKEY||!window.DROMDATA)return;busy=1;
   if(last===null){last=sig;if((D.up||"")===(window.DROMUPD||""))return}
   if(sig===last)return;last=sig;
   var t=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(D.iv)},window.DROMKEY,b64(D.ct)),N=JSON.parse(new TextDecoder().decode(t)),DD=window.DROMDATA;
+  var same=["S","OT","CL","BK"].every(k=>JSON.stringify(N[k]||null)===JSON.stringify(DD[k]||null));window.DROMUPD=D.up||"";if(same){var q=document.getElementById("dupd");if(q)q.textContent="Dados atualizados em "+window.DROMUPD;return}
   var df=[];try{df=dromDiff(JSON.parse(JSON.stringify(DD.S||[])),N.S||[],2023)}catch(e){}
   var u=saveUI();["S","OT","CL","BK"].forEach(k=>{if(N[k]){if(Array.isArray(DD[k]))put(DD[k],N[k]);else DD[k]=N[k]}});
   Object.keys(N).forEach(k=>{if(!Array.isArray(N[k]))DD[k]=N[k]});
