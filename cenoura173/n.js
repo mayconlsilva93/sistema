@@ -47,9 +47,9 @@ if(log.some(x=>!x.r&&x.ts===now)){var t=document.createElement("div");t.classNam
 (async function(){try{if(!pushOk()||Notification.permission!=="granted"||!window.DROMKEY)return;
  var hr=(await navigator.serviceWorker.getRegistrations()).find(r=>/\/sistema\/$/.test(r.scope));if(hr&&await hr.pushManager.getSubscription())return;
  var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();
- if(s&&(ls.g("subv")!==2||Date.now()-(ls.g("subt")||0)>2592e5)){try{await s.unsubscribe()}catch(e){}s=null}
+ if(s&&(ls.g("subv")!==2||Date.now()-(ls.g("subt")||0)>864e5)){try{await s.unsubscribe()}catch(e){}s=null}
  if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
- if(s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<2592e5)return;
+ if(s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<864e5)return;
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},window.DROMKEY,new TextEncoder().encode(JSON.stringify(s)))),b6=u=>btoa(String.fromCharCode.apply(null,u));
  await fetch(SURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:location.pathname.split("/").filter(Boolean).pop(),iv:b6(iv),ct:b6(ct)})});
  ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2)}catch(e){}})();
