@@ -105,16 +105,19 @@ async function sub(){var nf=pn.querySelector(".nf");try{
  var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},AK,new TextEncoder().encode(JSON.stringify(s))));
  await fetch(SURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:"hub",iv:b6(iv),ct:b6(ct)})});
- ls.s("subok",s.endpoint);ls.s("subt",Date.now());setTimeout(()=>reg.showNotification("Notificações ativadas!",{body:"Você vai receber aqui os avisos de todos os artistas.",icon:"icon-192.png",badge:"badge.png"}),1500);
+ ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2);setTimeout(()=>reg.showNotification("Notificações ativadas!",{body:"Você vai receber aqui os avisos de todos os artistas.",icon:"icon-192.png",badge:"badge.png"}),1500);
  nf.innerHTML='<p class="ne">✓ Notificações ativadas neste aparelho. Os avisos começam a chegar em até 1 hora.</p>'}
  catch(e){nf.insertAdjacentHTML("beforeend",'<p class="ne">Não foi possível ativar: '+(e.message||e)+"</p>")}}
 
 /*KEEP*/ async function keepSub(){try{if(window.HUBCFG||!pushOk()||Notification.permission!=="granted"||typeof AK==="undefined"||!AK)return;
- var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
- if(s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<6048e5)return;
+ var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();
+ /* inscrição renovada a cada 3 dias (o Android às vezes invalida a antiga sem avisar) */
+ if(s&&(ls.g("subv")!==2||Date.now()-(ls.g("subt")||0)>2592e5)){try{await s.unsubscribe()}catch(e){}s=null}
+ if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
+ if(s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<2592e5)return;
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},AK,new TextEncoder().encode(JSON.stringify(s))));
  await fetch(SURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:"hub",iv:b6(iv),ct:b6(ct)})});
- ls.s("subok",s.endpoint);ls.s("subt",Date.now())}catch(e){}}
+ ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2)}catch(e){}}
 
 /* ---------- menu inferior: Início, Agenda, Calendário (Painel e Booker ainda não habilitados) ---------- */
 var TAB="h",HV="m",HM=null,HY=null,HF="P",HSD=null,MNS=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],WD=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
