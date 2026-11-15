@@ -337,6 +337,7 @@ function isBlank(p){return p.localName==="p"&&!ptxt(p).trim()&&!p.getElementsByT
 function fp(root,starts){var ps=ELs(root,"p");for(var i=0;i<ps.length;i++)if(ptxt(ps[i]).replace(/^\s+/,"").indexOf(starts)===0)return ps[i];return null}
 function mkRun(doc,o){var r=doc.createElementNS(WNS,"w:r"),rp=doc.createElementNS(WNS,"w:rPr");
   if(o.b)rp.appendChild(doc.createElementNS(WNS,"w:b"));if(o.i)rp.appendChild(doc.createElementNS(WNS,"w:i"));
+  if(o.c){var cc=doc.createElementNS(WNS,"w:color");cc.setAttributeNS(WNS,"w:val",o.c);rp.appendChild(cc)}
   if(o.hl){var h=doc.createElementNS(WNS,"w:highlight");h.setAttributeNS(WNS,"w:val","yellow");rp.appendChild(h)}
   if(rp.firstChild)r.appendChild(rp);
   var t=doc.createElementNS(WNS,"w:t");t.setAttributeNS("http://www.w3.org/XML/1998/namespace","xml:space","preserve");t.textContent=o.t;r.appendChild(t);return r}
@@ -503,6 +504,8 @@ function fillContrato(doc,r,a){var X=ctxOf(r,a),root=doc.documentElement,B=BASE[
       if(h1){var last=h1;hl.forEach(function(l,i){if(i===0)setRuns(h1,[{t:l}]);else last=cloneAfter(last,[{t:l}])})}
       if(h2)rmP(h2)}}
   if(/open/i.test(r.rid||""))rmP(fp(root,"Observação: Todos os itens"));
+  /* Josu: open bar -> linha extra em vermelho no rider de hospitalidade */
+  if(ht&&a==="Josu"&&/open/i.test(r.rid||"")){var nb=ELs(ht,"p").filter(function(p){return!isBlank(p)}),lp=nb[nb.length-1];if(lp){var bl=cloneAfter(lp,[]);cloneAfter(bl,[{t:"É necessário o fornecimento de opção de energético/refrigerante sem açúcar.",b:1,c:"FF0000"}])}}
   /* hospedagem e aéreo (cláusula 4) */
   var hs=["As despesas referentes à hospedagem para um total","O CONTRATANTE compromete-se a providenciar a hospedagem","O CONTRATANTE deve informar com antecedência de 01"];
   var as=["As despesas referentes às passagens aéreas","O CONTRATANTE compromete-se a providenciar as passagens","O CONTRATANTE arcará com os custos de despacho","O CONTRATANTE deve informar com antecedência de 05"];
