@@ -101,7 +101,7 @@ function locHtml(Y,sv,TY){var vm={};Y.forEach(s=>{var k=locKey(s),g=vm[k[0]]=vm[
  var mt=sv==="n"?"n":sv==="m"?"m":"v",tt=(mt==="n"?Y.length:TY)||1,G=Object.keys(vm).map(k=>{var g=vm[k],nm=g.fx?g.cn:Object.keys(g.nm).sort((x,y)=>g.nm[y]-g.nm[x])[0],cc={};g.a.forEach(s=>cc[s[3]]=(cc[s[3]]||0)+1);var ct=Object.keys(cc).sort((x,y)=>cc[y]-cc[x])[0],cv=sm(g.a,6),km=sm(g.a,8),m=mt==="n"?g.a.length:mt==="m"?km:cv;return{rv:1,a:g.a,l:nm,s:cu(ct)+" · "+(mt==="n"?"cachê "+f(cv):pl(g.a.length))+(mt==="m"?" · cachê "+f(cv):""),v:m,vt:mt==="n"?pl(g.a.length):undefined,n:g.a.length,cv:cv,km:km,p:mt==="v"?cv/(sm(Y,6)||1)*100:mt==="m"?km/(sm(Y,8)||1)*100:g.a.length/(Y.length||1)*100}});
  return rows(G.sort(mt==="n"?(x,y)=>y.n-x.n||y.cv-x.cv:mt==="m"?(x,y)=>y.km-x.km||y.n-x.n:(x,y)=>y.cv-x.cv).slice(0,15),true)+"<div class='lg'><b>Total: "+G.length+" casas e locais</b> · "+pl(Y.length)+" · "+f(sm(Y,6))+" · exibindo os 15 maiores, incluindo confirmados. Grafias diferentes da mesma casa (maiúsculas, acentos, nomes de salão ou sufixo) são somadas.</div>"}
 var AGK={k:0,d:1};
-function PG(s){var td=new Date();td.setHours(0,0,0,0);if(s[10])return["pago","mu"];
+function PG(s){var td=new Date();td.setHours(0,0,0,0);if(s[10])return["<b>pago</b>","ok"];
  if(isR(s))return s[6]>0?["cachê pendente"+(s[25]?" (sinal "+s[25]+"% pago)":""),"wr"]:["sem cachê","mu"];
  if(s[25])return["sinal pago ("+s[25]+"%)","ok"];
  if(s[24]){var d=new Date(s[24]+"T00:00:00"),t=pad(d.getDate())+"/"+pad(d.getMonth()+1);return d<td?["sinal vencido ("+t+")","wr"]:["sinal até "+t,""]}
