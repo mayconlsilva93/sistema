@@ -1,7 +1,7 @@
 /* DROM · atualização ao vivo dos apps de artista (sem recarregar a página) */
 (function(){
 if(window.DROMRT)return;window.DROMRT=1;
-function DTOAST(fn){var t=document.getElementById("rtt");if(!t){t=document.createElement("button");t.id="rtt";t.type="button";t.textContent="Dados novos · toque para atualizar";t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:110px;z-index:99999;background:#0000FF;color:#fff;border:0;border-radius:20px;padding:10px 18px;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer;white-space:nowrap";document.body.appendChild(t)}t.onclick=function(){t.remove();fn()}}
+function DTOAST(fn){var t=document.getElementById("rtt");if(!t){t=document.createElement("button");t.id="rtt";t.type="button";t.textContent="dados novos · toque para atualizar";t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:110px;z-index:99999;background:#0000FF;color:#fff;border:0;border-radius:20px;padding:10px 18px;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer;white-space:nowrap";document.body.appendChild(t)}t.onclick=function(){t.remove();fn()}}
 var b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),last=null,base=null,busy=0,U0=window.DROMUPD||"";
 function keyOf(el){var c=(el.className||"").split(" ").filter(x=>x&&x!=="open")[0];return el.tagName+(c?"."+c:"")}
 function saveUI(){var a=[];document.querySelectorAll("#app .open,#app details[open]").forEach(el=>{var k=keyOf(el),l=[...document.querySelectorAll("#app "+k.replace(/^(\w+)/,"$1"))];a.push([k,l.indexOf(el),el.tagName==="DETAILS"])});return{a:a,y:scrollY}}
