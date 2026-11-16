@@ -114,7 +114,7 @@ function PRV(s){var d=SDT(s),t;
  if(s[31])return new Date(s[31]+"T00:00:00");
  if(/^[PCAW]$/.test(s[16]))return d;   /* social, particular, corporativo: até o dia do evento */
  if(s[16]==="U"&&/florian|floripa/i.test(s[3])&&/life|stage|music park|atoa|gr[eê]mio|mans[aã]o/i.test(s[2]+" "+s[17]+" "+(VAL[vkey(s[17])]||""))){t=new Date(d);t.setDate(t.getDate()+((8-t.getDay())%7||7));return t}   /* universitário Floripa: 2ª-feira seguinte */
- var vc=VCN(s),H=function(f){return ALL.filter(function(x){return x!==s&&x[30]&&isR(x)&&VCN(x)===vc&&f(x)}).sort(function(a,b){return SDT(b)-SDT(a)}).slice(0,3)},L=H(function(x){return x[1]===s[1]});if(!L.length)L=H(function(){return true});
+ var vc=VCN(s),H=function(f){return ALL.filter(function(x){return x!==s&&x[30]&&isR(x)&&VCN(x)===vc&&f(x)}).sort(function(a,b){return SDT(b)-SDT(a)}).slice(0,3)},L=H(function(x){return x[1]===s[1]&&SDT(x)>=new Date(Date.now()-7776e6)});if(!L.length)L=ALL.filter(function(x){return x!==s&&x[30]&&isR(x)&&VCN(x)===vc&&x[1]!==s[1]});
  if(!L.length)return null;
  var dl=L.map(function(x){return Math.max(0,Math.round((new Date(x[30]+"T00:00:00")-SDT(x))/864e5))}).sort(function(a,b){return a-b}),md=dl[Math.floor(dl.length/2)];
  t=new Date(d);t.setDate(t.getDate()+md);return t}
