@@ -26,7 +26,7 @@ if(st.cq.length&&now-(st.cqt||0)>=6e5){
   for(const m of ms){const Q=st.cq.filter(q=>q.m===m).sort((a,b)=>a.d-b.d),tot=Q.reduce((x,q)=>x+q.v,0),dt=q=>p2(q.d)+"/"+p2((m-1)%12+1);
     const all=S.filter(s=>s[19]===m&&s[17]>0),full=all.length===Q.length&&all.every(s=>s[20]===1&&Q.some(q=>q.k===s[14]));
     const ref=full?"ao mês de "+MES[(m-1)%12]+" de "+(B+Math.floor((m-1)/12)):Q.length===1?"ao show de "+dt(Q[0]):"a "+Q.length+" shows, realizados entre "+dt(Q[0])+" e "+dt(Q[Q.length-1]);
-    msgs.push({keep:1,f:app,t:"Comissão recebida!",b:"Você pagou "+brl(tot)+", referente "+ref+". Muito obrigado!"})}
+    const km={keep:1,f:app,t:"Comissão recebida!",b:"Você pagou "+brl(tot)+", referente "+ref+". Muito obrigado!"};msgs.push(km);st.keep=(st.keep||[]).concat([{id:now+"-"+m,t:km.t,b:km.b,ts:now}]).slice(-20)}
   st.cq=[];delete st.cqt}
 const first=!st.S;st.S=S;
 for(const k of Object.keys(st.rem))if(!S.some(s=>k.startsWith(s[14])))delete st.rem[k];
