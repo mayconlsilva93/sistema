@@ -16,9 +16,21 @@ const p2=n=>String(n).padStart(2,"0");
 for(const s of S){const t=dromStart(s,B);if(!t)continue;const h=(t-now)/36e5,k=s[14];
   /* lembrete de 24 h no celular substituído por "Hoje tem show!" (agenda.mjs, 9h) */
 }
+/* comissão recebida: junta as comissões marcadas como pagas e envia 10 min depois da última marcação */
+const MES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const brl=v=>"R$ "+Number(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}).replace("R$ ","");
+st.cq=st.cq||[];
+if(st.S){const old=new Map(st.S.map(s=>[s[14],s]));for(const s of S){const o=old.get(s[14]);if(s[17]>0&&s[20]===1&&o&&o[20]!==1&&!st.cq.some(q=>q.k===s[14])){st.cq.push({k:s[14],v:s[17],m:s[19],d:s[0]});st.cqt=now}}}
+if(st.cq.length&&now-(st.cqt||0)>=6e5){
+  const ms=[...new Set(st.cq.map(q=>q.m))].sort((a,b)=>a-b);
+  for(const m of ms){const Q=st.cq.filter(q=>q.m===m).sort((a,b)=>a.d-b.d),tot=Q.reduce((x,q)=>x+q.v,0),dt=q=>p2(q.d)+"/"+p2((m-1)%12+1);
+    const all=S.filter(s=>s[19]===m&&s[17]>0),full=all.length===Q.length&&all.every(s=>s[20]===1&&Q.some(q=>q.k===s[14]));
+    const ref=full?"ao mês de "+MES[(m-1)%12]+" de "+(B+Math.floor((m-1)/12)):Q.length===1?"ao show de "+dt(Q[0]):"a "+Q.length+" shows, realizados entre "+dt(Q[0])+" e "+dt(Q[Q.length-1]);
+    msgs.push({keep:1,f:app,t:"Comissão recebida!",b:"Você pagou "+brl(tot)+", referente "+ref+". Muito obrigado!"})}
+  st.cq=[];delete st.cqt}
 const first=!st.S;st.S=S;
 for(const k of Object.keys(st.rem))if(!S.some(s=>k.startsWith(s[14])))delete st.rem[k];
-put("st.json",st);
+{const o=get("st.json");if(JSON.stringify(o)!==JSON.stringify(st))put("st.json",st)}
 console.log((first?"estado inicial; ":"")+msgs.length+" mensagem(ns), "+subs.length+" inscrição(ões)");
 const hs=await hubSubs(key);
 if(first||!msgs.length||(!subs.length&&!hs.length)||!vp)process.exit(0);

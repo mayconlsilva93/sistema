@@ -55,4 +55,6 @@ if(log.some(x=>!x.r&&x.ts===now)){var t=document.createElement("div");t.classNam
  ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2)}catch(e){}})();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)badge()});
 window.DROMNADD=function(L){var t=Date.now();(L||[]).forEach(x=>log.unshift({t:x.t,b:x.b,ts:t,r:0}));log=log.slice(0,50);ls.s("log",log);ls.s("snap",S);badge();if(!pn.hidden)draw()};
+function DROMPQ(add){if(!("caches" in self)||!("serviceWorker" in navigator))return;navigator.serviceWorker.ready.then(r=>{var k="q"+r.scope;return caches.open("drom-push").then(c=>c.match(k).then(x=>x?x.json():[]).then(L=>{if(!L.length)return;c.delete(k);add(L)}))}).catch(()=>{})}
+var pq=()=>DROMPQ(L=>{L.forEach(x=>log.unshift({t:x.t,b:x.b,ts:x.ts,r:0}));log=log.slice(0,50);ls.s("log",log);badge();if(!pn.hidden)draw()});pq();document.addEventListener("visibilitychange",()=>{if(!document.hidden)pq()});if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.drom==="push")setTimeout(pq,800)});
 })();

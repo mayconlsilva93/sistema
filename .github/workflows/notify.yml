@@ -3,7 +3,7 @@ on:
   push:
     paths: ["*/d.json","*/subs.json"]
   schedule:
-    - cron: "17 * * * *"
+    - cron: "*/10 * * * *"   # checagem a cada 10 min (comissão recebida)
   workflow_dispatch:
 permissions:
   contents: write
