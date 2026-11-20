@@ -274,12 +274,14 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("cpop"))$("cpop")
 /*RAJS*/
 var OTP=DD.OTP;
 var RSEL=null,RSORT={c:0,d:1},RM=[
+ {k:"qtd",t:"Shows",s:"Shows no período",two:1},
+ {k:"tot",t:"Propostas",s:"Todas as propostas do período, de qualquer status, inclusive as aprovadas"},
  {k:"fat",t:"Faturamento",s:"Soma dos cachês brutos",m:1,two:1},
  {k:"com",t:"Comissão",s:"Soma das comissões da DROM",m:1,two:1},
  {k:"cme",t:"Cachê médio",s:"Cachê bruto por show",m:1,w:1},
  {k:"cmm",t:"Comissão média",s:"Comissão por show",m:1,w:1},
- {k:"qtd",t:"Shows",s:"Shows no período",two:1},
- {k:"tot",t:"Propostas",s:"Todas as propostas do período, de qualquer status, inclusive as aprovadas"}];
+ {k:"liq",t:"Faturamento líquido",s:"O que sobrou para os artistas depois de custos e comissão",m:1},
+ {k:"cus",t:"Custos",s:"Custos lançados pelos artistas nos shows",m:1}];
 function rFmt(k,v){return RM.find(x=>x.k===k).m?f(v):String(Math.round(v))}
 /*PRJ projeção (só aba Gráficos, filtro "Realizados + Projetado")*/
 var PJ={c:{},pc:{}};
@@ -345,11 +347,11 @@ function RCnotes(k){var ya=+$("ra").value,rm=$("rm").value,inP=m=>(ya===0?YF(m)<
  return out}
 
 function rAgg(){var OV=window.ROV,ya=OV?OV.ya:+$("ra").value,rm=OV?OV.rm:$("rm").value,rr=$("rc").value==="R",pj=PJon(),inP=m=>(ya===0?YF(m)<=NOW.getFullYear():YF(m)===ya)&&(rm===""||(m-1)%12+1===+rm),
- ai=!OV&&RAS&&RAS.size===1?[...RAS][0]:-1,PER=ai>=0&&(ya===0||rm===""),PK=ya===0?[...new Set(MS.map(YF))].filter(y=>y<=NOW.getFullYear()).sort():[1,2,3,4,5,6,7,8,9,10,11,12],kf=m=>PK.indexOf(ya===0?YF(m):(m-1)%12+1),z0=(n,i)=>({i:i,n:n,old:OLD.indexOf(n)>-1,fp:0,cp:0,cpn:0,cpa:0,np:0,tp:0,nrc:0,vrc:0,fr:0,fc:0,cr:0,cc:0,nr:0,nc:0,nz:0,liq:0,ot:0,ts:0,st:{}}),
+ ai=!OV&&RAS&&RAS.size===1?[...RAS][0]:-1,PER=ai>=0&&(ya===0||rm===""),PK=ya===0?[...new Set(MS.map(YF))].filter(y=>y<=NOW.getFullYear()).sort():[1,2,3,4,5,6,7,8,9,10,11,12],kf=m=>PK.indexOf(ya===0?YF(m):(m-1)%12+1),z0=(n,i)=>({i:i,n:n,old:OLD.indexOf(n)>-1,fp:0,cp:0,cpn:0,cpa:0,np:0,tp:0,nrc:0,vrc:0,fr:0,fc:0,cr:0,cc:0,nr:0,nc:0,nz:0,liq:0,cus:0,ot:0,ts:0,st:{}}),
  out=PER?PK.map((k,j)=>z0(ya===0?String(k):["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][k-1],1000+j)):AR.map((n,i)=>z0(n,i));window.RPER=PER;
  ALL.forEach(s=>{if(!inP(s[14]))return;if(PER&&s[1]!==ai)return;var o=PER?out[kf(s[14])]:out[s[1]];o.ts++;if(rr&&!isR(s))return;
   var cm=s[8];if(pj&&s[27])o.cpa+=PJpc(s).com;if(isR(s)){o.fr+=s[6];o.cr+=cm;o.nr++;if(!s[10]&&s[6]>0){o.nrc++;o.vrc+=s[6]}}else{o.fc+=s[6];o.cc+=cm;o.nc++}
-  if(s[6]>0)o.nz++;o.liq+=s[6]-s[7]-s[8]});
+  if(s[6]>0)o.nz++;o.liq+=s[6]-s[7]-s[8];o.cus+=(+s[7]||0)});
  OTP.forEach(p=>{if(!inP(p[1]))return;if(PER&&p[0]!==ai)return;var o=PER?out[kf(p[1])]:out[p[0]];o.ot+=p[3];o.st[p[2]]=(o.st[p[2]]||0)+p[3]});
  if(pj){var cmk=(NOW.getFullYear()-B)*12+NOW.getMonth()+1;MS.forEach(mk=>{if(mk<cmk||!inP(mk))return;(PER?[ai]:AR.map((n,i)=>i)).forEach(a=>{var r=PJmon(a,mk);if(!r.n)return;var o=PER?out[kf(mk)]:out[a];if(!o)return;o.fp+=r.fat;o.cpn+=r.com;o.np+=r.n;o.tp+=r.tp})})}
  out.forEach(o=>{o.cp=o.cpn-o.cpa;o.n_=o.nr+o.nc+o.np;o.fat=o.fr+o.fc+o.fp;o.com=o.cr+o.cc+o.cp;o.qtd=o.n_;o.cme=o.n_?o.fat/o.n_:0;o.cmm=o.n_?o.com/o.n_:0;o.tot=o.ts+o.ot+o.tp});
