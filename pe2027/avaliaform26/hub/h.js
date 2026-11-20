@@ -1,0 +1,54 @@
+/* DROM · Avaliação 2026 · hub de respostas (login do Hub; respostas no Apps Script; números ao vivo dos apps) */
+(function(){
+var $=i=>document.getElementById(i),b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),es=AVes,fr=AVfr,Q=AVQ,QQ=[],ADM=null,AK=null,DD={},STS={},RS=[],TAB="g",SELQ=null,SELA=null;
+Q.forEach(s=>s.i.forEach(q=>QQ.push(Object.assign({sec:s.s},q))));
+function FW(t){var d=new Date(t);for(var i=0;i<3;i++){var w=new Date(d.getFullYear(),d.getMonth()+i,1);w.setDate(1+(3-w.getDay()+7)%7);if(w.getTime()>t)return w.getTime()}return t}
+function db(){return new Promise((ok,er)=>{var r=indexedDB.open("drom",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>er(r.error)})}
+async function kget(n){try{var d=await db();return await new Promise(ok=>{var q=d.transaction("k").objectStore("k").get(n);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}}
+async function kput(n,v){try{var d=await db();await new Promise(ok=>{var t=d.transaction("k","readwrite");t.objectStore("k").put(v,n);t.oncomplete=ok;t.onerror=ok})}catch(e){}}
+async function derive(p,salt){var k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(salt),iterations:200000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["decrypt"])}
+async function dec(k,iv,ct){return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(iv)},k,b64(ct))))}
+var H=null;
+async function start(){try{H=await (await fetch("../../../h.json",{cache:"no-store"})).json()}catch(e){$("lkm").textContent="Sem conexão.";return}
+ var st=await kget("hub");if(st&&st.salt===H.salt&&Date.now()<FW(st.ts)){try{return go(await dec(st.key,H.iv,H.ct))}catch(e){}}$("usr").focus()}
+$("lkf").onsubmit=async e=>{e.preventDefault();var u=$("usr").value.trim().toLowerCase(),p=$("pin").value;if(!u||!p)return;$("lkm").textContent="Verificando…";
+ try{var k=await derive(u+"\n"+p,H.salt),c=await dec(k,H.iv,H.ct);await kput("hub",{key:k,salt:H.salt,ts:Date.now()});go(c)}catch(er){$("lkm").textContent="Login ou senha incorretos.";$("pin").value=""}};
+async function go(c){AK=await crypto.subtle.importKey("raw",b64(c.ak),"AES-GCM",false,["decrypt"]);var a=await (await fetch("../adm.json?v="+Date.now(),{cache:"no-store"})).json();ADM=await dec(AK,a.iv,a.ct);
+ $("lk").remove();$("app").hidden=false;$("tst").checked=localStorage.getItem("av26_hubt")==="1";
+ $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{TAB=b.dataset.t;$("nav").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));draw()});
+ $("tst").onchange=()=>{localStorage.setItem("av26_hubt",$("tst").checked?"1":"0");draw()};$("rf").onclick=()=>load(1);
+ draw();await load();setInterval(()=>{if(!document.hidden)load()},180000)}
+async function load(force){await Promise.all(ADM.L.map(async x=>{try{var r=await (await fetch("../../../"+x.f+"/d.json?t="+Date.now(),{cache:"no-store"})).json();if(!force&&DD[x.k]===r.iv)return;DD[x.k]=r.iv;STS[x.k]=AVST(await dec(AK,r.iv,r.ct))}catch(e){}}));
+ try{var U=(await (await fetch("../u.json?v="+Date.now(),{cache:"no-store"})).json()).u;if(U){var j=await (await fetch(U+"?r="+encodeURIComponent(ADM.rk)+"&t="+Date.now())).json();if(j.ok)RS=j.L;$("sub").textContent="atualizado "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}else $("sub").textContent="envio ainda não ativado (u.json)"}catch(e){$("sub").textContent="sem conexão com as respostas"}
+ draw()}
+var ART=()=>ADM.L.filter(x=>$("tst").checked||!x.teste),RES=()=>RS.filter(r=>ART().some(x=>x.k===r.k)),nm=k=>(ADM.L.find(x=>x.k===k)||{}).n||k,ic=k=>"../../../"+((ADM.L.find(x=>x.k===k)||{}).f||"")+"/icon-round-192.png",
+ nums=id=>RES().filter(r=>typeof r.a[id]==="number").map(r=>({k:r.k,v:r.a[id]})),avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,f2=n=>n==null?"-":n.toFixed(2).replace(".",","),
+ sd=a=>{var m=avg(a);return a.length?Math.sqrt(avg(a.map(x=>(x-m)*(x-m)))):null};
+function draw(){var m=$("mn");if(!ADM)return;m.innerHTML=TAB==="g"?vg():TAB==="q"?vq():TAB==="a"?va():vx();bind();AVcount(m)}
+function vg(){var R=RES(),A=ART(),N=QQ.filter(q=>q.t==="n"),sat=avg(nums("sat").map(x=>x.v)),ren=avg(nums("ren").map(x=>x.v)),all=avg(N.map(q=>avg(nums(q.id).map(x=>x.v))).filter(x=>x!=null));
+ var tot=A.reduce((t,x)=>t+((STS[x.k]||{}).tot||0),0);
+ return'<div class="grid">'+A.map(x=>{var r=R.find(y=>y.k===x.k);return'<div class="ac'+(r?" ok":"")+'" data-a="'+x.k+'"><img src="'+ic(x.k)+'" alt=""><div><b>'+es(x.n)+'</b><span>'+(r?"✓ "+es(r.em):"aguardando")+'</span></div></div>'}).join("")+'</div>'+
+ '<div class="kps">'+AVkp(R.length,"de "+A.length+" responderam","","kb")+AVkp(f2(sat),"satisfação média","","ko")+AVkp(f2(ren),"chance média de renovar","","kr")+AVkp(f2(all),"média de todas as notas","","ky")+AVkp(tot,"shows do casting em 2026 (com projeção)")+'</div>'+
+ '<div class="card" style="margin-top:14px"><h3>Médias por pergunta</h3><div class="lgd"><span><i></i>2026</span><span><i class="o"></i>média 2025</span></div>'+N.map(q=>{var L=nums(q.id).map(x=>x.v),a=avg(L);return'<div class="qb" data-q="'+q.id+'"><span>'+es(q.q.replace(/\(a\)/g,""))+'</span><span class="t"><i style="--w:'+((a||0)*10)+'%"></i>'+(q.m25!=null?'<u style="--m:'+q.m25*10+'%" title="2025: '+f2(q.m25)+'"></u>':"")+'</span><span class="v">'+f2(a)+'<small>'+L.length+' resp.'+(a!=null&&q.m25!=null?' <span class="cmp '+(a>=q.m25?"up":"dn")+'">'+(a>=q.m25?"+":"")+f2(a-q.m25)+'</span>':"")+'</small></span></div>'}).join("")+'</div>'}
+function vq(){if(!SELQ)SELQ=QQ[0].id;var q=QQ.find(x=>x.id===SELQ),R=RES(),o='<select id="selq">'+Q.map(s=>'<optgroup label="'+es(s.s)+'">'+s.i.map(x=>'<option value="'+x.id+'"'+(x.id===SELQ?" selected":"")+'>'+es(x.q.replace(/\(a\)/g,""))+'</option>').join("")+'</optgroup>').join("")+'</select><div class="card" style="margin-top:12px"><h3>'+es(q.q.replace(/\(a\)/g,""))+'</h3>';
+ if(q.t==="n"){var L=nums(q.id),v=L.map(x=>x.v),c=Array(11).fill(0);v.forEach(x=>c[x]++);var mx=Math.max(1,...c);
+  o+='<div class="st4">'+AVkp(f2(avg(v)),"média")+AVkp(v.length?Math.min(...v):"-","mínimo")+AVkp(v.length?Math.max(...v):"-","máximo")+AVkp(f2(sd(v)),"desvio padrão")+'</div>'+(q.m25!=null?'<p class="nt">Média 2025: '+f2(q.m25)+(v.length?" · variação "+AVdl(avg(v),q.m25):"")+'</p>':"")+
+  '<div class="dots">'+[0,5,10].map(n=>'<span class="sc2" style="left:'+n*10+'%">'+n+'</span>').join("")+(q.m25!=null?'<span class="mk" style="left:'+q.m25*10+'%" title="2025"></span>':"")+L.map((x,i)=>'<img src="'+ic(x.k)+'" title="'+es(nm(x.k))+': '+x.v+'" style="left:'+(x.v*10)+'%;top:'+(-17+(L.slice(0,i).filter(y=>y.v===x.v).length*-12))+'px">').join("")+'</div>'+
+  '<div class="hist">'+c.map((n,i)=>'<div><b>'+(n||"")+'</b><i style="--h:'+n/mx*100+'%"></i><span>'+i+'</span></div>').join("")+'</div>'}
+ else if(q.t==="s"||q.t==="m"){var C={};R.forEach(r=>{var a=r.a[q.id];(Array.isArray(a)?a:a?[a]:[]).forEach(x=>C[x]=(C[x]||0)+1)});o+=AVbars(Object.entries(C).sort((a,b)=>b[1]-a[1]))||"";o+=R.filter(r=>r.a[q.id]&&r.a[q.id].length!==0).map(r=>'<div class="ans"><b>'+es(nm(r.k))+'</b><p>'+es([].concat(r.a[q.id]).join(", "))+'</p></div>').join("")}
+ else if(q.t==="v"){var V=R.filter(r=>r.a[q.id]>0).map(r=>({k:r.k,v:r.a[q.id]})),vs=V.map(x=>x.v).sort((a,b)=>a-b);o+='<div class="st4">'+AVkp(fr(avg(vs)||0),"média")+AVkp(vs.length?fr(vs[Math.floor(vs.length/2)]):"-","mediana")+AVkp(vs.length?fr(vs[0]):"-","menor")+AVkp(vs.length?fr(vs[vs.length-1]):"-","maior")+'</div>'+AVbars(V.sort((a,b)=>b.v-a.v).map(x=>[nm(x.k),x.v]),0,fr)}
+ else o+=R.filter(r=>r.a[q.id]).map(r=>'<div class="ans"><b>'+es(nm(r.k))+'</b><p>'+es(r.a[q.id])+'</p></div>').join("")||'<p class="empty">Sem respostas.</p>';
+ if(q.sec==="Quanto você cobraria em 2027")o+='<div class="tw" style="margin-top:14px">'+tabV()+'</div>';
+ return o+'</div>'}
+function tabV(){var R=RES(),V=QQ.filter(q=>q.t==="v");return'<table><tr><th>Formato</th>'+R.map(r=>'<th class="n">'+es(nm(r.k))+'</th>').join("")+'<th class="n">Mediana</th></tr>'+V.map(q=>{var v=R.map(r=>r.a[q.id]||0),s=v.filter(x=>x).sort((a,b)=>a-b);return'<tr><td>'+es(q.q)+'</td>'+v.map(x=>'<td class="n">'+(x?fr(x):"-")+'</td>').join("")+'<td class="n md">'+(s.length?fr(s[Math.floor(s.length/2)]):"-")+'</td></tr>'}).join("")+'</table>'}
+function va(){var A=ART();if(!SELA||!A.some(x=>x.k===SELA))SELA=A[0].k;var r=RES().find(x=>x.k===SELA),st=STS[SELA],o='<div class="chip">'+A.map(x=>'<button data-sa="'+x.k+'" class="'+(x.k===SELA?"on":"")+'"><img src="'+ic(x.k)+'" alt="">'+es(x.n)+(RES().some(y=>y.k===x.k)?" ✓":"")+'</button>').join("")+'</div>';
+ if(st)o+='<div class="card"><h3>'+es(nm(SELA))+' · números de 2026 (ao vivo)</h3>'+AVW("resumo",st)+'<div class="kps" style="margin-top:10px">'+AVkp(fr(st.fat),"cachês brutos")+AVkp(fr(st.com),"comissão")+AVkp(fr(st.flo.md),"mediano Floripa")+AVkp(st.fora.n?fr(st.fora.md):"-","mediano fora")+'</div></div>';
+ if(!r)return o+'<p class="empty">'+es(nm(SELA))+' ainda não respondeu.</p>';
+ o+='<p class="nt" style="margin:0 0 10px">Enviado em '+es(r.em)+' · '+es(r.e)+'</p>';
+ return o+Q.map(s=>'<div class="card"><h3>'+es(s.s)+'</h3>'+s.i.map(q=>{var a=r.a[q.id],t;if(a==null||a===""||(Array.isArray(a)&&!a.length))t='<span style="color:#d93025">sem resposta</span>';else if(q.t==="n"){var m=avg(nums(q.id).map(x=>x.v)),d=a-m;t='<b style="font-size:20px">'+a+'</b>'+(nums(q.id).length>1?'<span class="cmp '+(d>=0?"up":"dn")+'">'+(d>=0?"+":"")+f2(d)+' vs média do casting</span>':"")}else if(q.t==="v")t=fr(a);else t=es([].concat(a).join(", "));
+  return'<div class="ans"><b>'+es(q.q.replace(/\(a\)/g,""))+'</b><p>'+t+'</p></div>'}).join("")+'</div>').join("")}
+function vx(){var u=location.href.replace(/hub\/.*$/,"");return'<div class="card"><h3>Acessos dos artistas</h3><p class="nt" style="margin:0 0 10px">Link: <a href="'+u+'" target="_blank">'+u.replace(/^https?:\/\//,"")+'</a> · cada artista entra com o login e o código abaixo e só vê o próprio formulário.</p><div class="tw"><table><tr><th>Artista</th><th>Login</th><th>Código</th><th>Status</th></tr>'+ADM.L.map(x=>{var r=RS.find(y=>y.k===x.k);return'<tr><td>'+es(x.n)+'</td><td>'+es(x.k)+'</td><td><span class="code">'+es(x.c)+'</span></td><td>'+(r?"✓ "+es(r.em):"aguardando")+'</td></tr>'}).join("")+'</table></div></div>'}
+function bind(){var m=$("mn");m.querySelectorAll("[data-a]").forEach(e=>e.onclick=()=>{SELA=e.dataset.a;tab("a")});m.querySelectorAll("[data-q]").forEach(e=>e.onclick=()=>{SELQ=e.dataset.q;tab("q")});
+ m.querySelectorAll("[data-sa]").forEach(e=>e.onclick=()=>{SELA=e.dataset.sa;draw()});var s=$("selq");if(s)s.onchange=()=>{SELQ=s.value;draw()}}
+function tab(t){TAB=t;$("nav").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.t===t));draw();scrollTo(0,0)}
+start()})();

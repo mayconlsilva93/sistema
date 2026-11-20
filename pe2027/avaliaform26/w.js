@@ -1,0 +1,38 @@
+/* DROM · Avaliação 2026 · painéis de dados de cada bloco (usados no formulário e no hub) */
+(function(){
+var fr=n=>"R$ "+(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}),pc=n=>(n*100).toFixed(2).replace(".",",")+"%",
+ MN=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],DW=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],
+ es=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]),
+ dl=(a,b)=>{if(!b)return"";var v=(a-b)/b*100;return'<span class="dl '+(v>=0?"up":"dn")+'">'+(v>=0?"▲ +":"▼ ")+v.toFixed(2).replace(".",",")+"%</span>"},
+ du=m=>!m?"-":m<60?m+" min":Math.floor(m/60)+"h"+(m%60?String(m%60).padStart(2,"0"):"");
+function kp(v,l,x,c){return'<div class="kp'+(c?" "+c:"")+'"><b class="cnt" data-v="'+(typeof v==="number"?v:"")+'">'+(typeof v==="number"?v:v)+'</b><span>'+l+'</span>'+(x||"")+'</div>'}
+function bars(L,max,fmt){max=max||Math.max(1,...L.map(x=>x[1]));return'<div class="hb">'+L.map(x=>'<div class="hbr"><span class="hbl">'+es(x[0])+'</span><span class="hbt"><i style="--w:'+(x[1]/max*100)+'%"></i></span><span class="hbv">'+(fmt?fmt(x[1]):x[1])+'</span></div>').join("")+'</div>'}
+function chart(st){var mx=Math.max(1,...st.mon.map(m=>Math.max(m.r+m.f+m.p,m.y25))),H=150,w=100/12,o='<svg class="ch" viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="Shows por mês em 2026">';
+ for(var g=0;g<=4;g++){var y=10+H-H*g/4;o+='<line x1="0" x2="600" y1="'+y+'" y2="'+y+'" class="gl"/>'}
+ st.mon.forEach((m,i)=>{var x=i*50+9,bw=32,y=10+H,seg=[[m.r,"cr"],[m.f,"cf"],[m.p,"cp"]];seg.forEach((q,j)=>{if(!q[0])return;var h=H*q[0]/mx;y-=h;o+='<rect class="'+q[1]+' gr" style="--d:'+(i*40+j*80)+'ms" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="3"><title>'+MN[i]+"/2026 · "+["realizados","a realizar","projetados"][j]+": "+q[0]+'</title></rect>'});
+  var t=m.r+m.f+m.p;if(t)o+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" class="tv">'+t+'</text>';o+='<text x="'+(x+bw/2)+'" y="183" class="tx">'+MN[i]+'</text>'});
+ o+='<polyline class="l25" points="'+st.mon.map((m,i)=>(i*50+25)+","+(10+H-H*m.y25/mx)).join(" ")+'"/>';
+ st.mon.forEach((m,i)=>{o+='<circle class="d25" cx="'+(i*50+25)+'" cy="'+(10+H-H*m.y25/mx)+'" r="3"><title>'+MN[i]+"/2025: "+m.y25+' shows</title></circle>'});
+ return o+'</svg><div class="lg"><span><i class="cr"></i>Realizados</span><span><i class="cf"></i>A realizar</span><span><i class="cp"></i>Projetados</span><span><i class="l"></i>2025</span></div>'}
+function donut(L,lab){var T=L.reduce((a,x)=>a+x[1],0)||1,a=0,C=["#0000FF","#FF5B1F","#F244E7","#17FF0D","#FFF602","#9a9a9a"],o='<div class="dn2"><svg viewBox="0 0 42 42" class="do">';
+ L.slice(0,6).forEach((x,i)=>{var p=x[1]/T*100;o+='<circle r="15.9" cx="21" cy="21" fill="none" stroke="'+C[i]+'" stroke-width="7" stroke-dasharray="'+p+' '+(100-p)+'" stroke-dashoffset="'+(25-a)+'"><title>'+es(x[0])+": "+x[1]+'</title></circle>';a+=p});
+ return o+'<text x="21" y="23" class="dt">'+lab+'</text></svg><div class="dl2">'+L.slice(0,6).map((x,i)=>'<span><i style="background:'+C[i]+'"></i>'+es(x[0])+' <b>'+x[1]+'</b></span>').join("")+'</div></div>'}
+function gauge(v,l){v=Math.max(0,Math.min(1,v));return'<div class="ga"><svg viewBox="0 0 100 56"><path d="M8 50a42 42 0 0 1 84 0" class="gb"/><path d="M8 50a42 42 0 0 1 84 0" class="gf" style="--p:'+v*132+'"/></svg><b>'+pc(v)+'</b><span>'+l+'</span></div>'}
+var W={
+resumo:st=>'<div class="kps">'+kp(st.r,"realizados","","kb")+kp(st.f,"a realizar","","ko")+kp(st.p,"projetados","","kr")+kp(st.tot,"total 2026",st.pv[2025]?dl(st.tot,st.pv[2025])+'<small>2025: '+st.pv[2025]+'</small>':"","ky")+'</div>'+chart(st)+'<p class="nt">Projetados = estimativa até 31/12 pelo seu ritmo dos últimos 12 meses e pela sazonalidade. Atualiza sozinho com a agenda.</p>',
+gestao:st=>'<div class="kps">'+kp(st.prop.n,"propostas e consultas em 2026")+kp(pc(st.prop.conv),"viraram show")+kp(st.pago,"shows pagos","","kb")+kp(st.aguard,"aguardando pagamento","","ko")+'</div>'+(st.prop.st.length?'<h4>Propostas por status</h4>'+bars(st.prop.st.concat(Object.entries(st.prop.ot).filter(x=>!st.prop.st.some(y=>y[0]===x[0])))):"")+(st.ctr.length?'<h4>Contratos dos shows</h4>'+donut(st.ctr,st.n):""),
+shows:st=>{var y=[2023,2024,2025].filter(x=>st.pv[x]);return'<div class="yrs">'+y.map(x=>'<div><b>'+st.pv[x]+'</b><span>'+x+(x===2023?" (parcial)":"")+'</span></div>').join("")+'<div class="cu"><b>'+st.tot+'</b><span>2026 '+(st.pv[2025]?dl(st.tot,st.pv[2025]):"")+'</span></div></div>'+chart(st)+'<h4>Dias da semana</h4>'+bars(DW.map((d,i)=>[d,st.dw[i]]))},
+cflo:st=>'<div class="kps">'+kp(st.flo.n,"shows em Floripa e região")+kp(fr(st.flo.md),"cachê mediano",st.flo.m25?dl(st.flo.md,st.flo.m25)+'<small>2025: '+fr(st.flo.m25)+'</small>':"")+kp(fr(st.flo.mn)+" – "+fr(st.flo.mx),"menor e maior cachê")+'</div><h4>Casas onde mais tocou</h4>'+bars(st.cas.slice(0,6)),
+cfora:st=>st.fora.n?'<div class="kps">'+kp(st.fora.n,"shows fora")+kp(fr(st.fora.md),"cachê mediano",st.fora.m25?dl(st.fora.md,st.fora.m25)+'<small>2025: '+fr(st.fora.m25)+'</small>':"")+kp(fr(st.fora.liq),"mediano líquido de custos")+'</div><h4>Cidades fora de Floripa</h4>'+bars(st.fora.cid.slice(0,8)):'<p class="nt">Nenhum show fora de Floripa e região em 2026.</p>',
+comissao:st=>'<div class="kps">'+kp(fr(st.fat),"cachês brutos 2026")+kp(fr(st.liq),"líquido de custos")+kp(fr(st.com),"comissão DROM")+'</div>'+gauge(st.cp,"comissão efetiva sobre o líquido dos shows com comissão"),
+tabela:st=>'<div class="kps">'+kp(fr(st.flo.md),"seu mediano em Floripa 2026")+kp(st.fora.n?fr(st.fora.md):"-","seu mediano fora 2026")+kp(fr(st.cm),"cachê médio geral")+'</div>',
+formato:st=>'<div class="kps">'+kp(du(st.dur),"duração mediana dos seus sets")+kp(st.hosp,"shows com hospedagem")+'</div><h4>Durações em 2026</h4>'+bars(st.durs.slice(0,6).map(x=>[du(+x[0]),x[1]]))+(Object.keys(st.ini).length?'<h4>Horário de início</h4>'+bars(Object.entries(st.ini).sort((a,b)=>((+a[0]+18)%24)-((+b[0]+18)%24)).map(x=>[String(x[0]).padStart(2,"0")+"h",x[1]])):""),
+riders:st=>'<div class="two"><div><h4>Equipamento</h4>'+donut(st.eq,st.n)+'</div><div><h4>Hospitalidade</h4>'+donut(st.rd,st.n)+'</div></div>',
+metas:st=>'<div class="kps">'+kp(st.cid.length,"cidades")+kp(st.cas.length,"casas diferentes")+kp(st.tot,"shows no ano")+'</div><h4>Cidades em 2026</h4>'+bars(st.cid.slice(0,8)),
+materiais:st=>'<p class="nt">Em 2026 foram '+st.r+' shows realizados até agora — cada um pode virar arte de agenda, post e conteúdo para as suas redes.</p>',
+redes:st=>'<div class="kps">'+kp(st.cas.length,"casas onde você tocou")+kp(st.r,"shows para mostrar nas redes")+'</div>',
+contrato:st=>'<div class="kps">'+kp(st.tot,"shows em 2026")+kp(fr(st.liq-st.com),"seu líquido no ano (cachê − custos − comissão)")+'</div>',
+casting:()=>"",reuniao:()=>""};
+window.AVW=function(d,st){try{return st&&W[d]?W[d](st):""}catch(e){return""}};window.AVfr=fr;window.AVdl=dl;window.AVes=es;window.AVbars=bars;window.AVkp=kp;window.AVchart=chart;window.AVdonut=donut;
+window.AVcount=function(root){(root||document).querySelectorAll(".cnt").forEach(el=>{var v=+el.dataset.v;if(!el.dataset.v||isNaN(v)||el.dataset.dn)return;el.dataset.dn=1;var t0=performance.now();(function f(t){var p=Math.min(1,(t-t0)/700);el.textContent=Math.round(v*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)})};
+})();
