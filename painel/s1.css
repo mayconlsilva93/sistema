@@ -72,5 +72,5 @@ ul{margin:0;padding-left:18px}li{margin:5px 0}
 .rsvt{display:inline-block;background:#FFF6C2;color:#6b5600;border:1px dashed #E0B800;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;margin:2px 0}
 
 /*IOSF*/@supports (-webkit-touch-callout:none){html,body{overflow-y:visible!important;overflow-x:clip;height:auto!important;min-height:100%}html{background:#FFF602!important}}
-/*HDF2*/.hdf{background:#EEF1FF!important;color:#3A45B8!important;border:1px solid #C9D0FF!important}
-.hdf .dfb{background:#DDE3FF!important;border:1.5px dashed #9AA6FF!important}
+/*HDF2*/#tl .hdf,.hdf.hdf{background:#EEF1FF!important;color:#3A45B8!important;border:1px solid #C9D0FF!important}
+#tl .hdf .dfb,.hdf.hdf .dfb{background:#DDE3FF!important;border:1.5px dashed #9AA6FF!important}
