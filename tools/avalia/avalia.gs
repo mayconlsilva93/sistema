@@ -9,12 +9,18 @@ function sh_(){var p=PropertiesService.getScriptProperties(),id=p.getProperty("S
   if(id){try{ss=SpreadsheetApp.openById(id)}catch(e){ss=null}}
   if(!ss){ss=SpreadsheetApp.create("DROM · Avaliação 2026 (respostas)");p.setProperty("SHEET",ss.getId());
     var a=ss.getSheets()[0];a.setName("Respostas");a.appendRow(["login","nome","e-mail","enviado em","teste","respostas (json)","números (json)","texto (json)"]);
-    ss.insertSheet("Histórico").appendRow(["login","nome","e-mail","enviado em","teste","respostas (json)"])}
+    ss.insertSheet("Histórico").appendRow(["login","nome","e-mail","enviado em","teste","respostas (json)"]);ss.insertSheet("Rascunhos").appendRow(["login","nome","salvo em","ts","respostas (json)"])}
   return ss}
 function doPost(e){try{var b=JSON.parse(e.postData.contents),T=JSON.parse(P_("TOKENS")||"{}");
   if(!b.k||!T[b.k]||T[b.k]!==b.t)return out_({ok:false,err:"login inválido"});
-  var lock=LockService.getScriptLock();lock.waitLock(20000);
-  var ss=sh_(),r=ss.getSheetByName("Respostas"),now=Utilities.formatDate(new Date(),"America/Sao_Paulo","dd/MM/yyyy HH:mm"),
+  var lock=LockService.getScriptLock();lock.waitLock(20000);var ss=sh_();
+  /* rascunho: salva enquanto o artista preenche, sem e-mail */
+  var rd=ss.getSheetByName("Rascunhos")||ss.insertSheet("Rascunhos");if(rd.getLastRow()<1)rd.appendRow(["login","nome","salvo em","ts","respostas (json)"]);
+  var dv=rd.getDataRange().getValues(),di=-1;for(var j=1;j<dv.length;j++)if(dv[j][0]===b.k){di=j+1;break}
+  var drow=[b.k,b.n,Utilities.formatDate(new Date(),"America/Sao_Paulo","dd/MM/yyyy HH:mm"),b.ts||0,JSON.stringify(b.a||{})];
+  if(di>0){if((+dv[di-1][3]||0)<=(b.ts||0))rd.getRange(di,1,1,5).setValues([drow])}else rd.appendRow(drow);
+  if(b.draft){lock.releaseLock();return out_({ok:true})}
+  var r=ss.getSheetByName("Respostas"),now=Utilities.formatDate(new Date(),"America/Sao_Paulo","dd/MM/yyyy HH:mm"),
       row=[b.k,b.n,b.e,now,b.teste?"sim":"",JSON.stringify(b.a||{}),JSON.stringify(b.st||{}),JSON.stringify(b.r||[])],
       v=r.getDataRange().getValues(),at=-1;
   for(var i=1;i<v.length;i++)if(v[i][0]===b.k){at=i+1;break}
@@ -30,9 +36,13 @@ function mail_(b,now){var h='<div style="font-family:Arial,sans-serif;max-width:
   try{MailApp.sendEmail({to:b.e,subject:sub,htmlBody:h,name:"DROM Entretenimento",replyTo:DROM_MAIL})}catch(e){}
   MailApp.sendEmail({to:DROM_MAIL,subject:sub,htmlBody:h,name:"DROM Entretenimento",replyTo:b.e})}
 function esc_(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function doGet(e){if(!e.parameter.r||e.parameter.r!==P_("READ"))return out_({ok:false});
-  var v=sh_().getSheetByName("Respostas").getDataRange().getValues(),L=[];
+function doGet(e){var p=e.parameter,ss=sh_(),rd=ss.getSheetByName("Rascunhos"),dv=rd?rd.getDataRange().getValues():[];
+  if(p.k){var T=JSON.parse(P_("TOKENS")||"{}");if(!T[p.k]||T[p.k]!==p.t)return out_({ok:false});var o={ok:true};
+    for(var j=1;j<dv.length;j++)if(dv[j][0]===p.k)o.d={ts:+dv[j][3]||0,a:JSON.parse(dv[j][4]||"{}")};
+    var sv=ss.getSheetByName("Respostas").getDataRange().getValues();for(var i=1;i<sv.length;i++)if(sv[i][0]===p.k)o.em=sv[i][3];return out_(o)}
+  if(!p.r||p.r!==P_("READ"))return out_({ok:false});
+  var v=ss.getSheetByName("Respostas").getDataRange().getValues(),L=[],R=[];for(var j=1;j<dv.length;j++)R.push({k:dv[j][0],ts:+dv[j][3]||0,a:JSON.parse(dv[j][4]||"{}")});
   for(var i=1;i<v.length;i++)L.push({k:v[i][0],n:v[i][1],e:v[i][2],em:v[i][3],teste:v[i][4]==="sim",a:JSON.parse(v[i][5]||"{}"),st:JSON.parse(v[i][6]||"{}")});
-  return out_({ok:true,L:L})}
+  return out_({ok:true,L:L,R:R})}
 /* rode uma vez pelo editor para autorizar planilha e e-mail */
 function autorizar(){sh_();MailApp.getRemainingDailyQuota()}

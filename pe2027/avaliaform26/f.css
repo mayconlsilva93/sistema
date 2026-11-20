@@ -68,3 +68,15 @@ textarea:focus,.q input:focus{outline:2px solid var(--bl);background:#fff}
 @keyframes up{from{opacity:0;transform:translateY(10px)}}@keyframes gr{from{transform:scaleY(0)}}@keyframes gw{from{width:0}}@keyframes fi{from{stroke-dasharray:0 100}}@keyframes gg{from{stroke-dasharray:0 200}}
 @media(max-width:560px){.sc{grid-template-columns:repeat(6,1fr)}.sec h2{font-size:22px}.kp b{font-size:20px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* escala 0–10: uma linha, cor do vermelho ao verde, arrastar para escolher */
+.nsc{display:flex;gap:3px;touch-action:none;user-select:none;-webkit-user-select:none;padding-top:6px}
+.nsc button{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;height:46px;padding:0;border:0;border-radius:10px;background:var(--bg);font-weight:800;font-size:16px;line-height:1;color:var(--ink);transition:background .15s,transform .15s,color .15s}
+.nsc button:first-child{border-radius:14px 6px 6px 14px}.nsc button:last-child{border-radius:6px 14px 14px 6px}
+.nsc button:hover{background:color-mix(in srgb,var(--c) 22%,var(--bg))}
+.nsc.has button.bf{background:color-mix(in srgb,var(--c) 30%,#fff)}
+.nsc button.on{background:var(--c);color:#fff;transform:scale(1.14);z-index:1;box-shadow:0 4px 12px color-mix(in srgb,var(--c) 45%,transparent)}
+.nsc button span{pointer-events:none}
+.tb{width:100%;border-collapse:collapse;font-size:13px}.tb th,.tb td{text-align:left;padding:6px;border-bottom:1px solid var(--bg);white-space:nowrap}.tb .n{text-align:right}.tw{overflow-x:auto}
+.vr{flex-wrap:wrap}.vr .op{margin-left:4px}.vr input:disabled{opacity:.45}
+.dat{margin-top:4px}
+@media(max-width:420px){.nsc{gap:2px}.nsc button{font-size:14px;height:42px;border-radius:7px}}
