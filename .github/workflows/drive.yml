@@ -1,7 +1,7 @@
 name: DROM · Contratos PDF e cadastros (Drive → apps)
 on:
   schedule:
-    - cron: "13 11,21 * * *"   # 08h13 e 18h13 (Brasília)
+    - cron: "13 * * * *"   # de hora em hora
   workflow_dispatch:
 permissions:
   contents: write
