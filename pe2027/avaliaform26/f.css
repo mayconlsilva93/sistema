@@ -80,3 +80,23 @@ textarea:focus,.q input:focus{outline:2px solid var(--bl);background:#fff}
 .vr{flex-wrap:wrap}.vr .op{margin-left:4px}.vr input:disabled{opacity:.45}
 .dat{margin-top:4px}
 @media(max-width:420px){.nsc{gap:2px}.nsc button{font-size:14px;height:42px;border-radius:7px}}
+.ch .cf{fill:#8C8CFF}.ch .cp{fill:#FFAD8F;opacity:1}.lg .cf{background:#8C8CFF}.lg .cp{background:#FFAD8F;opacity:1}.kp.ko b{color:#6b6bff}.kp.kr b{color:#ff8a5c}
+.vb{display:flex;align-items:flex-end;gap:10px;height:200px;margin-top:12px}.vb>div{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center}
+.vb i{display:block;width:100%;max-width:90px;height:var(--h);min-height:3px;border-radius:10px 10px 4px 4px;background:var(--bl);animation:gr2 .7s both}.vb b{font-size:13px;margin-bottom:4px;white-space:nowrap}.vb b small{font-weight:500;color:var(--mu)}.vb span{font-size:12px;color:var(--mu);margin-top:6px;line-height:1.2}
+.vb.du i{background:#8C8CFF}.vb.du .md i{background:var(--bl)}@keyframes gr2{from{height:0}}
+.tb .pg{color:#0a8f06;font-weight:700;font-size:11px}.tb .pe{color:#d93025;font-size:11px}
+/* reunião: grade dia × horário */
+.rg{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:stretch}
+.rg .hd{font-size:13px;font-weight:800;text-align:center;padding:4px 0;line-height:1.15}.rg .hd small{display:block;font-weight:500;color:var(--mu)}
+.rg .hr{font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+.rg button{height:46px;border:2px dashed var(--ln);border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;padding:0;transition:all .15s;color:transparent}
+.rg button:hover{border-color:var(--bl)}.rg button.on{background:var(--bl);border:2px solid var(--bl);color:#fff;animation:pop .25s}
+@keyframes pop{50%{transform:scale(1.12)}}
+.rgc{margin-top:8px;font-size:13px;color:var(--mu)}
+/* escala: retorno ao escolher */
+.nfb{display:flex;align-items:center;gap:10px;margin-top:10px;min-height:40px}
+.nfb .em{font-size:30px;line-height:1;display:inline-block}.nfb.go .em{animation:bounce .45s}.nfb b{font-size:15px}
+.nmt{position:relative;height:8px;border-radius:4px;margin-top:10px;background:linear-gradient(90deg,hsl(0 85% 52%),hsl(60 85% 45%),hsl(120 85% 42%));opacity:.25}
+.nmt i{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--c,#999);transform:translate(-50%,-50%);left:var(--x,0%);transition:left .35s cubic-bezier(.3,1.6,.5,1),border-color .2s;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.nmt.on{opacity:1}
+@keyframes bounce{0%{transform:scale(.4) rotate(-20deg)}60%{transform:scale(1.3)}100%{transform:scale(1)}}

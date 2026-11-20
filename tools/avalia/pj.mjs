@@ -14,9 +14,10 @@ vm.runInContext(s4.slice(a,b)+";this.PJmon=PJmon;",C);
 const AR=["Ramonstro","Carloto","Sena","Cenoura","Maneira","Amaro","Josu","Cadu Vieira","Brinquinho","Liquinho"],
  FD={Ramonstro:"ramonstro003",Carloto:"carloto453",Sena:"sena089",Cenoura:"cenoura173",Maneira:"maneira038",Amaro:"amaro095",Josu:"josu185","Cadu Vieira":"caduvieira089",Brinquinho:"brinquinho131",Liquinho:"liquinho000"};
 const now=C.NOW,cmk=(now.getFullYear()-2023)*12+now.getMonth()+1,Y=2026,P={};
+const CT={};DD.ALL.forEach(r=>{const f=FD[AR[r[1]]];if(!f||r[14]<=(Y-2023)*12||r[14]>(Y-2023)*12+12)return;const k=r[14]+"|"+r[0]+"|"+r[3];(CT[f]=CT[f]||{})[k]=(CT[f][k]&&CT[f][k]!==r[16])?"?":r[16]});
 AR.forEach((n,i)=>{const o={};for(let mk=(Y-2023)*12+1;mk<=(Y-2023)*12+12;mk++){if(mk<cmk)continue;const r=C.PJmon(i,mk);if(r&&r.n)o[mk]=r.n}P[FD[n]]=o});
 const salt=JSON.parse(fs.readFileSync("maneira038/d.json","utf8")).salt,AK=crypto.pbkdf2Sync(process.env.DROM_PIN,b64(salt),200000,32,"sha256");
-const out={P,up:pd.up||"",dia:now.toISOString().slice(0,10)},iv=crypto.randomBytes(12),ci=crypto.createCipheriv("aes-256-gcm",AK,iv);
+const out={P,CT,up:pd.up||"",dia:now.toISOString().slice(0,10)},iv=crypto.randomBytes(12),ci=crypto.createCipheriv("aes-256-gcm",AK,iv);
 const enc=Buffer.concat([ci.update(JSON.stringify(out)),ci.final(),ci.getAuthTag()]);
 const f="pe2027/avaliaform26/pj.json";let old=null;try{old=JSON.parse(fs.readFileSync(f,"utf8"))}catch(e){}
 if(old&&old.h===crypto.createHash("sha256").update(JSON.stringify(out)).digest("hex").slice(0,16)){console.log("sem mudança");process.exit(0)}

@@ -8,7 +8,9 @@ window.AVQ=[
 {s:"Comunicação e gestão",i:[
  {id:"grp",t:"n",q:"Como você avalia o contato com a agência pelo grupo artístico?",m25:10},
  {id:"cmp",t:"n",q:"Como você avalia o seu comprometimento com prazos e com as demandas compartilhadas no grupo?",m25:8.33},
- {id:"app",d:"prop",t:"n",q:"Como você avalia a organização das propostas e da agenda de shows (app DROM, planilha e Google Agenda)?",m25:9.83},
+ {id:"app",d:"prop",t:"n",q:"Como você avalia a organização das propostas e da agenda de shows em 2026 (planilha e Google Agenda)?",m25:9.83},
+ {id:"apa",t:"n",q:"Quanto você está satisfeito(a) com o aplicativo para artistas DROM?"},
+ {id:"apac",t:"t",q:"Comentários e sugestões sobre o aplicativo"},
  {id:"fin",d:"pag",t:"n",q:"Como você avalia o gerenciamento e o fluxo financeiro?",m25:10},
  {id:"gesc",t:"t",q:"Comente as quatro perguntas anteriores. Tem alguma sugestão de melhoria?"}]},
 {s:"Shows",i:[
@@ -24,23 +26,10 @@ window.AVQ=[
  {id:"c20",d:"com20",t:"n",q:"Quão satisfeito(a) você está com a comissão de 20% sobre o cachê líquido das suas apresentações?",m25:9.67},
  {id:"c30",d:"com30",t:"n",q:"Quão satisfeito(a) você está com a comissão de 30% sobre o cachê líquido das apresentações de maior cachê?",m25:9.00},
  {id:"cmin",t:"s",q:"Se a DROM passasse a cobrar 20% sobre cachês abaixo do mínimo em shows fechados por você, você aceitaria?",o:["Sim","Não","Depende"]}]},
-{s:"Quanto você cobraria em 2027",h:"Valor mínimo que você aceitaria em cada formato (R$). Se não faz esse tipo de evento, marque “não faço”.",i:[
- {id:"v1",d:"tabela",t:"v",q:"Casa noturna Florianópolis/São José/Palhoça · set de 45 min a 1h"},
- {id:"v2",t:"v",q:"Casa noturna Florianópolis/São José/Palhoça · set de 1h30 a 2h"},
- {id:"v3",t:"v",q:"Festa universitária grande em Florianópolis · set de 1h a 1h30"},
- {id:"v4",t:"v",q:"Evento universitário pequeno em Florianópolis e região · set de 1h a 1h30"},
- {id:"v5",t:"v",q:"Evento particular em Florianópolis e região · set de 1h"},
- {id:"v6",t:"v",q:"Evento particular em Florianópolis e região · set de 2h"},
- {id:"v7",t:"v",q:"Evento particular em Florianópolis e região · set de 3h"},
- {id:"v8",t:"v",q:"Formaturas em Florianópolis e região · set de até 2h"},
- {id:"v9",t:"v",q:"Casamentos em Florianópolis e região · set de até 2h"},
- {id:"v10",t:"v",q:"Casa noturna em Balneário Camboriú/Itapema/Brusque/Itajaí (75 a 100 km) · até 1h30"},
- {id:"v11",t:"v",q:"Casa noturna em Blumenau/Tubarão (150 km) · até 1h30"},
- {id:"v12",t:"v",q:"Casa noturna em Joinville/Criciúma (200 km) · até 1h30"},
- {id:"v13",t:"v",q:"Casa noturna em Lages (220 km) · até 1h30"},
- {id:"v14",t:"v",q:"Outras cidades (500 km, terrestre) · até 1h30"},
- {id:"v15",t:"v",q:"Outras cidades (1.000 km, terrestre) · até 1h30"},
- {id:"v16",t:"v",q:"Outras cidades (aéreo, despesas terrestres por conta do artista) · até 1h30"}]},
+{s:"Seus cachês em 2026",i:[
+ {id:"cac",d:"tabela",t:"t",q:"Comentários sobre os seus cachês em 2026"},
+ {id:"csu",t:"t",q:"Onde o cachê precisa subir?"},
+ {id:"cse",t:"t",q:"Onde dá para segurar o cachê para não perder datas?"}]},
 {s:"Formato dos shows",i:[
  {id:"hkm",d:"hosp",t:"s",q:"A partir de que distância você considera necessário exigir hospedagem do contratante?",o:["100 km","150 km","200 km (Joinville/Criciúma)","Lages (220 km) pra mais","300 km ou mais"]},
  {id:"dId",d:"dur",t:"s",q:"Qual seria a duração ideal para o seu show?",o:["45 min","1h","1h30","2h","Mais de 2h"]},
@@ -79,12 +68,8 @@ window.AVQ=[
  {id:"e27",t:"t",q:"O que você espera da DROM e da sua carreira em 2027?"}]},
 {s:"Casting",i:[
  {id:"grpv",t:"t",q:"Como você se enxerga dentro do grupo atual de artistas? Sente-se alinhado(a) ao momento da agência? O que te diferencia?"},
- {id:"b2b",t:"m",q:"Com quais artistas da DROM faria sentido uma parceria em shows (B2B, Boteco do Ramonstro, Baile da DROM…)?",o:["Amaro","Cadu Vieira","Carloto","Cenoura","Josu","Maneira","Ramonstro","Sena","Nenhum"]},
- {id:"agr",t:"t",q:"Quais artistas você acredita que agregariam ao casting da DROM? Cite apenas nomes."},
- {id:"nag",t:"t",q:"Quais artistas você acredita que NÃO agregariam ao casting? Cite apenas nomes."},
- {id:"cstc",t:"t",q:"Comente em linhas gerais as duas respostas anteriores."},
  {id:"out",t:"t",q:"Tem algum ponto não tratado aqui que você considera relevante, antes da reunião individual?"}]},
 {s:"Reunião individual",i:[
- {id:"reu",t:"m",q:"Marque os dias e horários de preferência para a reunião presencial (até 2 horas), de 07 a 09/12",o:["Seg 07/12 10h", "Seg 07/12 11h", "Seg 07/12 14h", "Seg 07/12 15h", "Seg 07/12 18h", "Seg 07/12 19h", "Seg 07/12 21h", "Ter 08/12 10h", "Ter 08/12 11h", "Ter 08/12 14h", "Ter 08/12 15h", "Ter 08/12 18h", "Ter 08/12 19h", "Ter 08/12 21h", "Qua 09/12 10h", "Qua 09/12 11h", "Qua 09/12 14h", "Qua 09/12 15h", "Qua 09/12 18h", "Qua 09/12 19h", "Qua 09/12 21h"]},
+ {id:"reu",t:"g",q:"Marque os dias e horários de preferência para a reunião presencial (até 2 horas), de 07 a 09/12",o:["Seg 07/12 10h", "Seg 07/12 11h", "Seg 07/12 14h", "Seg 07/12 15h", "Seg 07/12 18h", "Seg 07/12 19h", "Seg 07/12 21h", "Ter 08/12 10h", "Ter 08/12 11h", "Ter 08/12 14h", "Ter 08/12 15h", "Ter 08/12 18h", "Ter 08/12 19h", "Ter 08/12 21h", "Qua 09/12 10h", "Qua 09/12 11h", "Qua 09/12 14h", "Qua 09/12 15h", "Qua 09/12 18h", "Qua 09/12 19h", "Qua 09/12 21h"]},
  {id:"reuo",t:"t",q:"Outro dia e horário? Qual? (se não precisar, escreva “não”)"}]}
 ];
