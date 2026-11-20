@@ -5,7 +5,9 @@ import os,sys,json,re,base64,subprocess,time,urllib.request,urllib.parse
 R=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))));sys.path.insert(0,R+'/tools/sync')
 import state
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-URL,KEY=os.environ['DRIVE_URL'].strip(),os.environ['DRIVE_KEY'].strip();W='/tmp/w';SINCE=R+'/tools/drive/since.txt'
+URL,KEY=os.environ.get('DRIVE_URL','').strip(),os.environ.get('DRIVE_KEY','').strip()
+if not URL or not KEY:print('DRIVE_URL/DRIVE_KEY ainda não configurados');sys.exit(0)
+W='/tmp/w';SINCE=R+'/tools/drive/since.txt'
 ARTS=['Ramonstro','Carloto','Sena','Cenoura','Maneira','Amaro','Josu','Cadu Vieira','Brinquinho','Liquinho']
 PFX={'Ramonstro':'1','Brinquinho':'2','Carloto':'3','Sena':'4','Cenoura':'5','Liquinho':'6','Maneira':'7','Amaro':'8','Josu':'9','Cadu Vieira':'10'}
 def get(**q):
