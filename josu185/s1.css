@@ -76,3 +76,5 @@ nav button{font-size:14px}.cal{margin-bottom:4px}
 /*GUT*/html,body{scrollbar-gutter:auto!important}
 
 /*DTC*/.hd>.dt{align-self:center}
+
+/*IOSF*/@supports (-webkit-touch-callout:none){html,body{overflow-y:visible!important;overflow-x:clip;height:auto!important;min-height:100%}html{background:#0000FF!important}}

@@ -69,3 +69,5 @@ ul{margin:0;padding-left:18px}li{margin:5px 0}
 .gr td.x4{background:#FFD400;color:#000;font-weight:800;font-size:11px}
 .tl i.rsv{background:#FFD400!important;color:#000!important}
 .rsvt{display:inline-block;background:#FFD400;color:#000;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;margin:2px 0}
+
+/*IOSF*/@supports (-webkit-touch-callout:none){html,body{overflow-y:visible!important;overflow-x:clip;height:auto!important;min-height:100%}html{background:#FFF602!important}}
