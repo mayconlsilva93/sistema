@@ -1,0 +1,33 @@
+name: DROM · Contratos PDF e cadastros (Drive → apps)
+on:
+  schedule:
+    - cron: "13 11,21 * * *"   # 08h13 e 18h13 (Brasília)
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency: drive
+jobs:
+  drive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: America/Sao_Paulo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -q cryptography openpyxl
+      - run: python3 tools/drive/drivein.py
+        env:
+          DROM_BKK: ${{ secrets.DROM_BKK }}
+          DRIVE_URL: ${{ secrets.DRIVE_URL }}
+          DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
+      - run: |
+          git config user.name "drom-bot"; git config user.email "drom-bot@users.noreply.github.com"
+          git add tools/drive/since.txt tools/sync/inbox 2>/dev/null || true
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -qm "contratos/cadastros (Drive)" && (git push -q || (git pull -q --rebase && git push -q))
+          [ -f tools/sync/inbox/upd.json ] && gh workflow run sheet.yml -f dry=0 || true
+        env:
+          GH_TOKEN: ${{ github.token }}
