@@ -312,14 +312,21 @@ function PJval(b,y){var yrs=Math.max(0,y-NOW.getFullYear()),g=Math.pow(b.gc,yrs)
 /* shows extras projetados para o artista ai no mês absoluto mk (só dias depois de hoje) */
 /*PJA*/ /* só projeta artista com show realizado nos últimos 3 meses ou show confirmado (aprovado) nos últimos 3 meses */
 function PJact(ai){if(!PJ.a)PJ.a={};if(ai in PJ.a)return PJ.a[ai];var T=PJT(),t0=new Date(T.getFullYear(),T.getMonth()-3,T.getDate()),a0=Math.round((t0-new Date(2023,0,1))/864e5);return PJ.a[ai]=ALL.some(s=>s[1]===ai&&((PJD(s)>=t0&&PJD(s)<=T)||(s[26]>=a0)))}
+/* nível mensal para o ano seguinte: ano corrente completo (realizados + confirmados + projetado até dezembro), sem efeito da época do ano; artista novo conta só a partir do 1º mês */
+/* cachê esperado no ano seguinte: média do ano corrente (realizados + confirmados, sem 5% de cada ponta) × (1 + metade do reajuste da tabela do ano seguinte, pelo estudo de cachês) */
+var AJN={"Ramonstro":.0794,"Carloto":.0272,"Sena":.0425,"Cenoura":.0547,"Maneira":.0523,"Amaro":.0011,"Josu":.0472,"Cadu Vieira":.1};
+function PJca(ai){var k="ca"+ai;if(k in PJ.c)return PJ.c[k];var m0=(NOW.getFullYear()-B)*12+1,v=ALL.filter(s=>s[1]===ai&&s[14]>=m0&&s[14]<m0+12&&s[6]>0).map(s=>s[6]).sort((a,b)=>a-b),c=Math.floor(v.length*.05);v=v.slice(c,v.length-c);return PJ.c[k]=v.length?v.reduce((a,b)=>a+b,0)/v.length*(1+(AJN[AR[ai]]||0)):0}
+function PJlvl(ai){var k="lv"+ai;if(k in PJ.c)return PJ.c[k];var b=PJbase(ai),cy=NOW.getFullYear(),m0=(cy-B)*12+1,cm=(NOW.getFullYear()-B)*12+NOW.getMonth()+1,first=1e9;ALL.forEach(s=>{if(s[1]===ai)first=Math.min(first,s[14])});var tot=0,w=0;
+ for(var m=Math.max(m0,first);m<=m0+11;m++){var n=ALL.filter(s=>s[1]===ai&&s[14]===m).length;if(m>=cm)n+=PJmon(ai,m).n;tot+=n;w+=b.se[(m-1)%12+1]||1}
+ return PJ.c[k]=w?tot/w:b.lvl}
 function PJmon(ai,mk){var key=ai+"|"+mk;if(key in PJ.c)return PJ.c[key];var T=PJT(),y=YF(mk),mo=(mk-1)%12+1,nd=new Date(y,mo,0).getDate(),d0=new Date(y,mo-1,1),r={n:0,fat:0,com:0,cu:0,tp:0,e:0,conf:0,bk:0,pl:0};
  if(new Date(y,mo-1,nd)<=T){PJ.c[key]=r;return r}var b=PJbase(ai);if(!b.n12||!PJact(ai)){PJ.c[key]=r;return r}
- var st=T>=d0?T.getDate()+1:1,rem=nd-st+1,ahead=(mk-((NOW.getFullYear()-B)*12+NOW.getMonth()+1))/12,e=b.lvl*b.se[mo]*Math.pow(b.tr,Math.max(0,ahead))*rem/nd,
+ var st=T>=d0?T.getDate()+1:1,rem=nd-st+1,ahead=(mk-((NOW.getFullYear()-B)*12+NOW.getMonth()+1))/12,e=(y>NOW.getFullYear()?PJlvl(ai)*b.se[mo]*Math.max(.95,Math.min(1.15,1+(b.tr-1)*.5)):b.lvl*b.se[mo]*Math.pow(b.tr,Math.max(0,ahead)))*rem/nd,
  nl=0;for(var dd=st;dd<=nd;dd++){var ld=Math.round((new Date(y,mo-1,dd)-T)/864e5),c=0;for(var i=0;i<b.L.length&&b.L[i]<ld;i++)c++;nl+=b.L.length?c/b.L.length:1}nl/=rem;
  var conf=ALL.filter(s=>s[1]===ai&&s[14]===mk&&PJD(s)>T).length,all_=ALL.filter(s=>s[1]===ai&&s[14]===mk).length,bk=1-nl,ec=bk>.15?conf/bk:null,ef=ec==null?e:bk*ec+(1-bk)*e,
  pl=0;OTP.forEach(p=>{if(p[0]===ai&&p[1]===mk&&(p[2]==="Proposta emitida"||p[2]==="Data reservada"))pl+=p[3]*b.cr});
  var ex=Math.max(0,ef-conf),capm=Math.max(0,b.cap-all_);ex=Math.min(ex,Math.max(capm,pl));ex=Math.round(ex);
- var v=PJval(b,y);r={n:ex,fat:ex*v.ca,com:ex*v.co,cu:ex*v.cu,tp:Math.round(ex*(1+b.rat)),e:e,conf:conf,bk:bk,pl:pl,ca:v.ca};PJ.c[key]=r;return r}
+ var v=PJval(b,y);if(y>NOW.getFullYear()){var c27=PJca(ai);if(c27&&v.ca){var q=c27/v.ca;v={ca:c27,cu:v.cu*q,co:v.co*q}}}r={n:ex,fat:ex*v.ca,com:ex*v.co,cu:ex*v.cu,tp:Math.round(ex*(1+b.rat)),e:e,conf:conf,bk:bk,pl:pl,ca:v.ca};PJ.c[key]=r;return r}
 /* custo pendente estimado (shows semelhantes: local > cidade > categoria > artista) e comissão a descontar */
 function PJpc(s){var k=s[20]+"|"+s[1];if(k in PJ.pc)return PJ.pc[k];var r={cu:0,com:0,how:""};if(s[27]&&s[8]>0&&s[6]>0){var base=ALL.filter(z=>z[1]===s[1]&&!z[27]&&z[8]>0&&z[6]>0),f=null,how="";
  [[17,"local"],[3,"cidade"],[16,"categoria"]].some(q=>{var L=base.filter(z=>z[q[0]]===s[q[0]]);if(L.length>=2){f=L;how=q[1];return true}});if(!f){f=base;how="artista"}
