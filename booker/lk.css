@@ -30,3 +30,5 @@
 body.hasnav .dbrand{bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:5px 0}
 body.hasnav .dbrand img{height:12px}
 body.hasnav{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/*OR*/.bkrf{background:#FF5B1F!important;border-color:#FF5B1F!important;color:#0a0a0a!important}
+.tabs button.on{background:#FF5B1F!important;border-color:#FF5B1F!important;color:#0a0a0a!important}
