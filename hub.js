@@ -26,7 +26,7 @@ $("lkf").onsubmit=async e=>{e.preventDefault();var us=$("usr").value.trim().toLo
 async function goArt(){CFG=window.HUBCFG;document.body.classList.remove("locked");var A=(window.DROMDATA||{}).A||{};
  var RR=(window.DROMDATA||{}).R||{};CFG.apps.forEach(a=>{DATA[a.f]={S:A[a.k]||[],R:RR[a.k],up:""}});icons();notif();draw();if(TAB!=="h")hview()}
 /* ---------- depois de entrar ---------- */
-async function go(c){CFG=c;$("lk").remove();document.body.classList.remove("locked");
+async function go(c){if(c&&c.apps&&!c.apps.some(a=>a.f==="dev/artistateste"))c.apps.push({k:"artistateste",f:"dev/artistateste",idb:"artistateste",n:"Artista Teste",img:"dev/artistateste/icon-192.png",url:"dev/artistateste/"});/*TESTE: artista de teste no Hub*/CFG=c;$("lk").remove();document.body.classList.remove("locked");
  AK=await crypto.subtle.importKey("raw",b64(c.ak),"AES-GCM",false,["decrypt","encrypt"]);
  /* libera os apps dos artistas neste aparelho (mesma chave do PIN deles), para abrirem aqui dentro sem pedir PIN */
  for(var a of c.apps)await kput(a.idb,{key:AK,salt:c.as,ts:Date.now(),v:2});
