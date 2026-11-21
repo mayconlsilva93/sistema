@@ -19,3 +19,14 @@
 /*LOAD*/body.locked #bkw{display:block!important;visibility:hidden}body.locked.ld #bkw .hd{visibility:visible}#lk{z-index:100}
 
 /*HDF*/.hd{padding-left:50px!important;padding-right:50px!important;box-sizing:border-box;gap:min(12px,1.6vw)!important}.hd .hlogo{height:min(34px,4.7vw)!important;width:auto}.hd .hic{height:min(30px,4.4vw)!important}.hd b{font-size:min(22px,3.3vw)!important;padding:min(6px,.8vw) min(20px,2.6vw) min(6px,.8vw) min(17px,2.3vw)!important;gap:min(9px,1.2vw)!important}
+
+/*RF*/.bkrf{left:auto!important;right:0}
+/*NAV*/#bknav{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#FF5B1F;display:grid;grid-template-columns:repeat(3,1fr);padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#bknav[hidden]{display:none}
+#bknav button{display:flex;align-items:center;justify-content:center;height:58px;padding:0;margin:0;border:0;border-radius:0;background:transparent;color:#0a0a0a;opacity:.45;font-size:0;line-height:0;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:0;transform:none!important}
+#bknav button.on{opacity:1}
+#bknav svg{display:block;width:26px;height:26px;flex:none}
+#bknav svg *{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+body.hasnav .dbrand{bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:5px 0}
+body.hasnav .dbrand img{height:12px}
+body.hasnav{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}

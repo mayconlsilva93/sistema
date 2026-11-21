@@ -166,4 +166,13 @@ Promise.all([iget("ov"),iget("new"),iget("ws")]).then(function(v){SAVED=v[0]||{}
  NEW.forEach(function(p){if(!BASE[TA].p.some(function(x){return x.n===p.n}))BASE[TA].p.push(CL_(p))});
  Object.keys(SAVED).forEach(function(k){OV[k]=CL_(SAVED[k])});
  var arts=ORDER.filter(function(a){return BASE[a]&&BASE[a].p&&BASE[a].p.length});$("art").innerHTML='<option value="">Selecionar</option>'+arts.map(function(a){return'<option value="'+esc(a)+'">'+esc(a)+"</option>"}).join("");$("art").value="";fillProps()})
+
+;/*RF+NAV*/(function(){var hd=document.querySelector(".hd");if(hd&&!document.getElementById("bkrf")){var r=document.createElement("button");r.type="button";r.id="bkrf";r.className="bklo bkrf";r.title="Atualizar";r.setAttribute("aria-label","Atualizar");
+ r.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-14.2 5M4 12a8 8 0 0 1 14.2-5"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/></svg>';
+ r.onclick=function(){guard(function(){location.reload()})};hd.appendChild(r)}
+ if(document.getElementById("bknav"))return;var I={d:'<path d="M8 4.5h8M6.5 4.5H5a1.5 1.5 0 0 0-1.5 1.5v13A1.5 1.5 0 0 0 5 20.5h14a1.5 1.5 0 0 0 1.5-1.5V6A1.5 1.5 0 0 0 19 4.5h-1.5"/><path d="M8 10h8M8 13.5h8M8 17h5"/>',p:'<path d="M6 3.5h8l4.5 4.5v12.5H6z"/><path d="M14 3.5V8h4.5M12 11v6M9.5 14.5 12 17l2.5-2.5"/>',c:'<path d="M5 20.5h14M7 17l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L11 16z"/><path d="M14.5 6.5l3 3"/>'},N={d:"Dados",p:"Emissão",c:"Contrato"};
+ var nv=document.createElement("nav");nv.id="bknav";nv.innerHTML=["d","p","c"].map(function(t){return'<button type="button" data-t="'+t+'" title="'+N[t]+'" aria-label="'+N[t]+'"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">'+I[t]+"</svg></button>"}).join("");document.body.appendChild(nv);document.body.classList.add("hasnav");
+ function sync(){var on=document.querySelector(".tabs button.on");nv.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",!!on&&b.dataset.t===on.dataset.t)});nv.hidden=!!$("app").hidden}
+ nv.onclick=function(e){var b=e.target.closest("button");if(!b)return;var t=document.querySelector('.tabs button[data-t="'+b.dataset.t+'"]');if(t)t.click();sync();scrollTo(0,0)};
+ new MutationObserver(sync).observe(document.getElementById("bkw"),{attributes:true,subtree:true,attributeFilter:["class","hidden"]});sync()})();
 })();
