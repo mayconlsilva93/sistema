@@ -10,7 +10,7 @@ function rev(s){var m=(s[19]-1)%12+1;return(m===12&&s[0]===31)||(m===1&&s[0]===1
 /* grupos do Painel Geral (CGR) */
 var CGR=[["Eventos Públicos",[["Casas noturnas","N"],["Bares","B"],["Outdoor","O"],["Label DROM","L"]]],["Eventos Universitários",[["Grande Florianópolis","U1"],["Outras cidades","U2"]]],["Eventos Sociais e Corporativos",[["Formaturas","F"],["Aniversários","A"],["Casamentos","W"],["Particular","P"],["Corporativos","C"]]]];
 window.AVST=function(D,X){X=X||{};var P=X.P||{},CT=X.CT||{},CA=X.CA||{},FIN=X.FIN||null,PC=X.PC||{},hasCT=Object.keys(CT).length>0,
- ky=s=>s[19]+"|"+s[0]+"|"+String(s[3]).replace(/\/[A-Z]{2}$/,""),kl=s=>ky(s)+"|"+String(s[2]||"").trim().toLowerCase(),
+ ky=s=>s[19]+"|"+s[0]+"|"+String(s[3]).replace(/\/SC$/,""),kl=s=>ky(s)+"|"+String(s[2]||"").trim().toLowerCase(),
  cat=s=>CT[kl(s)]||CT[ky(s)]||"",cs=s=>CA[s[3]+"|"+s[2]]||s[2],sub=s=>{var c=cat(s);return c==="U"?(FLO[s[3]]?"U1":"U2"):c};
  var S=D.S||[],A=yr(S,Y),R=A.filter(ok),F=A.filter(s=>!ok(s)),mon=[];
  for(var i=1;i<=12;i++){var k=M0+i;mon.push({r:R.filter(s=>s[19]===k).length,f:F.filter(s=>s[19]===k).length,p:P[k]||0,y25:yr(S,2025).filter(s=>s[19]===k-12).length})}
