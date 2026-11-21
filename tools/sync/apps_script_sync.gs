@@ -35,12 +35,23 @@ function out(o) { return ContentService.createTextOutput(JSON.stringify(o)).setM
 
 /* a cada 1 min: se a planilha mudou desde a última vez, chama o GitHub */
 function verificar() {
+  try { verificarDev(); } catch (x) { console.log('dev: ' + x); }
   var u = String(DriveApp.getFileById(SID).getLastUpdated().getTime()), pr = PropertiesService.getScriptProperties();
   if (pr.getProperty('ULT') === u) return;
   var r = UrlFetchApp.fetch(WF, {method: 'post', muteHttpExceptions: true, contentType: 'application/json',
     headers: {Authorization: 'Bearer ' + P('GH_TOKEN'), Accept: 'application/vnd.github+json'},
     payload: JSON.stringify({ref: 'main'})});
   if (r.getResponseCode() === 204) pr.setProperty('ULT', u); else console.log('GitHub ' + r.getResponseCode() + ': ' + r.getContentText());
+}
+
+/* planilha do Artista Teste: quando muda, roda o dev.yml (app de teste e Booker) */
+var DEV = '1_FIaPSZjz7rr1QwDvC7jL6qCXu09Wh1ZsgTTdearxGs';
+function verificarDev() {
+  var u = String(DriveApp.getFileById(DEV).getLastUpdated().getTime()), pr = PropertiesService.getScriptProperties();
+  if (pr.getProperty('ULTDEV') === u) return;
+  var r = UrlFetchApp.fetch(WF.replace('sheet.yml', 'dev.yml'), {method: 'post', muteHttpExceptions: true, contentType: 'application/json',
+    headers: {Authorization: 'Bearer ' + P('GH_TOKEN'), Accept: 'application/vnd.github+json'}, payload: JSON.stringify({ref: 'main'})});
+  if (r.getResponseCode() === 204) pr.setProperty('ULTDEV', u); else console.log('GitHub dev ' + r.getResponseCode() + ': ' + r.getContentText());
 }
 
 /* rodar uma vez */
