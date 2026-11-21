@@ -4,5 +4,7 @@ nav button svg path,nav button[data-t=p] svg circle{fill:none;stroke:currentColo
 
 html{overflow:hidden!important;height:100%}
 body{position:fixed!important;top:0;left:0;right:0;bottom:var(--fh,calc(85.6px + env(safe-area-inset-bottom,0px)));margin:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+html body{overflow-y:auto!important;overflow-x:hidden!important;height:auto!important;min-height:0!important;touch-action:pan-y pinch-zoom}
+main{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}
 main{padding-bottom:14px!important}
 @media (max-width:420px){.top{gap:8px!important}.top b{font-size:16px!important;white-space:nowrap}.top .av,.top img.av{width:46px!important;height:46px!important}.top .bell,.top .eye{width:38px!important;height:38px!important}}
