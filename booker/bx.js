@@ -50,7 +50,7 @@ function tbar(){var t=$("bktb");if(!t)return;if(!t.firstChild){t.innerHTML=[["nw
  S("tbsv",d,d?"Salvar alterações":!c?"Salvar: escolha uma proposta primeiro":!w?"Somente leitura: disponível quando a gravação for liberada para este artista":"Nada para salvar");
  S("tbds",d,d?"Descartar alterações":"Descartar alterações: nada para descartar");$("tbsv").classList.toggle("dd",d)}
 function bar(){tbar();if(!cur)return;var w=WRT(cur.a),d=dirty();
- $("dvbar").innerHTML='<div class="dvb">'+(w?'<span class="dvst '+(d?"dd":"ok")+'">'+(d?"● Alterações não salvas":"✓ Tudo salvo")+'</span><span class="dvdev">'+(WS.on?"grava na planilha de "+esc(cur.a):"gravação desligada: salvo só neste aparelho")+"</span>":'<span class="dvro">Somente leitura · as edições valem só nesta tela; nada é gravado nas planilhas</span>')+"</div>"+finHTML()+'<div id="dsug"></div>';finBind();sug()}
+ $("dvbar").innerHTML='<div class="dvb">'+(w?'<span class="dvst '+(d?"dd":"ok")+'">'+(d?"● Alterações não salvas":"✓ Tudo salvo")+'</span><span class="dvdev">'+(WS.on?"grava na planilha de "+esc(cur.a):"gravação desligada: salvo só neste aparelho")+"</span>":'<span class="dvro">Somente leitura · as edições valem só nesta tela; nada é gravado nas planilhas</span>')+"</div>"+'<div id="dsug"></div>';finRender();sug()}
 function saveLocal(k,p,msg){SAVED[k]=CL_(OV[k]);var o=OV[k]||{};NEW.forEach(function(x){if(x.n===p.n)Object.assign(x,o)});return persist().then(function(){toast(msg);bar();renderSum()})}
 var BUSY=0;
 function save(){var k=ck(),p=cur.p;if(!WS.on)return saveLocal(k,p,"Salvo neste aparelho");if(BUSY)return Promise.resolve(false);
@@ -124,7 +124,7 @@ var FSUG=[["cid","Cidade/UF"],["cat","Categoria"],["end_local","Endereço"],["hi
 function sug(){var box=$("dsug");if(!box||!cur)return;var r=cur_(),L=similar(r,1);document.querySelectorAll(".dvsg").forEach(function(e){e.remove()});
  if(!L.length||!(r.loc||r.ev)){box.innerHTML="";return}var b=L[0],q=b.r,S=[];
  FSUG.forEach(function(f){var v=q[f[0]],cv=r[f[0]];if((cv===undefined||cv===null||cv===""||cv==="a definir")&&v!==undefined&&v!==null&&v!==""&&v!=="a definir")S.push([f[0],f[1],v])});
- S.forEach(function(s){var inp=$("f_"+s[0]);if(!inp)return;var c=document.createElement("button");c.type="button";c.className="dvsg";c.textContent="Sugestão: "+(s[0]==="cach"?money(s[2]):String(s[2]).split("\n")[0].slice(0,40));c.title="Da proposta de "+brs(q.dt)+(b.a!==cur.a?" · "+b.a:"");c.onclick=function(){setVal(s[0],String(s[2]));inp.value=String(s[2]);c.remove();bar()};inp.parentNode.appendChild(c)});
+ S.forEach(function(s){var inp=$("f_"+s[0]);if(!inp)return;var c=document.createElement("button");c.type="button";c.className="dvsg";c.textContent="Sugestão: "+(s[0]==="cach"?money(s[2]):String(s[2]).split("\n")[0].slice(0,40));c.title="Da proposta de "+brs(q.dt)+(b.a!==cur.a?" · "+b.a:"");c.onclick=function(){setVal(s[0],s[0]==="cach"?num(s[2]):String(s[2]));c.remove();buildForms();bar()};inp.parentNode.appendChild(c)});
  box.innerHTML=S.length?'<div class="dvsb">💡 '+S.length+' sugest'+(S.length>1?"ões":"ão")+' com base em '+esc((q.ev||q.loc||"").trim())+" ("+esc(brs(q.dt))+(b.a!==cur.a?" · "+esc(b.a):"")+') <button id="dsa">Aplicar todas</button></div>':"";
  var ba=$("dsa");if(ba)ba.onclick=function(){var k=ck(),o=OV[k]||(OV[k]={});S.forEach(function(s){o[s[0]]=s[2]});buildForms();buildOpts();renderSum();renderAll();bar();toast("Sugestões aplicadas — confira e salve")}}
 var _bf=buildForms;buildForms=function(){_bf();setTimeout(sug,0)};
@@ -164,14 +164,14 @@ function calcInit(){if(!cur||!C.T26){$("calcp").innerHTML="";return}var r=cur_()
  function run(){var a=$("cxa").value,t=$("cxt2").value,k=+$("cxk").value||0,d=+$("cxd").value||1,e=+$("cxe").value||3,x=+$("cxx").value||0,air=$("cxv").checked,
   v=Y==="2027"?calc27(a,t,k,d,e,air):tab26(a,t,k,d,e),vv=v==null?null:r50(v)+x;
   $("cxr").innerHTML=vv==null?'<span class="mu">Sem valor de tabela para este perfil e tipo.</span>':'<span>Cachê sugerido ('+Y+'):</span><b>'+money(vv)+'</b><button class="pri" id="cxi">Inserir na proposta</button>'+(Y==="2027"?'<small>2026 seria '+money(r50(tab26(a,t,k,d,e)||0)+x)+"</small>":"");
-  var bi=$("cxi");if(bi)bi.onclick=function(){setVal("cach",String(vv));var f=$("f_cach");if(f)f.value=String(vv);bar();toast("Cachê "+money(vv)+" inserido — salve para confirmar")}}
+  var bi=$("cxi");if(bi)bi.onclick=function(){setVal("cach",String(vv));var f=$("f_cach");if(f)f.value="R$ "+nm2(vv);bar();toast("Cachê "+money(vv)+" inserido — salve para confirmar")}}
  run()}
 
 /* ---- seletor: nada selecionado ao abrir; nº completo (prefixo + 4 dígitos + /ano); sem artista = todos os artistas ---- */
 listFor=function(a){var open=$("flt").value==="open",L=[];(a?[a]:ORDER.filter(function(x){return BASE[x]&&BASE[x].p})).forEach(function(ar){(BASE[ar].p||[]).forEach(function(p){if(open&&!okOpen(p))return;L.push({a:ar,p:p})})});
- L.sort(function(x,y){return open?(x.p.dt<y.p.dt?-1:x.p.dt>y.p.dt?1:0):(x.p.dt<y.p.dt?1:x.p.dt>y.p.dt?-1:0)});return L};
+ var EK=function(p){var d=String(p.dprop||"");return/^\d{4}-\d\d-\d\d/.test(d)?d:String(p.dt||"")};L.sort(function(x,y){var a=EK(x.p),b=EK(y.p);if(a!==b)return a<b?1:-1;if(x.p.dt!==y.p.dt)return String(x.p.dt||"")<String(y.p.dt||"")?1:-1;return(+y.p.n||0)-(+x.p.n||0)});return L};/* emissão (DATA PROPOSTA) mais recente primeiro; sem data de proposta válida na planilha, usa a data do show */
 fillProps=function(keep){var a=$("art").value,L=listFor(a);
- $("prop").innerHTML='<option value="">'+(L.length?"Selecionar proposta ("+L.length+")":"Nenhuma proposta com esse filtro")+"</option>"+L.map(function(x){var p=x.p;return'<option value="'+esc(ovk(x.a,p.n))+'">'+numero(p,x.a)+" · "+brs(p.dt)+(a?"":" · "+esc(x.a))+" · "+esc((p.ev||p.loc||"(sem evento)").trim()).slice(0,50)+(p.cid?" · "+esc(p.cid):"")+" · "+esc(p.st||"")+"</option>"}).join("");
+ $("prop").innerHTML='<option value="">'+(L.length?"Selecionar proposta ("+L.length+")":"Nenhuma proposta com esse filtro")+"</option>"+L.map(function(x){var p=x.p;return'<option value="'+esc(ovk(x.a,p.n))+'">'+numero(p,x.a)+" · "+br(p.dt)+(a?"":" · "+esc(x.a))+" · "+esc((p.ev||p.loc||"(sem evento)").trim()).slice(0,50)+(p.cid?" · "+esc(p.cid):"")+" · "+esc(p.st||"")+"</option>"}).join("");
  var sel=keep&&L.some(function(x){return ovk(x.a,x.p.n)===keep})?keep:"";$("prop").value=sel;lastSel=sel;if(sel)pick();else{cur=null;noSel()}};
 function noSel(){$("app").hidden=true;$("empty").hidden=false;$("empty").innerHTML='<b>Nenhuma proposta aberta.</b><br>Escolha uma proposta no seletor acima, busque por evento, local, cidade ou nº, ou use <b>Nova</b> para criar uma.';tbar()}
 
@@ -269,6 +269,87 @@ Promise.all([iget("ov"),iget("new"),iget("ws")]).then(function(v){SAVED=v[0]||{}
  Object.keys(SAVED).forEach(function(k){OV[k]=CL_(SAVED[k])});
  var arts=ORDER.filter(function(a){return BASE[a]&&BASE[a].p&&BASE[a].p.length});$("art").innerHTML='<option value="">Todos os artistas</option>'+arts.map(function(a){return'<option value="'+esc(a)+'">'+esc(a)+"</option>"}).join("");$("art").value="";fillProps()})
 
+/* ===== formatos DROM, listas da planilha, vários horários, show confirmado, financeiro na lateral ===== */
+brs=br;/* datas sempre DD/MM/AAAA */
+STOK["Em negociação"]="wr";
+/* listas de validação reais (aba _AUXILIAR das planilhas "Gestão e Propostas") */
+var VL={st:["Proposta emitida","Proposta descartada","Em negociação","Show confirmado","Show realizado","Show cancelado","Data reservada","Remarcar","Data indisponível"],
+ cat:["Casa noturna","Bar","Universitário","Formatura","Aniversário","Casamento","Corporativo","Particular","Label","Outdoor"],
+ eq:["LEVAR","CONFIRMAR","2CDJ+Mixer","XDJ","Controladora"],hosp:["Contratante","Artista","Não"],
+ ctr:["Sim","Não","Pendente"],nf:["Sim","Não","Pendente"],rec:["Pago","Pendente","Entrada 30%","Entrada 50%"]};
+var DTF=["dt","dprop","dapr","dsin"],MNY=["cach","desp"],RO={dow:"automático pela data",liq:"cachê bruto − despesas",rec:"use o botão Cachê recebido",recpor:"use o botão Cachê recebido",drec:"use o botão Cachê recebido"};
+var HLP={st:"Ao mudar para Show confirmado, a aprovação, o sinal e o contrato são preenchidos",hi:"HH:MM · madrugada (00:00–05:59) conta como a noite da data do show",ini:"HH:MM ou a definir",dur:"H:MM (ex.: 1:30)",prod:"pessoas além do artista",com:"% sobre o cachê líquido",tel:"telefone do contratante",dsin:"automático: aprovação + prazo da 1ª parcela"};
+function isoL(d){return d.getFullYear()+"-"+pad(d.getMonth()+1,2)+"-"+pad(d.getDate(),2)}
+function hojeIso(){return isoL(new Date())}
+function brD(s){return String(s||"").replace(/\b(\d{4})-(\d\d)-(\d\d)\b/g,"$3/$2/$1")}
+var _gv=getVal;getVal=function(r,k){var v=_gv(r,k);if((k==="_comr"||k==="liq")&&v!=="")return"R$ "+nm2(num(v));if(k==="drec")return brD(v);return v};
+/* horas */
+function hN(v){v=String(v||"").trim();if(!v||/defin/i.test(v))return v?"a definir":"";var m=/^(\d{1,2})\s*(?:[:hH.]\s*(\d{1,2})?)?\s*(?:min)?$/.exec(v);if(!m||+m[1]>24||+(m[2]||0)>59)return null;return(+m[1]%24)+":"+pad(+(m[2]||0),2)}
+function dN(v){v=String(v||"").trim();if(!v)return"";var m=/^(\d{1,2})\s*[:hH]\s*(\d{1,2})?\s*(?:min)?$/.exec(v);if(m)return(+m[1])+":"+pad(+(m[2]||0),2);
+ m=/^(\d+)\s*min$/i.exec(v);if(m)return Math.floor(m[1]/60)+":"+pad(m[1]%60,2);m=/^(\d+(?:[.,]\d+)?)$/.exec(v);if(m){var t=Math.round(parseFloat(m[1].replace(",","."))*60);return Math.floor(t/60)+":"+pad(t%60,2)}return null}
+function hm(x){x=((x%1440)+1440)%1440;return pad(Math.floor(x/60),2)+":"+pad(x%60,2)}
+function parseH(t){var L=[],re=/(\d{1,2})(?:\s*[:h]\s*(\d{2})?|h)\s*(?:às|as|à|a|-|–|até)\s*(\d{1,2})(?:\s*[:h]\s*(\d{2})?|h)?/gi,x,b=null;
+ while((x=re.exec(String(t||"")))){var i=+x[1]*60+ +(x[2]||0),f=+x[3]*60+ +(x[4]||0);if(b===null)b=i;while(i<b)i+=1440;while(f<=i)f+=1440;L.push([i,f]);b=f}return L}
+function fmtSegs(g){return g.map(function(x){var e=hm(x[1]);return hm(x[0])+" "+asH(e)+" "+e}).join(" e ")}
+function sumDur(g){var t=0;g.forEach(function(x){t+=x[1]-x[0]});return Math.floor(t/60)+":"+pad(t%60,2)}
+var HRE=/^[ \t]*hor[áa]rios?\s*:[^\n]*\n?/im;
+function segsOf(r){var m=/hor[áa]rios?\s*:\s*([^\n]+)/i.exec(String(r.obs||""));if(!m)return null;var g=parseH(m[1]);return g.length>=2?g:null}
+var _ic=iniC;iniC=function(r){var g=segsOf(r);return g?fmtSegs(g):_ic(r)};
+var _cx=ctxOf;ctxOf=function(r,a){var X=_cx(r,a),g=segsOf(r);if(g){X.ini=X.iniC=fmtSegs(g);X.dur=durFmt(sumDur(g))+" no total ("+g.length+" entradas)"}return X};
+var _wp=waProposta;waProposta=function(r,a){var t=_wp(r,a);return segsOf(r)?t.replace(/^Horário de início da apresentação: /m,"Horários da apresentação: "):t};
+var _wa=waArtista;waArtista=function(r,a){var t=_wa(r,a),g=segsOf(r);return g?t.replace(/^Horário de início: .*$/m,"Horários: "+fmtSegs(g)).replace(/^Duração: .*$/m,"Duração: "+durFmt(sumDur(g))+" no total"):t};
+/* show confirmado: o que muda junto */
+function onSt(v){if(v!=="Show confirmado")return;var r=cur_(),a=cur.a,ch=[];
+ if(!r.dapr){setVal("dapr",hojeIso());ch.push("Data de aprovação: "+br(hojeIso()))}
+ r=cur_();var sp=splitPct(opt(r,a,"pag"));if(!r.dsin&&sp&&r.dapr){var d=new Date(r.dapr+"T12:00");d.setDate(d.getDate()+(+opt(r,a,"dias")||7));setVal("dsin",isoL(d));ch.push("Vencimento do sinal ("+sp+"%): "+br(isoL(d)))}
+ if(!r.ctr||r.ctr==="Não"){setVal("ctr","Pendente");ch.push("Contrato: Pendente")}
+ buildForms();renderSum();bar();
+ modal('<b>Show confirmado</b><p>'+(ch.length?"Preenchido junto:<br>• "+ch.map(esc).join("<br>• "):"Aprovação, sinal e contrato já estavam preenchidos.")+'</p><p class="note">Ao salvar, a planilha é atualizada; na próxima sincronização o show aparece como confirmado no app do artista, no Painel e na agenda. Próximos passos: aba <b>Contrato</b> (gerar e enviar), <b>Cachê recebido</b> quando o sinal entrar.</p><div class="dvmb"><button class="pri c">OK</button></div>',function(m){m.querySelector(".c").onclick=function(){m.remove()}})}
+function lbl(i,t){var s=document.createElement("small");s.className="fhl";s.textContent=t;i.parentNode.appendChild(s);return s}
+function enh(){var r=cur_();if(!r)return;
+ Object.keys(VL).forEach(function(k){var i=$("f_"+k);if(!i)return;var v=_gv(r,k),L=VL[k].slice(),fora=v&&L.indexOf(v)<0;if(fora)L.unshift(v);
+  var se=document.createElement("select");se.id=i.id;se.dataset.k=k;se.innerHTML='<option value="">—</option>'+L.map(function(o){return"<option"+(o===v?" selected":"")+">"+esc(o)+"</option>"}).join("");
+  i.replaceWith(se);if(fora)lbl(se,"Valor fora da lista da planilha").style.color="#c5221f";
+  if(RO[k]){se.disabled=true;return}se.addEventListener("change",function(){setVal(k,se.value);if(k==="st")onSt(se.value);bar()})});
+ DTF.forEach(function(k){var i=$("f_"+k);if(!i)return;var t=document.createElement("input");t.type="text";t.id=i.id;t.dataset.k=k;t.placeholder="DD/MM/AAAA";t.value=br(_gv(r,k));i.replaceWith(t);dmask(t);
+  t.addEventListener("input",function(){var v=t.value;if(!v){setVal(k,"");if(k==="dt")setDow("");return}var m=/^(\d\d)\/(\d\d)\/(\d{4})$/.exec(v);if(!m)return;var x=new Date(+m[3],m[2]-1,+m[1]);if(x.getDate()!==+m[1]){derr(t);return}setVal(k,m[3]+"-"+m[2]+"-"+m[1]);if(k==="dt")setDow(m[3]+"-"+m[2]+"-"+m[1])})});
+ MNY.forEach(function(k){var i=$("f_"+k);if(!i)return;var n=i.cloneNode(false),v=_gv(r,k);n.value=v===""?"":"R$ "+nm2(num(v));n.inputMode="decimal";n.placeholder="R$ 0,00";i.replaceWith(n);mmask(n,"R$ ");n.addEventListener("input",function(){setVal(k,n.value?pv(n.value):"")})});
+ Object.keys(RO).forEach(function(k){var i=$("f_"+k);if(i&&i.tagName==="INPUT"){i.readOnly=true;i.classList.add("ro");i.value=getVal(r,k)}if(i)lbl(i,RO[k])});
+ ["hi","hf","ini"].forEach(function(k){tm(k,hN,"HH:MM")});tm("dur",dN,"H:MM");
+ var p=$("f_prod");if(p){p.inputMode="numeric"}
+ var c=$("f_cid");if(c)c.addEventListener("change",function(){var v=fmtCidUF(c.value);if(v!==c.value){c.value=v;setVal("cid",v);bar()}});
+ var te=$("f_tel");if(te)te.addEventListener("change",function(){var v=fmtTel(te.value);if(v!==te.value){te.value=v;setVal("tel",v);bar()}});
+ Object.keys(HLP).forEach(function(k){var i=$("f_"+k);if(i&&!RO[k])lbl(i,HLP[k])});
+ /* vários horários (mesmo formato dos apps/Painel: linha "Horários: …" nas OBSERVAÇÕES) */
+ var du=$("f_dur");if(du&&!$("f_hors")){var L=document.createElement("label");L.className="w2";var g=segsOf(r);L.innerHTML='<span>Vários horários (opcional)</span><input type="text" id="f_hors" placeholder="ex.: 23:00 às 00:00 e 01:30 às 02:30" value="'+esc(g?fmtSegs(g):"")+'"><small class="fhl">Show em mais de uma entrada: preenche Início do show, Duração (soma) e a linha "Horários:" das observações</small>';
+  du.parentNode.parentNode.appendChild(L);var hi_=$("f_hors");hi_.addEventListener("change",function(){var v=hi_.value.trim(),o=String(cur_().obs||""),e=hi_.parentNode.querySelector(".er");if(e)e.remove();hi_.style.borderColor="";
+   if(!v){var o2=o.replace(HRE,"").trim();if(o2!==o)setObs(o2);bar();return}
+   var gg=parseH(v);if(gg.length<2){hi_.style.borderColor="#c5221f";hi_.insertAdjacentHTML("afterend",'<p class="er">Informe pelo menos dois horários no formato 23:00 às 00:00 e 01:30 às 02:30</p>');return}
+   var tx=fmtSegs(gg);hi_.value=tx;setObs(HRE.test(o)?o.replace(HRE,"Horários: "+tx+"\n").trim():(o?o+"\n":"")+"Horários: "+tx);
+   var s0=hm(gg[0][0]).replace(/^0(\d)/,"$1"),d0=sumDur(gg);setVal("ini",s0);setVal("dur",d0);$("f_ini").value=s0;$("f_dur").value=d0;bar();toast("Horários aplicados: início "+s0+", duração "+d0)})}
+ if(segsOf(r))["ini","dur"].forEach(function(k){var i=$("f_"+k);if(i)lbl(i,"calculado de Vários horários").style.color="#b25b00"})}
+function setObs(v){setVal("obs",v);var o=$("f_obs");if(o)o.value=v}
+function setDow(iso){var d=iso?dowOf(iso):"";setVal("dow",d);var e=$("f_dow");if(e)e.value=d}
+function tm(k,fn,ph){var i=$("f_"+k);if(!i)return;i.placeholder=ph;i.addEventListener("change",function(){var v=fn(i.value),e=i.parentNode.querySelector(".er");if(e)e.remove();i.style.borderColor="";
+ if(v===null){i.style.borderColor="#c5221f";i.insertAdjacentHTML("afterend",'<p class="er">Use o formato '+ph+'</p>');return}if(v!==i.value){i.value=v;setVal(k,v);bar()}})}
+var _bo=buildOpts;buildOpts=function(){_bo();$("optg").querySelectorAll('input[type=date]').forEach(function(i){var k=i.dataset.o,t=document.createElement("input");t.type="text";t.id=i.id;t.placeholder="DD/MM/AAAA";t.value=br(i.value);i.replaceWith(t);dmask(t);
+ t.addEventListener("input",function(){var o=OV[ck()]||(OV[ck()]={}),v=t.value,m=/^(\d\d)\/(\d\d)\/(\d{4})$/.exec(v);if(v&&!m)return;o["o_"+k]=m?m[3]+"-"+m[2]+"-"+m[1]:"";renderAll()})})};
+var _bf2=buildForms;buildForms=function(){_bf2();try{enh()}catch(e){console.error(e)}};
+/* financeiro na lateral, só para show confirmado/realizado */
+function finRender(){var sd=document.querySelector(".dvside");if(!sd)return;var box=$("finp");if(!box){box=document.createElement("div");box.className="p";box.id="finp";sd.insertBefore(box,sd.firstChild)}
+ var r=cur_(),ok=!!r&&/^Show (confirmado|realizado)$/.test(r.st||"");box.hidden=!ok;if(!ok){box.innerHTML="";return}var c=num(r.cach),rv=recv(r),pg=cpaid(r),w=finOK(),pc=num(r.com),stc=nh(r.rec)==="PAGO"?"ok":rv>0?"pa":"pe",D=w?"":" disabled";
+ function it(l,v,cl,id,bc,bt){return'<div class="fit"><div class="fil"><small>'+l+'</small><b class="'+cl+'">'+v+'</b></div><button type="button" class="'+bc+'" id="'+id+'"'+D+'>'+bt+"</button></div>"}
+ box.innerHTML="<h2>Financeiro</h2><div class=\"fin\">"+it("Custos",num(r.desp)?"R$ "+nm2(r.desp):"—","","fcu","fb1","Lançar custos")
+  +it("Cachê recebido",stc==="ok"?"✓ Pago":rv>0?"R$ "+nm2(rv)+" de R$ "+nm2(c):"Pendente",stc,"fca","fb2","Cachê recebido")
+  +it("Comissão"+(pc>0&&pc<1?" ("+Math.round(pc*100)+"%)":""),(comV(r)?"R$ "+nm2(comV(r))+" · ":"")+(pg?"✓ Paga":"Pendente"),pg?"ok":"pe","fco","fb3"+(pg?" fdn":""),pg?"✓ Comissão paga":"Comissão paga")
+  +(w?(pg?'<p class="finh">Comissão paga: custos e cachê ficam bloqueados aqui (edite direto na planilha).</p>':""):'<p class="finh">Disponível quando a gravação for liberada para este artista.</p>')+"</div>";finBind()}
+/* detalhe dos custos: a nota da célula DESPESAS não vem na sincronização (IMPORTRANGE não copia notas); lida na hora pelo escrita.gs (op "notas") */
+function parseNota(t){var d={},n=0;String(t||"").split("\n").forEach(function(l){var m=/^(.+?):\s*R\$\s*([\d.,]+)\s*$/.exec(l.trim());if(!m)return;CI.forEach(function(c){if(c[1]===m[1].trim()){d[c[0]]=pv(m[2]);n++}})});return n?d:null}
+var _cu=custos;custos=function(r){var k=ck();if(CUD[k]||!WS.on||!num(r.desp)){_cu(r);return}toast("Lendo o detalhe dos custos na planilha…");var a=cur.a,n=+cur.p.n;
+ WS.send("notas",a,{n:n}).then(function(x){var t=x&&x.ok&&x.r&&x.r.notas&&x.r.notas[String(n)],d=parseNota(t);if(d){CUD[k]={det:d,tot:num(r.desp)};iput("cud",CUD)}if(ck()===k)_cu(cur_())},function(){if(ck()===k)_cu(cur_())})};
+var css2=document.createElement("style");css2.textContent='#finp .fin{border:0;margin:0;padding:0}#finp .fit{margin-bottom:12px}#finp .fil{display:flex;justify-content:space-between;align-items:baseline;gap:8px;background:#f6f6f6;border-radius:10px;padding:7px 10px;margin-bottom:6px}#finp .fil small{font-size:12px;color:#666}#finp .fil b{font-size:14px;text-align:right}#finp .fil b.ok{color:#0a8a07}#finp .fil b.pa{color:#b25b00}#finp .fil b.pe{color:#c5221f}#finp .fit button{display:block;width:100%;height:42px;border-radius:21px;border:0;color:#fff;font:700 14px/1 inherit;cursor:pointer}#finp .fb1{background:#FF5B1F;color:#0a0a0a!important}#finp .fb2{background:#0a8a07}#finp .fb3{background:#0000FF}#finp .fdn{background:#e6f4e6;color:#0a8a07!important}#finp .fit button:disabled{background:#e6e6e6!important;color:#999!important;cursor:not-allowed}#finp h2{margin-top:0}'
+ +'.fhl{display:block;font-size:11px;color:#888;margin-top:3px;line-height:1.3}#forms input.ro,#forms select:disabled{background:#f3f3f1;color:#555}#forms select{padding:9px 10px;border:1px solid #d9d9d9;border-radius:9px;width:100%;box-sizing:border-box;font:inherit;background:#fff;color:inherit}#forms .er{color:#c5221f;font-size:12px;margin:3px 0 0;font-weight:600}';document.head.appendChild(css2);
+
 ;/*RF+NAV*/(function(){var hd=document.querySelector(".hd");if(hd&&!document.getElementById("bkrf")){var r=document.createElement("button");r.type="button";r.id="bkrf";r.className="bklo bkrf";r.title="Atualizar";r.setAttribute("aria-label","Atualizar");
  r.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-14.2 5M4 12a8 8 0 0 1 14.2-5"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/></svg>';
  r.onclick=function(){guard(function(){location.reload()})};hd.appendChild(r)}
@@ -277,7 +358,7 @@ Promise.all([iget("ov"),iget("new"),iget("ws")]).then(function(v){SAVED=v[0]||{}
   /* rodapé único (faixa DROM + abas) num só bloco fixo: altura medida vira --ft (respiro do conteúdo e posição do aviso) */
   var ft=document.createElement("div");ft.id="bkft";var br=document.querySelector(".dbrand");if(br)ft.appendChild(br);ft.appendChild(nv);document.body.appendChild(ft);document.body.classList.add("hasft");
   function fh(){document.documentElement.style.setProperty("--ft",Math.round(ft.getBoundingClientRect().height)+"px")}fh();if(window.ResizeObserver)new ResizeObserver(fh).observe(ft);addEventListener("resize",fh);
- function sync(){var on=document.querySelector(".tabs button.on");nv.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",!!on&&b.dataset.t===on.dataset.t)});nv.hidden=!!$("app").hidden;fh()}
+ function sync(){var on=document.querySelector(".tabs button.on");nv.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",!!on&&b.dataset.t===on.dataset.t)});var off=!!$("app").hidden;nv.hidden=false;nv.classList.toggle("off",off);nv.querySelectorAll("button").forEach(function(b){b.disabled=off;if(off)b.classList.remove("on")});fh()}
  nv.onclick=function(e){var b=e.target.closest("button");if(!b)return;var t=document.querySelector('.tabs button[data-t="'+b.dataset.t+'"]');if(t)t.click();sync();scrollTo(0,0)};
  new MutationObserver(sync).observe(document.getElementById("bkw"),{attributes:true,subtree:true,attributeFilter:["class","hidden"]});sync()})();
 })();

@@ -21,7 +21,7 @@ const cell=(r,c)=>G[r+","+c]||(G[r+","+c]={v:"",f:"",n:""});
 function lastRow(){let m=0;for(const k in G){const[r]=k.split(",").map(Number);if(G[k].v!==""||G[k].f)m=Math.max(m,r)}return m}
 function lastCol(){let m=0;for(const k in G){const[,c]=k.split(",").map(Number);if(G[k].v!==""||G[k].f)m=Math.max(m,c)}return m}
 function Range(r,c,nr=1,nc=1){const it=f=>{for(let i=0;i<nr;i++)for(let j=0;j<nc;j++)f(cell(r+i,c+j),i,j)};const grid=g=>Array.from({length:nr},(_,i)=>Array.from({length:nc},(_,j)=>g(cell(r+i,c+j))));
- const o={getValue:()=>cell(r,c).v,getValues:()=>grid(x=>x.v),getFormula:()=>cell(r,c).f,getFormulas:()=>grid(x=>x.f),
+ const o={getValue:()=>cell(r,c).v,getValues:()=>grid(x=>x.v),getFormula:()=>cell(r,c).f,getNotes:()=>grid(x=>x.n),getFormulas:()=>grid(x=>x.f),
   setValue:v=>{it(x=>{x.v=v;x.f=""});return o},setValues:V=>{it((x,i,j)=>{x.v=V[i][j];x.f=""});return o},setNote:t=>{it(x=>x.n=t);return o},
   setNumberFormat:()=>o,clearContent:()=>{it(x=>{x.v="";x.f=""});return o},clearNote:()=>{it(x=>x.n="");return o},
   copyTo:dst=>{it((x,i,j)=>{const y=cell(dst._r+i,dst._c+j);y.v=x.v;y.f=x.f;y.n=x.n})},getRow:()=>r,getLastRow:()=>r+nr-1,getColumn:()=>c,getLastColumn:()=>c+nc-1,getSheet:()=>SH,_r:r,_c:c};return o}
@@ -32,13 +32,13 @@ const CACHE={},hm=(v,k)=>Array.from(crypto.createHmac("sha256",Buffer.from(k.map
 const pad=n=>String(n).padStart(2,"0");
 const ctx={JSON,Math,Date,String,Number,Object,Array,isNaN,RegExp,Error,
  ContentService:{MimeType:{JSON:"json"},createTextOutput:t=>({setMimeType:()=>({_t:t})})},
- PropertiesService:{getScriptProperties:()=>({getProperty:k=>k==="KEY"?process.env.KEY:null})},
+ PropertiesService:{getScriptProperties:()=>({getProperty:k=>k==="KEY"?process.env.KEY:(process.env[k]||null),setProperty:(k,v)=>{process.env[k]=v}})},
  Utilities:{newBlob:s=>({getBytes:()=>Array.from(Buffer.from(s,"utf8")).map(x=>x>127?x-256:x)}),computeHmacSha256Signature:hm,
   formatDate:(dt,tz,f)=>f.replace("dd",pad(dt.getDate())).replace("MM",pad(dt.getMonth()+1)).replace("yyyy",dt.getFullYear()).replace("HH",pad(dt.getHours())).replace("mm",pad(dt.getMinutes()))},
  CacheService:{getScriptCache:()=>({get:k=>CACHE[k]||null,put:(k,v)=>{CACHE[k]=v}})},
  LockService:{getScriptLock:()=>({tryLock:()=>true,releaseLock:()=>{}})},
  SpreadsheetApp:{openById:id=>{if(!IDS.includes(id))throw new Error("sem acesso");G=grid(id);CUR=id;return{getSheetByName:n=>n==="PROPOSTAS"?SH:null,getActiveSheet:()=>SH,getName:()=>"planilha "+id.slice(0,6)}},flush:()=>{}},
- ScriptApp:{getProjectTriggers:()=>TRIG,deleteTrigger:t=>{TRIG=TRIG.filter(x=>x!==t)},newTrigger:h=>({forSpreadsheet:id=>({onEdit:()=>({create:()=>TRIG.push({h,id,getHandlerFunction:()=>h})})})})},
+ ScriptApp:{getProjectTriggers:()=>TRIG,deleteTrigger:t=>{TRIG=TRIG.filter(x=>x!==t)},newTrigger:h=>({forSpreadsheet:id=>({onEdit:()=>({create:()=>TRIG.push({h,id,getHandlerFunction:()=>h})})}),timeBased:()=>({everyHours:n=>({create:()=>TRIG.push({h,every:n,getHandlerFunction:()=>h})})})})},
  Logger:{log:x=>console.log("[gs]",x)}};
 vm.createContext(ctx);vm.runInContext(SRC,ctx);
 function dump(id){if(id)G=grid(id);const hd=id===CADU?HDC:HD;const L=lastRow(),out=[];for(let r=4;r<=L;r++){const o={};hd.forEach((h,i)=>{const x=cell(r,i+1);o[(h||hd[i-1]+">1").replace(/\s+/g," ")]=x.v instanceof Date?x.v.toISOString().slice(0,10):x.v;if(x.n)o["nota:"+h]=x.n});const t=cell(r,54).v;o.BB=t instanceof Date?t.toISOString():t;out.push(o)}return out}

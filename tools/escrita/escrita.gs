@@ -1,5 +1,5 @@
 /* DROM · ESCRITA nas planilhas "Gestão e Propostas" (um único projeto do Apps Script, conta contato@dromentretenimento.com)
-   Implantar como "App da Web": Executar como EU, acesso "Qualquer pessoa". Propriedade do script: KEY (ver docs/INTEGRACAO.md).
+   Implantar como "App da Web": Executar como EU, acesso "Qualquer pessoa". Propriedades do script: KEY (ver docs/INTEGRACAO.md); opcionais AUTO_REALIZADO=1 e AUTO_CONTRATO=1 (rotina de hora em hora; ver docs/IMPLANTACAO.md).
    Segurança: cada app assina o pedido com HMAC-SHA256 usando a chave do app = HMAC-SHA256("app:"+nome, KEY).
    Cada app só escreve nas planilhas da sua lista (APPS). Pedidos com mais de 15 min, assinatura errada ou app/planilha fora da lista são recusados.
    Colunas sempre pelo TÍTULO da linha 4 (nunca pela posição); linhas pelo Nº. Coluna que falta = recusa com erro.
@@ -24,7 +24,7 @@ var ARTS={
 /* app -> planilhas (nome -> id) e operações. Cada app de artista só escreve na própria planilha; o Booker em todas + teste. */
 var APPS=(function(){
   var A={artistateste:{planilhas:{'Artista Teste':TESTE}, ops:['custos','cache'], recebidoPor:'Artista'}},
-      B={planilhas:{'Artista Teste':TESTE}, ops:['criar','editar','ler','custos','cache','comissao'], rp:{'Artista Teste':'Artista'}};
+      B={planilhas:{'Artista Teste':TESTE}, ops:['criar','editar','ler','notas','custos','cache','comissao'], rp:{'Artista Teste':'Artista'}};
   Object.keys(ARTS).forEach(function(n){var x=ARTS[n];
     A[x.app]={planilhas:{}, ops:['custos','cache'], recebidoPor:x.rp};A[x.app].planilhas[n]=x.id;
     B.planilhas[n]=x.id;B.rp[n]=x.rp});
@@ -133,11 +133,18 @@ function opLer(S){
   var T=raw.map(function(t,i){return t?nh(t):(i&&raw[i-1]?nh(raw[i-1])+'>1':'')});
   return {cols:T,rows:V.filter(function(r){return r[S.cN-1]!==''}).map(function(r){return r.map(function(x){return x instanceof Date?Utilities.formatDate(x,TZ,'yyyy-MM-dd'):x})})}}
 
+function opNotas(S,p){   /* só leitura: notas da coluna DESPESAS (detalhe dos custos), que o IMPORTRANGE não leva para a BASECLAUDE. p.n opcional = só uma proposta */
+  var sh=S.sh,n=sh.getLastRow()-DADOS+1,o={};if(n<1)return {notas:o};
+  var N=sh.getRange(DADOS,S.cN,n,1).getValues(),T=sh.getRange(DADOS,S.col('DESPESAS'),n,1).getNotes();
+  N.forEach(function(r,i){var x=r[0];if(x===''||!T[i][0])return;if(p.n&&String(+x)!==String(+p.n))return;o[String(+x)]=T[i][0]});
+  return {notas:o}}
+
 function run(env){
   var v=verify(env),p=v.p,C=CacheService.getScriptCache(),ck='r:'+p.id,old=C.get(ck);
   if(old)return JSON.parse(old);   /* mesmo id = repetição: devolve o resultado anterior, não grava de novo */
   var res;
   if(p.op==='ler'){res={ok:1,id:p.id,r:opLer(Sheet(v.sid))};return res}
+  if(p.op==='notas'){res={ok:1,id:p.id,r:opNotas(Sheet(v.sid),p)};return res}
   var lk=LockService.getScriptLock();if(!lk.tryLock(25000))throw new Error('planilha ocupada, tente de novo');
   try{old=C.get(ck);if(old)return JSON.parse(old);
     var S=Sheet(v.sid),r=p.op==='custos'?opCustos(S,p):p.op==='cache'?opCache(S,p,v.A):p.op==='comissao'?opComissao(S,p):p.op==='editar'?opEditar(S,p):opCriar(S,p);
@@ -159,11 +166,62 @@ function doGet(e){var q=(e&&e.parameter)||{};
     return out({ok:1,svc:'drom-escrita'})}
   catch(er){return out({ok:0,err:String(er&&er.message||er)})}}
 
-/* ---------------- carimbo de edição (substitui os scripts de carimbo de cada planilha) ---------------- */
+/* ---------------- gatilhos: carimbo de edição (onEdit) + rotina de hora em hora ---------------- */
 function installTriggers(){
-  ScriptApp.getProjectTriggers().forEach(function(t){if(t.getHandlerFunction()==='carimbo')ScriptApp.deleteTrigger(t)});
+  ScriptApp.getProjectTriggers().forEach(function(t){var h=t.getHandlerFunction();if(h==='carimbo'||h==='rotina')ScriptApp.deleteTrigger(t)});
   CARIMBO.forEach(function(id){ScriptApp.newTrigger('carimbo').forSpreadsheet(id).onEdit().create()});
-  Logger.log('gatilhos instalados: '+CARIMBO.length+' (esperado 11)')}
+  ScriptApp.newTrigger('rotina').timeBased().everyHours(1).create();
+  Logger.log('gatilhos instalados: '+CARIMBO.length+' de carimbo (esperado 11) + 1 de rotina (de hora em hora)');
+  Logger.log('AUTO_REALIZADO='+(prop('AUTO_REALIZADO')||'(vazio = desligado)')+' · AUTO_CONTRATO='+(prop('AUTO_CONTRATO')||'(vazio = desligado)'))}
+function prop(k){return PropertiesService.getScriptProperties().getProperty(k)}
+
+/* rotina (de hora em hora). Cada parte só roda se a propriedade do script estiver = 1:
+   AUTO_REALIZADO=1 -> "Show confirmado" vira "Show realizado" quando início + duração já passou
+   AUTO_CONTRATO=1  -> PDF "[assinado]" em "Contratos com Contratantes" marca CONTRATO = "Sim" na proposta */
+function rotina(){var L=[];
+  if(prop('AUTO_REALIZADO')==='1')try{L.push('realizados: '+autoRealizado(new Date()))}catch(e){L.push('realizados: erro '+e)}
+  if(prop('AUTO_CONTRATO')==='1')try{L.push('contratos: '+autoContrato())}catch(e){L.push('contratos: erro '+e)}
+  Logger.log(L.join(' · ')||'rotina: nada ligado (AUTO_REALIZADO / AUTO_CONTRATO)');return L}
+
+/* hora "HH:MM" (texto, Date de célula de hora ou fração do dia) -> minutos; null se não for hora (ex.: "a definir") */
+function minutos(v){if(v instanceof Date)return +Utilities.formatDate(v,TZ,'H')*60+ +Utilities.formatDate(v,TZ,'m');
+  if(typeof v==='number')return v>=0&&v<2?Math.round(v*1440):null;var m=/^\s*(\d{1,2})\s*(?::|h)\s*(\d{2})?/i.exec(String(v||''));return m?+m[1]*60+ +(m[2]||0):null}
+/* "Horários: 23:00 às 00:00 e 01:30 à 02:30" nas OBSERVAÇÕES -> [[ini,fim],...] em minutos desde a 00:00 do 1º horário (fim sempre depois do início) */
+function horarios(obs){var m=/hor[áa]rios?\s*:\s*([^\n]+)/i.exec(String(obs||''));if(!m)return null;var L=[],re=/(\d{1,2})[:h](\d{2})\s*(?:às|as|à|a|-|–|até)\s*(\d{1,2})[:h](\d{2})/gi,x,b=null;
+  while((x=re.exec(m[1]))){var i=+x[1]*60+ +x[2],f=+x[3]*60+ +x[4];if(b===null)b=i;while(i<b)i+=1440;while(f<=i)f+=1440;L.push([i,f]);b=f}return L.length?L:null}
+/* fim do show (regras DROM, iguais ao Painel): início 00:00–05:59 = madrugada do dia seguinte; fim = início + duração (ou fim do último horário);
+   sem horário de início ("a definir"/vazio) = considera realizado às 06:00 do dia seguinte */
+function fimShow(dt,ini,dur,obs){if(!(dt instanceof Date))return null;var d=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()),g=horarios(obs),a=g?g[0][0]%1440:minutos(ini);
+  if(a===null)return new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,6,0);
+  var ext=g?g[g.length-1][1]-g[0][0]:(minutos(dur)||60);
+  return new Date(d.getFullYear(),d.getMonth(),d.getDate()+(a<360?1:0),0,a+ext)}
+function autoRealizado(now){var tot=0;
+  CARIMBO.forEach(function(id){try{var S=Sheet(id),sh=S.sh,n=sh.getLastRow()-DADOS+1;if(n<1)return;
+    var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,lc=Math.max(cS,cD,cI,cU,cO);
+    var V=sh.getRange(DADOS,1,n,lc).getValues(),F=sh.getRange(DADOS,cS,n,1).getFormulas();
+    V.forEach(function(r,i){if(nh(r[cS-1])!=='SHOW CONFIRMADO'||F[i][0])return;var e=fimShow(r[cD-1],r[cI-1],r[cU-1],cO?r[cO-1]:'');
+      if(e&&now>=e){sh.getRange(DADOS+i,cS).setValue('Show realizado');S.stamp(DADOS+i);tot++}})}catch(e){Logger.log(id+': '+e)}});
+  return tot}
+/* contratos assinados: "DROM Entretenimento - Contrato 50028-2026 [assinado].pdf" em .../<artista>/Contratos com Contratantes[/ano]/
+   nº do contrato = prefixo do artista + Nº com 4 dígitos (Booker: numero()). Só marca se CONTRATO estiver vazio, "Não" ou "Pendente". */
+var PFX={'1':'Ramonstro','2':'Brinquinho','3':'Carloto','4':'Sena','5':'Cenoura','6':'Liquinho','7':'Maneira','8':'Amaro','9':'Josu','10':'Cadu Vieira'};
+function autoContrato(){var since=new Date(Date.now()-3*864e5),tot=0,P=PropertiesService.getScriptProperties(),feito=JSON.parse(P.getProperty('CONTRATOS_FEITOS')||'{}');
+  var it=DriveApp.searchFiles("title contains 'assinado' and mimeType = 'application/pdf' and modifiedDate > '"+since.toISOString()+"' and trashed = false");
+  while(it.hasNext()){var f=it.next(),id=f.getId();if(feito[id])continue;
+    var m=/Contrato\s+(\d{5,6})-(\d{4})/.exec(f.getName());if(!m)continue;
+    var k=m[1],pf=k.length===6?k.slice(0,2):k.slice(0,1),a=PFX[pf],n=+k.slice(pf.length);if(!a||!ARTS[a])continue;
+    var p1=f.getParents(),pa=p1.hasNext()?p1.next():null,ok=false,x=pa;for(var j=0;j<3&&x;j++){var nmx=x.getName();if(nmx.toLowerCase().indexOf(a.toLowerCase())>=0&&j>0){ok=true;break}var px=x.getParents();x=px.hasNext()?px.next():null}
+    if(!ok||!pa||!/Contratos com Contratantes|^\d{4}$/.test(pa.getName()))continue;   /* só PDFs dentro da pasta do próprio artista */
+    try{var S=Sheet(ARTS[a].id),r=S.row(n),c=S.sh.getRange(r,S.col('CONTRATO'));
+      if(!c.getFormula()&&/^(|N[ÃA]O|PENDENTE)$/.test(nh(c.getValue()))){c.setValue('Sim');c.setNote('Contrato assinado no Drive: '+f.getName()+' ('+agora()+')');S.stamp(r);tot++}
+      feito[id]=1}catch(e){Logger.log(f.getName()+': '+e)}}
+  var ks=Object.keys(feito);if(ks.length>500)ks.slice(0,ks.length-500).forEach(function(z){delete feito[z]});P.setProperty('CONTRATOS_FEITOS',JSON.stringify(feito));
+  return tot}
+/* teste manual pelo editor: mostra o que a rotina FARIA agora com os realizados, sem gravar nada */
+function testeRotina(){CARIMBO.forEach(function(id){try{var S=Sheet(id),sh=S.sh,n=sh.getLastRow()-DADOS+1;if(n<1)return;
+  var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,lc=Math.max(cS,cD,cI,cU,cO),V=sh.getRange(DADOS,1,n,lc).getValues();
+  V.forEach(function(r,i){if(nh(r[cS-1])!=='SHOW CONFIRMADO')return;var e=fimShow(r[cD-1],r[cI-1],r[cU-1],cO?r[cO-1]:'');
+    Logger.log(SpreadsheetApp.openById(id).getName()+' · Nº '+r[S.cN-1]+' · fim '+(e?Utilities.formatDate(e,TZ,'dd/MM/yyyy HH:mm'):'?')+(e&&new Date()>=e?' -> viraria Show realizado':''))})}catch(e){Logger.log(id+': '+e)}})}
 function carimbo(e){try{   /* mesmo comportamento dos scripts antigos de cada planilha: aba ativa, linha >= 5, coluna 54 (BB); edição no próprio BB é ignorada */
   var aba=e.source.getActiveSheet(),g=e.range;
   var r0=Math.max(g.getRow(),DADOS),r1=g.getLastRow();if(r1<r0)return;
@@ -171,4 +229,4 @@ function carimbo(e){try{   /* mesmo comportamento dos scripts antigos de cada pl
   var d=new Date(),v=[];for(var r=r0;r<=r1;r++)v.push([d]);aba.getRange(r0,COL_TS,v.length,1).setValues(v)}catch(x){}}
 
 /* rode pelo editor (▶ autorizar) uma vez: pede as permissões de planilha */
-function autorizar(){CARIMBO.forEach(function(id){Logger.log(SpreadsheetApp.openById(id).getName())})}
+function autorizar(){CARIMBO.forEach(function(id){Logger.log(SpreadsheetApp.openById(id).getName())});Logger.log('Drive: '+DriveApp.getRootFolder().getName())}

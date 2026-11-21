@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <link rel="stylesheet" href="s1.css">
-<link rel="stylesheet" href="lk.css?v=4">
+<link rel="stylesheet" href="lk.css?v=5">
 <style id="splc">#spl{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;background:#FF5B1F;color:#fff;animation:splc 1.02s steps(1) infinite}#spl img{width:58%;max-width:260px}#spl .sb{width:52%;max-width:220px;height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 25%,transparent);position:relative}#spl .sb i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:currentColor;width:0}#spl .sp{font:800 13px/1 -apple-system,Inter,Arial,sans-serif;letter-spacing:2px}#spl .sw{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}#spl.out{transition:opacity .25s;opacity:0}
 @keyframes splc{0%{background:#FF5B1F;color:#fff}33.33%{background:#0000FF;color:#fff}66.66%{background:#FFF602;color:#000}}
 @media (prefers-reduced-motion:reduce){#spl{animation:none}}</style></head>
@@ -24,7 +24,7 @@
   <select id="art" aria-label="Artista"></select>
   <select id="prop" class="grow" aria-label="Proposta"></select>
   <div class="bktb" id="bktb" role="toolbar" aria-label="Ações da proposta"></div>
-  <select id="flt" aria-label="Filtro de propostas"><option value="open">Futuras e em aberto</option><option value="all">Todas</option></select>
+  <select id="flt" aria-label="Filtro de propostas"><option value="all">Todas</option><option value="open">Futuras e em aberto</option></select>
   <div class="sq"><input type="search" id="q" placeholder="Buscar: artista, evento, local, cidade, nº..." autocomplete="off"><div id="sres" class="sres" hidden></div></div>
 </div>
 <div id="empty" class="empty" hidden>Nenhuma proposta com esse filtro.</div>
@@ -91,6 +91,6 @@
 </main>
 <div id="toast" role="status"></div>
 </div>
-<script src="bkload.js?v=3"></script>
+<script src="bkload.js?v=4"></script>
 </body>
 </html>
