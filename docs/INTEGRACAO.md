@@ -1,5 +1,7 @@
 # Integração de escrita nas planilhas (Apps Script)
 
+> **Atualização 21/11/2026:** a gravação foi estendida aos 10 artistas reais (apps e Booker). Para implantar, siga **[IMPLANTACAO.md](IMPLANTACAO.md)**. Este guia continua valendo para a configuração inicial.
+
 Este guia liga o app do **Artista Teste** (`dev/artistateste`) e o **Booker** à planilha
 **"ARTISTATESTE - Gestão e Propostas | DROM"**. Por enquanto **só a planilha de teste** pode ser alterada.
 Os artistas reais continuam **somente leitura** até você aprovar.
@@ -162,6 +164,8 @@ gere outra (`chave.py nova` após apagar `key.enc.json`), troque a propriedade K
 | `tools/escrita/chave.py` | gera/mostra a KEY e grava os `w.json` |
 | `tools/escrita/mock.cjs` | simulador local do Apps Script para testes |
 | `ew.js` | cliente comum (assina e envia) |
+| `edt.js` | botões Cachê/Custos dos 10 apps de artistas (carregado pelo `lock.js` de cada app) |
+| `<app>/w.json` | URL + chave de cada app de artista (cifrada com o PIN) |
 | `dev/artistateste/w.json`, `booker/w.json` | URL + chave do app (cifrada); URL vazia = escrita desligada |
 | `booker/bx.js` | recursos novos do Booker (barra Nova/Copiar/Salvar/Descartar, Lançar custos, Cachê recebido, Comissão paga, semelhantes, calculadora) |
 | `booker/dv.json` | dados do Artista Teste no Booker (gerado por `tools/dev/devsync.py`) |

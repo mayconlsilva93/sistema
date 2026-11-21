@@ -8,13 +8,31 @@
 var TAB='PROPOSTAS', HDR=4, DADOS=5, COL_TS=54 /* BB */, TZ='America/Sao_Paulo';
 var TESTE='1_FIaPSZjz7rr1QwDvC7jL6qCXu09Wh1ZsgTTdearxGs';   /* ARTISTATESTE - Gestão e Propostas (dados falsos) */
 
-/* app -> artistas (nome -> id da planilha) e operações permitidas. Para liberar um artista real, acrescente-o aqui (ver docs/INTEGRACAO.md). */
-var APPS={
-  artistateste:{planilhas:{'Artista Teste':TESTE}, ops:['custos','cache'], recebidoPor:'Artista'},
-  booker:      {planilhas:{'Artista Teste':TESTE}, ops:['criar','editar','ler','custos','cache','comissao'], recebidoPor:'Artista'}
+/* planilhas "Gestão e Propostas" dos artistas (ids = tools/drive/drive.gs CADS; todas do contato@). rp = o que a planilha usa em RECEBIDO POR */
+var ARTS={
+  'Ramonstro':  {app:'ramonstro003',  id:'1mwK96YV00hJhxkakXmm05kD-9G70gt_MbrsT6-C0aME', rp:'Ramonstro'},
+  'Carloto':    {app:'carloto453',    id:'1WFNLEj2kj-DG5AJh1KmXC1HKcmqT9Ng4uTgp_tzKXic', rp:'Carloto'},
+  'Sena':       {app:'sena089',       id:'1aQHCJ3x0zQyM3HXH8dixSxzonzqmIncYKpCeZcPIHBA', rp:'Sena'},
+  'Cenoura':    {app:'cenoura173',    id:'1nQ-VVeVJ7Wo-p90uaq_cCy8FKBn-tMIilykq6sws8sQ', rp:'Cenoura'},
+  'Maneira':    {app:'maneira038',    id:'1Uy_FTxYsXYIXWKChkJR2gK5LcodeOqbmBfqegBwyATU', rp:'Maneira'},
+  'Amaro':      {app:'amaro095',      id:'1jHL-RMG7X0cw34VwBt851ghvRaIoLBSZtv6PwCdEask', rp:'Amaro'},
+  'Josu':       {app:'josu185',       id:'1nUbvXrtmzbRb5Ud-DlyfWW6atBGaJfzUaRtBG5a23Oo', rp:'Josu'},
+  'Cadu Vieira':{app:'caduvieira089', id:'1s109Zq58asQUZ_dr8rzZNen1Og-ER7AeaP6EzPXdUPU', rp:'Cadu'},
+  'Brinquinho': {app:'brinquinho131', id:'1BOOFB3GzJh3KdF8-OL9LQklnR94WjSSOpRtcMf-BvIg', rp:'Brinquinho'},
+  'Liquinho':   {app:'liquinho000',   id:'1WaHGhR66OIgVLS762ghUWC3XuEShRbRMUpEGCek1zF8', rp:'Liquinho'}
 };
-/* planilhas que recebem o carimbo de edição (gatilho onEdit instalado por installTriggers) */
-var CARIMBO=[TESTE];
+/* app -> planilhas (nome -> id) e operações. Cada app de artista só escreve na própria planilha; o Booker em todas + teste. */
+var APPS=(function(){
+  var A={artistateste:{planilhas:{'Artista Teste':TESTE}, ops:['custos','cache'], recebidoPor:'Artista'}},
+      B={planilhas:{'Artista Teste':TESTE}, ops:['criar','editar','ler','custos','cache','comissao'], rp:{'Artista Teste':'Artista'}};
+  Object.keys(ARTS).forEach(function(n){var x=ARTS[n];
+    A[x.app]={planilhas:{}, ops:['custos','cache'], recebidoPor:x.rp};A[x.app].planilhas[n]=x.id;
+    B.planilhas[n]=x.id;B.rp[n]=x.rp});
+  A.booker=B;return A})();
+/* planilhas que recebem o carimbo de edição na coluna BB (gatilho onEdit instalado por installTriggers): as 10 + teste */
+var CARIMBO=Object.keys(ARTS).map(function(n){return ARTS[n].id}).concat([TESTE]);
+/* títulos alternativos (a planilha do Cadu tem colunas extras e nomes diferentes; a do Liquinho usa RIDER CAMARIM) */
+var ALIAS={'INÍCIO DO SHOW':['INÍCIO DO SET'],'DURAÇÃO':['DURAÇÃO TOTAL'],'RIDER HOSPITALIDADE':['RIDER CAMARIM']};
 
 /* ---------------- utilidades ---------------- */
 function out(o){return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON)}
@@ -46,13 +64,15 @@ function verify(env){
 function Sheet(sid){
   var sh=SpreadsheetApp.openById(sid).getSheetByName(TAB);if(!sh)throw new Error('aba '+TAB+' não encontrada');
   var lc=Math.max(sh.getLastColumn(),COL_TS),H=sh.getRange(HDR,1,1,lc).getValues()[0].map(nh);
-  function col(t){var m=/^(.*?)>(\d+)$/.exec(t),b=nh(m?m[1]:t),i=H.indexOf(b);if(i<0)throw new Error('coluna não encontrada: '+t);
+  function idx(b){var i=H.indexOf(b);(ALIAS[b]||[]).forEach(function(x){if(i<0)i=H.indexOf(nh(x))});return i}
+  function col(t){var m=/^(.*?)>(\d+)$/.exec(t),b=nh(m?m[1]:t),i=idx(b);if(i<0)throw new Error('coluna não encontrada: '+t);
     if(m){var j=i+ +m[2];if(H[j])throw new Error('coluna à direita de '+b+' tem título ('+H[j]+'), esperado vazio');return j+1}return i+1}
   var cN=col('Nº');
   function nums(){var n=sh.getLastRow()-DADOS+1;return n>0?sh.getRange(DADOS,cN,n,1).getValues().map(function(r){return r[0]}):[]}
   function row(n){var L=nums();for(var i=0;i<L.length;i++)if(L[i]!==''&&String(+L[i])===String(+n))return DADOS+i;throw new Error('proposta Nº '+n+' não encontrada')}
-  var ts=(function(){for(var i=0;i<H.length;i++)if(/ATUALIZ|ÚLTIMA EDI|ULTIMA EDI|TIMESTAMP|CARIMBO|MODIFICA/.test(H[i]))return i+1;return COL_TS})();
-  return {sh:sh,H:H,col:col,row:row,nums:nums,cN:cN,
+  var ts=COL_TS;   /* carimbo sempre na coluna 54 (BB), por posição: a planilha do Cadu não tem título ali */
+  function has(t){try{col(t);return true}catch(e){return false}}
+  return {sh:sh,H:H,col:col,has:has,row:row,nums:nums,cN:cN,
     get:function(r,t){return sh.getRange(r,col(t)).getValue()},
     stamp:function(r){sh.getRange(r,ts).setValue(new Date())}}}
 
@@ -68,7 +88,7 @@ function opCustos(S,p){
 function opCache(S,p,A){
   var r=S.row(p.n),v=+p.v,d=dmy(p.d),cR=S.col('CACHÊ RECEBIDO?'),cA=S.col('STATUS ARTISTA'),cP=S.col('RECEBIDO POR'),cD=S.col('DATA RECEBIMENTO');
   if(!(v>0))throw new Error('valor inválido');
-  var sh=S.sh,quem=(p.por==='Artista'||p.por==='DROM')?p.por:(A.recebidoPor||p.a),tipo=p.tipo;   /* booker pode informar quem recebeu (Artista ou DROM) */
+  var sh=S.sh,quem=(A.rp&&A.rp[p.a])||A.recebidoPor||p.a,tipo=p.tipo;   /* o que a planilha usa em RECEBIDO POR */
   if(tipo==='total'||tipo==='s30'||tipo==='s50'){
     var st=tipo==='total'?'Pago':tipo==='s30'?'Entrada 30%':'Entrada 50%';
     sh.getRange(r,cR).setValue(st);sh.getRange(r,cA).setValue(st);sh.getRange(r,cP).setValue(quem);sh.getRange(r,cD).setValue(d)}
@@ -90,19 +110,22 @@ function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pag
 
 function opEditar(S,p){
   var r=S.row(p.n),h=p.h||{},ks=Object.keys(h);if(!ks.length)throw new Error('nada para gravar');
-  var C=ks.map(function(t){if(nh(t)==='Nº')throw new Error('Nº não pode ser alterado');return S.col(t)}),ign=[],n=0;   /* tudo verificado antes de gravar */
+  ks.forEach(function(t){if(nh(t)==='Nº')throw new Error('Nº não pode ser alterado')});
+  var ign=ks.filter(function(t){return !S.has(t)});ks=ks.filter(function(t){return S.has(t)});   /* coluna que esta planilha não tem: ignorada e avisada */
+  var C=ks.map(function(t){return S.col(t)}),n=0;   /* tudo verificado antes de gravar */
   ks.forEach(function(t,i){var c=S.sh.getRange(r,C[i]);if(c.getFormula()){ign.push(t);return}c.setValue(val(h[t]));n++});   /* célula com fórmula nunca é sobrescrita */
   S.stamp(r);return {n:+p.n,campos:n,ign:ign}}
 
 function opCriar(S,p){
-  var h=p.h||{},ks=Object.keys(h),C=ks.map(function(t){if(nh(t)==='Nº')throw new Error('Nº é automático');return S.col(t)});
+  var h=p.h||{},ks=Object.keys(h);ks.forEach(function(t){if(nh(t)==='Nº')throw new Error('Nº é automático')});
+  var fal=ks.filter(function(t){return !S.has(t)});ks=ks.filter(function(t){return S.has(t)});var C=ks.map(function(t){return S.col(t)});
   var L=S.nums(),last=DADOS-1,mx=0;L.forEach(function(x,i){if(x!==''&&!isNaN(+x)){last=DADOS+i;mx=Math.max(mx,+x)}});
   var sh=S.sh,r=last+1,lc=sh.getLastColumn(),n=mx+1;
   if(last>=DADOS){var src=sh.getRange(last,1,1,lc),F=src.getFormulas()[0];
     src.copyTo(sh.getRange(r,1,1,lc));   /* formatação, validações e fórmulas da linha anterior */
     F.forEach(function(f,i){if(!f)sh.getRange(r,i+1).clearContent().clearNote()})}
   sh.getRange(r,S.cN).setValue(n);
-  var ign=[];ks.forEach(function(t,i){var c=sh.getRange(r,C[i]);if(c.getFormula()){ign.push(t);return}c.setValue(val(h[t]))});
+  var ign=fal.slice();ks.forEach(function(t,i){var c=sh.getRange(r,C[i]);if(c.getFormula()){ign.push(t);return}c.setValue(val(h[t]))});
   S.stamp(r);return {n:n,linha:r,ign:ign}}
 
 function opLer(S){
@@ -140,12 +163,12 @@ function doGet(e){var q=(e&&e.parameter)||{};
 function installTriggers(){
   ScriptApp.getProjectTriggers().forEach(function(t){if(t.getHandlerFunction()==='carimbo')ScriptApp.deleteTrigger(t)});
   CARIMBO.forEach(function(id){ScriptApp.newTrigger('carimbo').forSpreadsheet(id).onEdit().create()});
-  Logger.log('gatilhos instalados: '+CARIMBO.length)}
-function carimbo(e){try{
-  var g=e.range,sh=g.getSheet();if(sh.getName()!==TAB)return;
+  Logger.log('gatilhos instalados: '+CARIMBO.length+' (esperado 11)')}
+function carimbo(e){try{   /* mesmo comportamento dos scripts antigos de cada planilha: aba ativa, linha >= 5, coluna 54 (BB); edição no próprio BB é ignorada */
+  var aba=e.source.getActiveSheet(),g=e.range;
   var r0=Math.max(g.getRow(),DADOS),r1=g.getLastRow();if(r1<r0)return;
-  if(g.getColumn()===COL_TS&&g.getLastColumn()===COL_TS)return;   /* edição no próprio BB: ignora */
-  var d=new Date(),v=[];for(var r=r0;r<=r1;r++)v.push([d]);sh.getRange(r0,COL_TS,v.length,1).setValues(v)}catch(x){}}
+  if(g.getColumn()===COL_TS&&g.getLastColumn()===COL_TS)return;
+  var d=new Date(),v=[];for(var r=r0;r<=r1;r++)v.push([d]);aba.getRange(r0,COL_TS,v.length,1).setValues(v)}catch(x){}}
 
 /* rode pelo editor (▶ autorizar) uma vez: pede as permissões de planilha */
-function autorizar(){Logger.log(SpreadsheetApp.openById(TESTE).getName())}
+function autorizar(){CARIMBO.forEach(function(id){Logger.log(SpreadsheetApp.openById(id).getName())})}
