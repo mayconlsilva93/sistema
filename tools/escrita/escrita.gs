@@ -10,7 +10,7 @@ var TESTE='1_FIaPSZjz7rr1QwDvC7jL6qCXu09Wh1ZsgTTdearxGs';   /* ARTISTATESTE - Ge
 
 /* app -> artistas (nome -> id da planilha) e operações permitidas. Para liberar um artista real, acrescente-o aqui (ver docs/INTEGRACAO.md). */
 var APPS={
-  artistateste:{planilhas:{'Artista Teste':TESTE}, ops:['custos','cache'], recebidoPor:'Artista Teste'},
+  artistateste:{planilhas:{'Artista Teste':TESTE}, ops:['custos','cache'], recebidoPor:'Artista'},
   booker:      {planilhas:{'Artista Teste':TESTE}, ops:['criar','editar','ler']}
 };
 /* planilhas que recebem o carimbo de edição (gatilho onEdit instalado por installTriggers) */
@@ -74,7 +74,12 @@ function opCache(S,p,A){
     sh.getRange(r,cR).setValue(st);sh.getRange(r,cA).setValue(st);sh.getRange(r,cP).setValue(quem);sh.getRange(r,cD).setValue(d)}
   else{ /* outro valor (ou restante): só RECEBIDO POR e DATA RECEBIMENTO "DD/MM/AAAA (R$ 0,00)", somando às entradas existentes */
     var old=txt(sh.getRange(r,cD).getValue()),nv=p.d+' ('+brl(v)+')';
-    sh.getRange(r,cD).setNumberFormat('@').setValue(old?old+', '+nv:nv);sh.getRange(r,cP).setValue(quem);tipo='parcial'}
+    sh.getRange(r,cD).setNumberFormat('@').setValue(old?old+', '+nv:nv);sh.getRange(r,cP).setValue(quem);tipo='parcial';
+    /* 100% pago: soma parcelas "(R$ x)" + entrada já marcada; se cobrir o cachê bruto, vira Pago */
+    var br=+S.get(r,'CACHÊ BRUTO')||0,st0=nh(S.get(r,'CACHÊ RECEBIDO?')),pg=0,m,re=/\(R\$\s*([\d.,]+)\)/g,all=old?old+', '+nv:nv;
+    while((m=re.exec(all)))pg+=parseFloat(m[1].replace(/\./g,'').replace(',','.'))||0;
+    if(!/\(R\$/.test(old)){var pc=/ENTRADA (\d+)%/.exec(st0);if(pc&&old)pg+=br*(+pc[1])/100}
+    if(br>0&&pg>=br-0.01){sh.getRange(r,cR).setValue('Pago');sh.getRange(r,cA).setValue('Pago');tipo='quitado'}}
   S.stamp(r);return {n:+p.n,tipo:tipo}}
 
 function opEditar(S,p){
