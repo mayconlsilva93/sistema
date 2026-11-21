@@ -31,6 +31,48 @@ Links dos arquivos (repositório **mayconlsilva93/sistema**, ramo `main`):
 
 ---
 
+## NOVO (21/11/2026, 2ª versão do dia) — o que muda e o que fazer
+
+Mudou o `escrita.gs` → **é preciso colar e implantar nova versão** (Passos 1, 2 e 3 abaixo; a URL `/exec` não muda).
+Não há permissão nova (nada de reautorizar), nem acionador novo.
+
+O que esta versão traz:
+
+1. **Leitura ao vivo pelo Booker** — a operação `ler` aceita o Nº da proposta e devolve só aquela linha,
+   com os valores exibidos e as **notas** das células. O Booker chama isso toda vez que uma proposta é aberta
+   e mostra os valores da planilha por cima dos sincronizados ("✓ conferido na planilha às HH:MM").
+   Com a versão antiga do script o Booker continua funcionando (lê a aba inteira e ignora notas/horas).
+2. **Vários horários** — o Booker grava a lista ("Horários: 23:00 às 00:00 e 01:30 às 02:30") como **nota da
+   célula INÍCIO DO SHOW** (campo `nota:INÍCIO DO SHOW` nas operações `editar`/`criar`) e também mantém a linha
+   "Horários:" nas OBSERVAÇÕES, porque os apps e o Painel recebem os dados pela sincronização (IMPORTRANGE),
+   que não copia notas. A rotina AUTO_REALIZADO passa a ler também a nota.
+3. **Cachê recebido em dobro é recusado** (`cache`): "total" com CACHÊ RECEBIDO? = Pago; sinal com Entrada já
+   marcada; parcela repetida (mesma data + valor em DATA RECEBIMENTO) ou que passe do CACHÊ BRUTO.
+   A mensagem aparece na janela do app/Booker ("Não foi gravado na planilha: …").
+4. **AUTO_DESCARTE** (rotina de hora em hora, **desligada até você criar a propriedade**): passado o dia do
+   evento (06:00 do dia seguinte à DATA DO SHOW — regra da madrugada — ou o fim do show, se for depois), a
+   proposta que nunca virou "Show confirmado"/"Show realizado" passa a **"Proposta descartada"**
+   (ex.: Proposta emitida, Em negociação, Data reservada, Remarcar). Não mexe em Show cancelado, em quem já
+   está descartada, em STATUS vazio nem em célula com fórmula.
+5. Operação `ping` (só confere assinatura e autorização; não lê nem grava) — para testes.
+
+Depois de implantar:
+
+- **Simulação do AUTO_DESCARTE (não grava nada):** no editor, escolha a função **testeRotina** na lista ao
+  lado de ▶ Executar → **Executar** → **Registro de execução**. A última linha diz
+  `AUTO_DESCARTE (simulação, nada gravado): N proposta(s) virariam Proposta descartada` e, acima, cada uma
+  (planilha · Nº · status · data). Confira algumas na planilha.
+- **Ligar o AUTO_DESCARTE:** ⚙️ **Configurações do projeto** → **Propriedades do script** → **Editar propriedades
+  do script** → **Adicionar propriedade do script** → Propriedade `AUTO_DESCARTE`, Valor `1` →
+  **Salvar propriedades do script**. Vale na próxima execução da rotina (até 1 hora). Para desligar: apague a
+  linha ou troque para `0`.
+- **Conferir:** https://script.google.com/home → DROM Escrita → **Execuções** (ícone ☰ com relógio, à esquerda):
+  as execuções de `rotina` mostram `descartadas: N`.
+
+Também nesta entrega (GitHub, sem ação sua): `dev.yml` (planilha falsa → app dev/Booker) roda **a cada 10 minutos**.
+
+---
+
 ## Passo 1 — Entrar como contato@ e abrir o DROM Escrita
 
 1. Abra **https://accounts.google.com** e confira, no canto superior direito, que a conta ativa é
@@ -48,7 +90,7 @@ Links dos arquivos (repositório **mayconlsilva93/sistema**, ramo `main`):
 3. Volte ao editor do DROM Escrita → clique em **Código.gs** → clique dentro do código → **Ctrl+A** → **Delete**.
 4. **Ctrl+V** para colar.
 5. Confira: a primeira linha começa com `/* DROM · ESCRITA nas planilhas` e, perto do fim, existem as funções
-   `installTriggers`, `rotina`, `autoRealizado`, `autoContrato`, `testeRotina` e `autorizar`.
+   `installTriggers`, `rotina`, `autoRealizado`, `autoDescarte`, `autoContrato`, `testeRotina` e `autorizar`.
 6. Salve: ícone de **disquete (Salvar projeto)** na barra de cima, ou **Ctrl+S**. O ponto laranja ao lado de
    "Código.gs" some.
 
@@ -57,14 +99,14 @@ Links dos arquivos (repositório **mayconlsilva93/sistema**, ramo `main`):
 1. Botão azul **Implantar** (canto superior direito) → **Gerenciar implantações**.
 2. Na coluna da esquerda, clique na implantação ativa (tipo **App da Web**).
 3. Clique no ícone de **lápis ✏️ (Editar)**, no alto da janela.
-4. Em **Versão**, abra a lista e escolha **Nova versão**. Em **Descrição**, escreva `notas + rotina`.
+4. Em **Versão**, abra a lista e escolha **Nova versão**. Em **Descrição**, escreva `ler ao vivo + horários + cachê duplicado + AUTO_DESCARTE`.
 5. Confira: **Executar como: Eu (contato@dromentretenimento.com)** e **Quem pode acessar: Qualquer pessoa**.
 6. Clique em **Implantar** → **Concluído**.
 7. Teste: ainda em **Implantar → Gerenciar implantações**, copie a **URL do app da Web** (termina em `/exec`) e abra
    numa aba. Deve aparecer `{"ok":1,"svc":"drom-escrita"}`.
    **Não crie uma implantação nova** (botão "Nova implantação"): isso gera outra URL e os apps não a conhecem.
 
-## Passo 4 — Propriedades do script (KEY, AUTO_REALIZADO, AUTO_CONTRATO)
+## Passo 4 — Propriedades do script (KEY, AUTO_REALIZADO, AUTO_DESCARTE, AUTO_CONTRATO)
 
 1. No editor, barra da esquerda, clique na **engrenagem ⚙️ (Configurações do projeto)**.
 2. Role até **Propriedades do script**. Deve existir **KEY** (já configurada na implantação anterior — **não altere**).
@@ -73,6 +115,7 @@ Links dos arquivos (repositório **mayconlsilva93/sistema**, ramo `main`):
      Propriedade `AUTO_REALIZADO`, Valor `1` → **Salvar propriedades do script**;
    - para desligar depois: apague a linha (ícone de lixeira) ou troque o valor para `0` e salve.
 4. **AUTO_CONTRATO** (opcional; mesmo jeito): Propriedade `AUTO_CONTRATO`, Valor `1`.
+   **AUTO_DESCARTE** (opcional; mesmo jeito): Propriedade `AUTO_DESCARTE`, Valor `1` — rode antes o **testeRotina** (simulação).
 5. A rotina lê essas propriedades **a cada execução**: ligar/desligar vale na hora seguinte, sem nova implantação.
 6. `CONTRATOS_FEITOS` aparece sozinha depois que o AUTO_CONTRATO rodar (memória dos PDFs já vistos). Não edite.
 

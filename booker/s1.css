@@ -8,7 +8,7 @@
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
 body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-main{max-width:1000px;margin:0 auto;padding-block:16px 40px}
+main{max-width:1000px;margin:0 auto;padding-block:calc(16px + env(safe-area-inset-top,0px)) 24px}
 .hd{display:flex;justify-content:center;align-items:center;gap:10px;min-height:44px}
 .hlogo{height:34px;width:auto}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hlogo{filter:invert(1)}}
@@ -62,6 +62,5 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);
 #toast.on{opacity:1}
 .empty{text-align:center;color:var(--mu);padding:40px 0}
 .sq{position:relative;flex:1 1 260px;min-width:200px}.sres{position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:60vh;overflow:auto;background:var(--cd);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:20}.sres button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--bd);border-radius:0;padding:8px 10px;background:transparent}.sres button:hover,.sres button.on{background:var(--ib)}.sres small{color:var(--mu);display:block}.sres .none{padding:10px;color:var(--mu)}
-/*BRAND*/.dbrand{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8.5px 0 calc(8.5px + env(safe-area-inset-bottom,0px));background:#FFF602;z-index:25;line-height:0;display:flex;justify-content:center}.dbrand img{height:13px;width:auto;filter:none!important}body{padding-bottom:40px}#toast{bottom:calc(46px + env(safe-area-inset-bottom,0px))}
 
-/*IOSF*/@supports (-webkit-touch-callout:none){html,body{overflow-y:visible!important;overflow-x:clip;height:auto!important;min-height:100%}html{background:var(--bg)!important}}
+/*IOSF*/@supports (-webkit-touch-callout:none){html{background:#FF5B1F!important}}

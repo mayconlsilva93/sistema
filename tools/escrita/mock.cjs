@@ -21,7 +21,7 @@ const cell=(r,c)=>G[r+","+c]||(G[r+","+c]={v:"",f:"",n:""});
 function lastRow(){let m=0;for(const k in G){const[r]=k.split(",").map(Number);if(G[k].v!==""||G[k].f)m=Math.max(m,r)}return m}
 function lastCol(){let m=0;for(const k in G){const[,c]=k.split(",").map(Number);if(G[k].v!==""||G[k].f)m=Math.max(m,c)}return m}
 function Range(r,c,nr=1,nc=1){const it=f=>{for(let i=0;i<nr;i++)for(let j=0;j<nc;j++)f(cell(r+i,c+j),i,j)};const grid=g=>Array.from({length:nr},(_,i)=>Array.from({length:nc},(_,j)=>g(cell(r+i,c+j))));
- const o={getValue:()=>cell(r,c).v,getValues:()=>grid(x=>x.v),getFormula:()=>cell(r,c).f,getNotes:()=>grid(x=>x.n),getFormulas:()=>grid(x=>x.f),
+ const o={getValue:()=>cell(r,c).v,getValues:()=>grid(x=>x.v),getFormula:()=>cell(r,c).f,getNotes:()=>grid(x=>x.n),getDisplayValues:()=>grid(x=>x.v instanceof Date?pad(x.v.getDate())+"/"+pad(x.v.getMonth()+1)+"/"+x.v.getFullYear():String(x.v)),getFormulas:()=>grid(x=>x.f),
   setValue:v=>{it(x=>{x.v=v;x.f=""});return o},setValues:V=>{it((x,i,j)=>{x.v=V[i][j];x.f=""});return o},setNote:t=>{it(x=>x.n=t);return o},
   setNumberFormat:()=>o,clearContent:()=>{it(x=>{x.v="";x.f=""});return o},clearNote:()=>{it(x=>x.n="");return o},
   copyTo:dst=>{it((x,i,j)=>{const y=cell(dst._r+i,dst._c+j);y.v=x.v;y.f=x.f;y.n=x.n})},getRow:()=>r,getLastRow:()=>r+nr-1,getColumn:()=>c,getLastColumn:()=>c+nc-1,getSheet:()=>SH,_r:r,_c:c};return o}

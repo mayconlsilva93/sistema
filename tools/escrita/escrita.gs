@@ -1,5 +1,5 @@
 /* DROM · ESCRITA nas planilhas "Gestão e Propostas" (um único projeto do Apps Script, conta contato@dromentretenimento.com)
-   Implantar como "App da Web": Executar como EU, acesso "Qualquer pessoa". Propriedades do script: KEY (ver docs/INTEGRACAO.md); opcionais AUTO_REALIZADO=1 e AUTO_CONTRATO=1 (rotina de hora em hora; ver docs/IMPLANTACAO.md).
+   Implantar como "App da Web": Executar como EU, acesso "Qualquer pessoa". Propriedades do script: KEY (ver docs/INTEGRACAO.md); opcionais AUTO_REALIZADO=1, AUTO_DESCARTE=1 e AUTO_CONTRATO=1 (rotina de hora em hora; ver docs/IMPLANTACAO.md).
    Segurança: cada app assina o pedido com HMAC-SHA256 usando a chave do app = HMAC-SHA256("app:"+nome, KEY).
    Cada app só escreve nas planilhas da sua lista (APPS). Pedidos com mais de 15 min, assinatura errada ou app/planilha fora da lista são recusados.
    Colunas sempre pelo TÍTULO da linha 4 (nunca pela posição); linhas pelo Nº. Coluna que falta = recusa com erro.
@@ -56,8 +56,8 @@ function verify(env){
   var p=JSON.parse(env.p);
   if(!p.ts||Math.abs(Date.now()-p.ts)>15*60e3)throw new Error('pedido expirado (confira o relógio do aparelho)');
   if(!p.id||!/^[A-Za-z0-9_-]{8,64}$/.test(p.id))throw new Error('id inválido');
-  if(A.ops.indexOf(p.op)<0)throw new Error('operação não permitida para '+env.app+': '+p.op);
-  var sid=A.planilhas[p.a];if(!sid)throw new Error('artista não liberado para '+env.app+': '+p.a);
+  if(p.op!=='ping'&&A.ops.indexOf(p.op)<0)throw new Error('operação não permitida para '+env.app+': '+p.op);
+  var sid=A.planilhas[p.a];if(p.op==='ping'&&sid)return {A:A,p:p,sid:sid,app:env.app};if(!sid)throw new Error('artista não liberado para '+env.app+': '+p.a);
   return {A:A,p:p,sid:sid,app:env.app}}
 
 /* planilha: cabeçalhos da linha 4. "TÍTULO>1" = coluna logo à direita de TÍTULO, só se ela não tiver título (ex.: fim do horário, telefone). */
@@ -89,6 +89,7 @@ function opCache(S,p,A){
   var r=S.row(p.n),v=+p.v,d=dmy(p.d),cR=S.col('CACHÊ RECEBIDO?'),cA=S.col('STATUS ARTISTA'),cP=S.col('RECEBIDO POR'),cD=S.col('DATA RECEBIMENTO');
   if(!(v>0))throw new Error('valor inválido');
   var sh=S.sh,quem=(A.rp&&A.rp[p.a])||A.recebidoPor||p.a,tipo=p.tipo;   /* o que a planilha usa em RECEBIDO POR */
+  dupCache(S,r,p,v);   /* recusa pagamento já registrado (mesmo cachê marcado duas vezes) */
   if(tipo==='total'||tipo==='s30'||tipo==='s50'){
     var st=tipo==='total'?'Pago':tipo==='s30'?'Entrada 30%':'Entrada 50%';
     sh.getRange(r,cR).setValue(st);sh.getRange(r,cA).setValue(st);sh.getRange(r,cP).setValue(quem);sh.getRange(r,cD).setValue(d)}
@@ -102,6 +103,16 @@ function opCache(S,p,A){
     if(br>0&&pg>=br-0.01){sh.getRange(r,cR).setValue('Pago');sh.getRange(r,cA).setValue('Pago');tipo='quitado'}}
   S.stamp(r);return {n:+p.n,tipo:tipo}}
 
+/* duplicidade: total com Pago; sinal com Entrada já marcada; parcial repetida (mesma data + valor) ou acima do cachê bruto */
+function dupCache(S,r,p,v){var st=nh(S.get(r,'CACHÊ RECEBIDO?')),br=+S.get(r,'CACHÊ BRUTO')||0,old=txt(S.sh.getRange(r,S.col('DATA RECEBIMENTO')).getValue());
+  if(st==='PAGO')throw new Error('Cachê já está como "Pago" na planilha: nada a registrar');
+  if(p.tipo==='total')return;
+  if(p.tipo==='s30'||p.tipo==='s50'){if(/^ENTRADA/.test(st))throw new Error('Sinal já registrado na planilha ('+S.get(r,'CACHÊ RECEBIDO?')+'). Para outra parcela use "Outro"');return}
+  var nv=p.d+' ('+brl(v)+')';if(old.indexOf(nv)>=0)throw new Error('Recebimento de '+brl(v)+' em '+p.d+' já está lançado na planilha');
+  var pg=0,m,re=/\(R\$\s*([\d.,]+)\)/g;while((m=re.exec(old)))pg+=parseFloat(m[1].replace(/\./g,'').replace(',','.'))||0;
+  var pc=/ENTRADA (\d+)%/.exec(st);if(pc)pg+=br*(+pc[1])/100;
+  if(br>0&&pg+v>br+0.01)throw new Error('Valor acima do cachê: já recebido '+brl(pg)+' de '+brl(br)+'; restante '+brl(Math.max(0,br-pg)))}
+
 function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pago" */
   var r=S.row(p.n),c=S.sh.getRange(r,S.col('STATUS COMISSÃO'));
   if(c.getFormula())throw new Error('STATUS COMISSÃO tem fórmula nesta linha (edite direto na planilha)');
@@ -111,13 +122,16 @@ function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pag
 function opEditar(S,p){
   var r=S.row(p.n),h=p.h||{},ks=Object.keys(h);if(!ks.length)throw new Error('nada para gravar');
   ks.forEach(function(t){if(nh(t)==='Nº')throw new Error('Nº não pode ser alterado')});
+  var nk=ks.filter(isNota);ks=ks.filter(function(t){return !isNota(t)});
   var ign=ks.filter(function(t){return !S.has(t)});ks=ks.filter(function(t){return S.has(t)});   /* coluna que esta planilha não tem: ignorada e avisada */
   var C=ks.map(function(t){return S.col(t)}),n=0;   /* tudo verificado antes de gravar */
+  n+=notas(S,r,h,nk,ign);
   ks.forEach(function(t,i){var c=S.sh.getRange(r,C[i]);if(c.getFormula()){ign.push(t);return}c.setValue(val(h[t]));n++});   /* célula com fórmula nunca é sobrescrita */
   S.stamp(r);return {n:+p.n,campos:n,ign:ign}}
 
 function opCriar(S,p){
   var h=p.h||{},ks=Object.keys(h);ks.forEach(function(t){if(nh(t)==='Nº')throw new Error('Nº é automático')});
+  var nk=ks.filter(isNota);ks=ks.filter(function(t){return !isNota(t)});
   var fal=ks.filter(function(t){return !S.has(t)});ks=ks.filter(function(t){return S.has(t)});var C=ks.map(function(t){return S.col(t)});
   var L=S.nums(),last=DADOS-1,mx=0;L.forEach(function(x,i){if(x!==''&&!isNaN(+x)){last=DADOS+i;mx=Math.max(mx,+x)}});
   var sh=S.sh,r=last+1,lc=sh.getLastColumn(),n=mx+1;
@@ -126,16 +140,23 @@ function opCriar(S,p){
     F.forEach(function(f,i){if(!f)sh.getRange(r,i+1).clearContent().clearNote()})}
   sh.getRange(r,S.cN).setValue(n);
   var ign=fal.slice();ks.forEach(function(t,i){var c=sh.getRange(r,C[i]);if(c.getFormula()){ign.push(t);return}c.setValue(val(h[t]))});
-  S.stamp(r);return {n:n,linha:r,ign:ign}}
+  notas(S,r,h,nk,ign);S.stamp(r);return {n:n,linha:r,ign:ign}}
+/* "nota:TÍTULO" = nota da célula (ex.: vários horários na nota de INÍCIO DO SHOW); texto vazio apaga a nota */
+function isNota(t){return /^nota:/i.test(t)}
+function notas(S,r,h,nk,ign){var n=0;nk.forEach(function(t){var c=t.slice(5);if(!S.has(c)){ign.push(t);return}S.sh.getRange(r,S.col(c)).setNote(String(h[t]==null?'':h[t]));n++});return n}
 
-function opLer(S){
+function cel(x){return x instanceof Date?Utilities.formatDate(x,TZ,x.getFullYear()<1900?'H:mm':'yyyy-MM-dd'):x}
+function opLer(S,p){
+  if(p&&p.n){var sh1=S.sh,r=S.row(p.n),L=S.H.length,raw1=sh1.getRange(HDR,1,1,L).getValues()[0],T1=raw1.map(function(t,i){return t?nh(t):(i&&raw1[i-1]?nh(raw1[i-1])+'>1':'')}),g=sh1.getRange(r,1,1,L),N=g.getNotes()[0],o={};
+    T1.forEach(function(t,i){if(t&&N[i])o[t]=N[i]});
+    return {cols:T1,rows:[g.getValues()[0].map(cel)],disp:[g.getDisplayValues()[0]],notas:o,n:+p.n,em:agora()}}
   var sh=S.sh,n=sh.getLastRow()-DADOS+1,V=n>0?sh.getRange(DADOS,1,n,S.H.length).getValues():[],raw=sh.getRange(HDR,1,1,S.H.length).getValues()[0];
   var T=raw.map(function(t,i){return t?nh(t):(i&&raw[i-1]?nh(raw[i-1])+'>1':'')});
   return {cols:T,rows:V.filter(function(r){return r[S.cN-1]!==''}).map(function(r){return r.map(function(x){return x instanceof Date?Utilities.formatDate(x,TZ,'yyyy-MM-dd'):x})})}}
 
 function opNotas(S,p){   /* só leitura: notas da coluna DESPESAS (detalhe dos custos), que o IMPORTRANGE não leva para a BASECLAUDE. p.n opcional = só uma proposta */
   var sh=S.sh,n=sh.getLastRow()-DADOS+1,o={};if(n<1)return {notas:o};
-  var N=sh.getRange(DADOS,S.cN,n,1).getValues(),T=sh.getRange(DADOS,S.col('DESPESAS'),n,1).getNotes();
+  var N=sh.getRange(DADOS,S.cN,n,1).getValues(),T=sh.getRange(DADOS,S.col(p.col||'DESPESAS'),n,1).getNotes();
   N.forEach(function(r,i){var x=r[0];if(x===''||!T[i][0])return;if(p.n&&String(+x)!==String(+p.n))return;o[String(+x)]=T[i][0]});
   return {notas:o}}
 
@@ -143,8 +164,9 @@ function run(env){
   var v=verify(env),p=v.p,C=CacheService.getScriptCache(),ck='r:'+p.id,old=C.get(ck);
   if(old)return JSON.parse(old);   /* mesmo id = repetição: devolve o resultado anterior, não grava de novo */
   var res;
-  if(p.op==='ler'){res={ok:1,id:p.id,r:opLer(Sheet(v.sid))};return res}
+  if(p.op==='ler'){res={ok:1,id:p.id,r:opLer(Sheet(v.sid),p)};return res}
   if(p.op==='notas'){res={ok:1,id:p.id,r:opNotas(Sheet(v.sid),p)};return res}
+  if(p.op==='ping'){return {ok:1,id:p.id,r:{app:v.app,a:p.a,ops:v.A.ops}}}   /* só confere assinatura e autorização; não lê nem grava */
   var lk=LockService.getScriptLock();if(!lk.tryLock(25000))throw new Error('planilha ocupada, tente de novo');
   try{old=C.get(ck);if(old)return JSON.parse(old);
     var S=Sheet(v.sid),r=p.op==='custos'?opCustos(S,p):p.op==='cache'?opCache(S,p,v.A):p.op==='comissao'?opComissao(S,p):p.op==='editar'?opEditar(S,p):opCriar(S,p);
@@ -172,7 +194,7 @@ function installTriggers(){
   CARIMBO.forEach(function(id){ScriptApp.newTrigger('carimbo').forSpreadsheet(id).onEdit().create()});
   ScriptApp.newTrigger('rotina').timeBased().everyHours(1).create();
   Logger.log('gatilhos instalados: '+CARIMBO.length+' de carimbo (esperado 11) + 1 de rotina (de hora em hora)');
-  Logger.log('AUTO_REALIZADO='+(prop('AUTO_REALIZADO')||'(vazio = desligado)')+' · AUTO_CONTRATO='+(prop('AUTO_CONTRATO')||'(vazio = desligado)'))}
+  Logger.log('AUTO_REALIZADO='+(prop('AUTO_REALIZADO')||'(vazio = desligado)')+' · AUTO_DESCARTE='+(prop('AUTO_DESCARTE')||'(vazio = desligado)')+' · AUTO_CONTRATO='+(prop('AUTO_CONTRATO')||'(vazio = desligado)'))}
 function prop(k){return PropertiesService.getScriptProperties().getProperty(k)}
 
 /* rotina (de hora em hora). Cada parte só roda se a propriedade do script estiver = 1:
@@ -180,6 +202,7 @@ function prop(k){return PropertiesService.getScriptProperties().getProperty(k)}
    AUTO_CONTRATO=1  -> PDF "[assinado]" em "Contratos com Contratantes" marca CONTRATO = "Sim" na proposta */
 function rotina(){var L=[];
   if(prop('AUTO_REALIZADO')==='1')try{L.push('realizados: '+autoRealizado(new Date()))}catch(e){L.push('realizados: erro '+e)}
+  if(prop('AUTO_DESCARTE')==='1')try{L.push('descartadas: '+autoDescarte(new Date(),true))}catch(e){L.push('descartadas: erro '+e)}
   if(prop('AUTO_CONTRATO')==='1')try{L.push('contratos: '+autoContrato())}catch(e){L.push('contratos: erro '+e)}
   Logger.log(L.join(' · ')||'rotina: nada ligado (AUTO_REALIZADO / AUTO_CONTRATO)');return L}
 
@@ -198,9 +221,23 @@ function fimShow(dt,ini,dur,obs){if(!(dt instanceof Date))return null;var d=new 
 function autoRealizado(now){var tot=0;
   CARIMBO.forEach(function(id){try{var S=Sheet(id),sh=S.sh,n=sh.getLastRow()-DADOS+1;if(n<1)return;
     var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,lc=Math.max(cS,cD,cI,cU,cO);
-    var V=sh.getRange(DADOS,1,n,lc).getValues(),F=sh.getRange(DADOS,cS,n,1).getFormulas();
-    V.forEach(function(r,i){if(nh(r[cS-1])!=='SHOW CONFIRMADO'||F[i][0])return;var e=fimShow(r[cD-1],r[cI-1],r[cU-1],cO?r[cO-1]:'');
+    var V=sh.getRange(DADOS,1,n,lc).getValues(),F=sh.getRange(DADOS,cS,n,1).getFormulas(),NI=sh.getRange(DADOS,cI,n,1).getNotes();
+    V.forEach(function(r,i){if(nh(r[cS-1])!=='SHOW CONFIRMADO'||F[i][0])return;var e=fimShow(r[cD-1],r[cI-1],r[cU-1],(NI[i][0]||'')+'\n'+(cO?r[cO-1]:''));
       if(e&&now>=e){sh.getRange(DADOS+i,cS).setValue('Show realizado');S.stamp(DADOS+i);tot++}})}catch(e){Logger.log(id+': '+e)}});
+  return tot}
+/* AUTO_DESCARTE: passado o dia do evento, proposta que nunca virou Show confirmado/realizado passa a "Proposta descartada".
+   Fim do dia = 06:00 do dia seguinte à DATA DO SHOW (regra da madrugada: show 00:00–05:59 é a noite da data), ou o fim do show, se for depois.
+   Não mexe em Show confirmado, Show realizado, Show cancelado, já descartada, STATUS vazio ou com fórmula. grava=false: só lista (testeRotina).*/
+var NAO_DESC=['SHOW CONFIRMADO','SHOW REALIZADO','SHOW CANCELADO','PROPOSTA DESCARTADA',''];
+function autoDescarte(now,grava){var tot=0;
+  CARIMBO.forEach(function(id){try{var S=Sheet(id),sh=S.sh,n=sh.getLastRow()-DADOS+1;if(n<1)return;
+    var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,lc=Math.max(cS,cD,cI,cU,cO);
+    var V=sh.getRange(DADOS,1,n,lc).getValues(),F=sh.getRange(DADOS,cS,n,1).getFormulas();
+    V.forEach(function(r,i){var st=nh(r[cS-1]);if(NAO_DESC.indexOf(st)>=0||F[i][0]||!(r[cD-1] instanceof Date))return;
+      var d=r[cD-1],e=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,6,0),f=fimShow(r[cD-1],r[cI-1],r[cU-1],cO?r[cO-1]:'');if(f&&f>e)e=f;
+      if(now<e)return;tot++;
+      if(grava){sh.getRange(DADOS+i,cS).setValue('Proposta descartada');S.stamp(DADOS+i)}
+      else Logger.log(SpreadsheetApp.openById(id).getName()+' · Nº '+r[S.cN-1]+' · '+r[cS-1]+' · '+Utilities.formatDate(d,TZ,'dd/MM/yyyy')+' -> viraria Proposta descartada')})}catch(e){Logger.log(id+': '+e)}});
   return tot}
 /* contratos assinados: "DROM Entretenimento - Contrato 50028-2026 [assinado].pdf" em .../<artista>/Contratos com Contratantes[/ano]/
    nº do contrato = prefixo do artista + Nº com 4 dígitos (Booker: numero()). Só marca se CONTRATO estiver vazio, "Não" ou "Pendente". */
@@ -221,7 +258,8 @@ function autoContrato(){var since=new Date(Date.now()-3*864e5),tot=0,P=Propertie
 function testeRotina(){CARIMBO.forEach(function(id){try{var S=Sheet(id),sh=S.sh,n=sh.getLastRow()-DADOS+1;if(n<1)return;
   var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,lc=Math.max(cS,cD,cI,cU,cO),V=sh.getRange(DADOS,1,n,lc).getValues();
   V.forEach(function(r,i){if(nh(r[cS-1])!=='SHOW CONFIRMADO')return;var e=fimShow(r[cD-1],r[cI-1],r[cU-1],cO?r[cO-1]:'');
-    Logger.log(SpreadsheetApp.openById(id).getName()+' · Nº '+r[S.cN-1]+' · fim '+(e?Utilities.formatDate(e,TZ,'dd/MM/yyyy HH:mm'):'?')+(e&&new Date()>=e?' -> viraria Show realizado':''))})}catch(e){Logger.log(id+': '+e)}})}
+    Logger.log(SpreadsheetApp.openById(id).getName()+' · Nº '+r[S.cN-1]+' · fim '+(e?Utilities.formatDate(e,TZ,'dd/MM/yyyy HH:mm'):'?')+(e&&new Date()>=e?' -> viraria Show realizado':''))})}catch(e){Logger.log(id+': '+e)}});
+  Logger.log('AUTO_DESCARTE (simulação, nada gravado): '+autoDescarte(new Date(),false)+' proposta(s) virariam Proposta descartada')}
 function carimbo(e){try{   /* mesmo comportamento dos scripts antigos de cada planilha: aba ativa, linha >= 5, coluna 54 (BB); edição no próprio BB é ignorada */
   var aba=e.source.getActiveSheet(),g=e.range;
   var r0=Math.max(g.getRow(),DADOS),r1=g.getLastRow();if(r1<r0)return;

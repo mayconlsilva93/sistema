@@ -1,7 +1,7 @@
 name: DROM · DEV (planilha falsa → app dev e Booker (artista de teste))
 on:
   schedule:
-    - cron: "43 * * * *"   # de hora em hora
+    - cron: "*/10 * * * *"   # a cada 10 min (Booker também lê a planilha ao vivo ao abrir a proposta)
   workflow_dispatch:
 permissions:
   contents: write
