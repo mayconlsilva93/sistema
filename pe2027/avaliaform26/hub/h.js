@@ -18,8 +18,8 @@ async function go(c){AK=await crypto.subtle.importKey("raw",b64(c.ak),"AES-GCM",
  $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{TAB=b.dataset.t;$("nav").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));draw()});
  $("tst").onchange=()=>{localStorage.setItem("av26_hubt",$("tst").checked?"1":"0");draw()};$("rf").onclick=()=>load(1);
  draw();await load();setInterval(()=>{if(!document.hidden)load()},180000)}
-async function load(force){var PJ={},CT={};try{var p=await (await fetch("../pj.json?t="+Date.now(),{cache:"no-store"})).json(),pp=await dec(AK,p.iv,p.ct);PJ=pp.P||{};CT=pp.CT||{}}catch(e){}
- await Promise.all(ADM.L.map(async x=>{try{var r=await (await fetch("../../../"+x.f+"/d.json?t="+Date.now(),{cache:"no-store"})).json();STS[x.k]=AVST(await dec(AK,r.iv,r.ct),PJ[x.f]||{},CT[x.f]||{})}catch(e){}}));
+async function load(force){var PJ={},CT={},CA={};try{var p=await (await fetch("../pj.json?t="+Date.now(),{cache:"no-store"})).json(),pp=await dec(AK,p.iv,p.ct);PJ=pp.P||{};CT=pp.CT||{};CA=pp.CA||{}}catch(e){}
+ await Promise.all(ADM.L.map(async x=>{try{var r=await (await fetch("../../../"+x.f+"/d.json?t="+Date.now(),{cache:"no-store"})).json();STS[x.k]=AVST(await dec(AK,r.iv,r.ct),PJ[x.f]||{},CT[x.f]||{},CA)}catch(e){}}));
  try{var U=(await (await fetch("../u.json?v="+Date.now(),{cache:"no-store"})).json()).u;if(U){var j=await (await fetch(U+"?r="+encodeURIComponent(ADM.rk)+"&t="+Date.now())).json();if(j.ok){RS=j.L;DR=j.R||[]}$("sub").textContent="atualizado "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}else $("sub").textContent="envio ainda não ativado (u.json)"}catch(e){$("sub").textContent="sem conexão com as respostas"}
  draw()}
 var ART=()=>ADM.L.filter(x=>$("tst").checked||!x.teste),RES=()=>RS.filter(r=>ART().some(x=>x.k===r.k)),nm=k=>(ADM.L.find(x=>x.k===k)||{}).n||k,ic=k=>"../av/"+((ADM.L.find(x=>x.k===k)||{}).f||"")+".png",

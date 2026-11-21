@@ -16,7 +16,7 @@ function proj(S){var now=new Date(Date.now()-216e5),cm=(now.getFullYear()-B)*12+
  return R}
 var CATN={L:"Label DROM",N:"Casa noturna",U:"Universitário",P:"Particular",F:"Formatura",C:"Corporativo",B:"Bar",A:"Aniversário",O:"Outdoor",W:"Casamento","?":"Outros"};
 function rider(t){t=String(t||"").trim();var l=t.toLowerCase();if(!t||/^(-|confirmar|a confirmar|consumação a definir)$/i.test(t))return"Não informado";if(/rider/.test(l)&&!/universit/.test(l))return"Rider completo";if((t.match(/\+/g)||[]).length>=2||/pizza|aliment|hamb|frutas|balde com gelo/.test(l))return"Rider completo";if(/open bar e open food/.test(l))return"Open Bar e Open Food";if(/open bar/.test(l))return"Open Bar";if(/combo|circuito|rider universit|\+/.test(l))return"Combo";if(/consum|r\$/.test(l))return"Consumação";return"Outros"}
-window.AVST=function(D,PJ,CT){CT=CT||{};var cat=s=>{var k=s[19]+"|"+s[0]+"|"+String(s[3]).replace(/\/[A-Z]{2}$/,"");return CT[k+"|"+String(s[2]||"").trim().toLowerCase()]||CT[k]||""};var S=D.S||[],PR=D.PR||[],OT=D.OT||[],A=yr(S,Y),R=A.filter(ok),F=A.filter(s=>!ok(s)),P=PJ||{},mon=[];
+window.AVST=function(D,PJ,CT,CA){CT=CT||{};CA=CA||{};var cs=s=>CA[s[3]+"|"+s[2]]||s[2];var cat=s=>{var k=s[19]+"|"+s[0]+"|"+String(s[3]).replace(/\/[A-Z]{2}$/,"");return CT[k+"|"+String(s[2]||"").trim().toLowerCase()]||CT[k]||""};var S=D.S||[],PR=D.PR||[],OT=D.OT||[],A=yr(S,Y),R=A.filter(ok),F=A.filter(s=>!ok(s)),P=PJ||{},mon=[];
  for(var i=1;i<=12;i++){var k=M0+i;mon.push({r:R.filter(s=>s[19]===k).length,f:F.filter(s=>s[19]===k).length,p:P[k]||0,y25:yr(S,2025).filter(s=>s[19]===k-12).length})}
  var pj=sum(mon.map(m=>m.p)),pv={};[2023,2024,2025].forEach(y=>pv[y]=yr(S,y).length);
  var ca=A.filter(s=>s[15]>0),flo=ca.filter(s=>FLO[s[3]]&&!/drom/i.test(s[1]||"")&&(!Object.keys(CT).length||/^[NBOU]$/.test(cat(s)))),fora=ca.filter(s=>!FLO[s[3]]),c25=yr(S,2025).filter(s=>s[15]>0),
@@ -28,11 +28,11 @@ window.AVST=function(D,PJ,CT){CT=CT||{};var cat=s=>{var k=s[19]+"|"+s[0]+"|"+Str
   fat:sum(ca.map(s=>s[15])),liq:sum(liq),com:com,cp:base?com/base:0,cm:avg(ca.map(s=>s[15])),
   flo:{n:flo.length,md:med(flo.map(s=>s[15])),mx:Math.max(0,...flo.map(s=>s[15])),mn:flo.length?Math.min(...flo.map(s=>s[15])):0,m25:med(c25.filter(s=>FLO[s[3]]).map(s=>s[15])),cn:Object.keys(CT).length>0},
   fora:{n:fora.length,md:med(fora.map(s=>s[15])),mx:Math.max(0,...fora.map(s=>s[15])),m25:med(c25.filter(s=>!FLO[s[3]]).map(s=>s[15])),cid:cnt(fora,s=>s[3]),liq:med(fora.map(s=>s[15]-(s[16]||0)))},
-  cid:cnt(A,s=>s[3]),floc:cnt(flo,s=>s[2]),
+  cid:cnt(A,s=>s[3]),floc:cnt(flo,cs),
   ctab:cnt(ca,s=>(CATN[cat(s)]||"Outros")+" · "+(FLO[s[3]]?"Grande Floripa":"fora")).map(x=>{var v=ca.filter(s=>(CATN[cat(s)]||"Outros")+" · "+(FLO[s[3]]?"Grande Floripa":"fora")===x[0]).map(s=>s[15]);return[x[0],x[1],avg(v),med(v)]}),
   hcid:cnt(A.filter(s=>!FLO[s[3]]),s=>s[3]).map(x=>[x[0],x[1],A.filter(s=>s[3]===x[0]&&/^(contratante|artista)/i.test(s[8]||"")).length]),
   c30:(function(){var L=A.filter(s=>s[17]>0&&s[15]-(s[16]||0)>0&&s[17]/(s[15]-(s[16]||0))>=.29);return{L:L.slice().sort((a,b)=>a[19]-b[19]||a[0]-b[0]),n:L.length,v:sum(L.map(s=>s[17])),c:sum(A.filter(s=>s[17]>0).map(s=>s[17]))-sum(L.map(s=>s[17])),n20:A.filter(s=>s[17]>0).length-L.length}})(),
-  dup:(function(){var C={};A.forEach(s=>{var k=s[19]+"|"+s[0];C[k]=(C[k]||0)+1});var v=Object.values(C);return{d:v.length,m:v.filter(x=>x>1).length,mx:Math.max(0,...v)}})(),cas:cnt(A,s=>s[2]),dw:dw,dur:med(A.filter(s=>s[5]>0).map(s=>s[5])),dura:avg(A.filter(s=>s[5]>0).map(s=>s[5])),cus:sum(ca.map(s=>s[16]||0)),durs:cnt(A.filter(s=>s[5]>0),s=>s[5]),
+  dup:(function(){var C={};A.forEach(s=>{var k=s[19]+"|"+s[0];C[k]=(C[k]||0)+1});var v=Object.values(C);return{d:v.length,m:v.filter(x=>x>1).length,mx:Math.max(0,...v)}})(),cas:cnt(A,cs),dw:dw,dur:med(A.filter(s=>s[5]>0).map(s=>s[5])),dura:avg(A.filter(s=>s[5]>0).map(s=>s[5])),cus:sum(ca.map(s=>s[16]||0)),durs:cnt(A.filter(s=>s[5]>0),s=>s[5]),
   hosp:A.filter(s=>/^(contratante|artista)/i.test(s[8]||"")).length,eq:cnt(A,s=>s[6]),rd:cnt(A,s=>rider(s[7])),
   pago:R.filter(s=>s[18]&&s[15]>0).length,aguard:R.filter(s=>!s[18]&&s[15]>0).length,
   ctr:cnt(A,s=>({S:"com contrato",N:"sem contrato",P:"contrato pendente"})[s[13]]),

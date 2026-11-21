@@ -1,6 +1,6 @@
 /* DROM · Avaliação 2026 · formulário do artista (login próprio; dados 2026 ao vivo do app dele; projeção = Painel Geral) */
 (function(){
-var $=i=>document.getElementById(i),b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),es=AVes,Q=AVQ,C=null,AK=null,ST=null,DG="",PG="",PJ={},CT={},A={},TS=0,CUR=0,SENT=null,LG="",U=null,DT=null;
+var $=i=>document.getElementById(i),b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),es=AVes,Q=AVQ,C=null,AK=null,ST=null,DG="",PG="",PJ={},CT={},CA={},A={},TS=0,CUR=0,SENT=null,LG="",U=null,DT=null;
 async function derive(p,salt){var k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(salt),iterations:200000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["decrypt"])}
 async function dec(k,iv,ct){return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(iv)},k,b64(ct))))}
 var ls={g:k=>{try{return JSON.parse(localStorage.getItem("av26_"+k))}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem("av26_"+k,JSON.stringify(v))}catch(e){}}};
@@ -16,8 +16,8 @@ $("lkf").onsubmit=async e=>{e.preventDefault();var u=$("usr").value.trim().toLow
  $("lk").remove();$("app").hidden=false;$("av").src="av/"+C.f+".png";$("tt").innerHTML=es(C.n)+"<small>Avaliação do ano 2026 · DROM</small>";
  nav();draw();setInterval(()=>{if(!document.hidden)rt()},180000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)rt();else flush()})};
 async function load(){var r=await (await fetch("../../"+C.f+"/d.json?t="+Date.now(),{cache:"no-store"})).json(),p=null;try{p=await (await fetch("pj.json?t="+Date.now(),{cache:"no-store"})).json()}catch(e){}
- if(r.iv===DG&&(!p||p.iv===PG))return 0;DG=r.iv;if(p){PG=p.iv;try{var pp=await dec(AK,p.iv,p.ct);PJ=(pp.P||{})[C.f]||{};CT=(pp.CT||{})[C.f]||{}}catch(e){}}
- var d=await dec(AK,r.iv,r.ct);ST=AVST(d,PJ,CT);ST.up=r.up||"";return 1}
+ if(r.iv===DG&&(!p||p.iv===PG))return 0;DG=r.iv;if(p){PG=p.iv;try{var pp=await dec(AK,p.iv,p.ct);PJ=(pp.P||{})[C.f]||{};CT=(pp.CT||{})[C.f]||{};CA=pp.CA||{}}catch(e){}}
+ var d=await dec(AK,r.iv,r.ct);ST=AVST(d,PJ,CT,CA);ST.up=r.up||"";return 1}
 async function rt(){try{if(await load())document.querySelectorAll(".dat").forEach(el=>{el.innerHTML=dh()+AVW(el.dataset.d,ST);AVcount(el)})}catch(e){}}
 var dh=()=>'<div class="dh"><i></i>Seus números de 2026 · ao vivo'+(ST.up?" · atualizado "+es(ST.up):"")+'</div>';
 function filled(id){var v=A[id];return Array.isArray(v)?v.length>0:v!==undefined&&v!==null&&String(v).trim()!==""}
