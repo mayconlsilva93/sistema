@@ -143,3 +143,15 @@ textarea:focus,.q input:focus{outline:2px solid var(--bl);background:#fff}
 .opc{display:inline-block;font-style:normal;font-size:11px;font-weight:600;color:var(--mu);background:var(--bg);border-radius:8px;padding:1px 7px;margin-right:6px;vertical-align:1px}
 .lkb{background:#ffe1d6;border-radius:12px;padding:10px 12px;font-weight:600}
 main.locked .q{pointer-events:none;opacity:.85}
+/* v14 */
+.hm,.hm .int{text-align:center}
+.kps.k5{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.k5 .kp b{font-size:clamp(16px,4.2vw,21px)}.kp{min-width:0}.kp b{overflow-wrap:normal}
+@media(max-width:420px){.kps.k5{grid-template-columns:1fr 1fr}.k5 .kp:first-child{grid-column:1/-1}.k5 .kp b{font-size:17px}}
+.sl{display:flex;flex-direction:column;gap:8px;margin-top:8px}.slr{background:var(--bg);border-radius:12px;padding:8px 10px;animation:up .35s both}
+.slt{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.slt>b{font-size:14px;min-width:0}.slt span{font-size:12px;color:var(--mu);white-space:nowrap}.slt span b{color:var(--ink);font-size:14px}
+.slb{position:relative;height:22px;margin-top:5px;background:#fff;border-radius:7px;overflow:hidden}.slb i{position:absolute;inset:0 auto 0 0;width:var(--w);background:#c9c9ff;border-radius:7px;animation:gw .7s both}.slb span{position:relative;font-size:12px;font-weight:700;line-height:22px;padding-left:8px;color:#1a1a7a;white-space:nowrap}
+.pz2{flex-direction:column;align-items:stretch}.pz2 .pzs{width:100%;max-width:300px;flex:none;margin:0 auto}.pzv{font-size:13px;font-weight:900;fill:#fff;text-anchor:middle;paint-order:stroke;stroke:rgba(0,0,0,.18);stroke-width:2px}.pzv.dk{fill:#151515;stroke:none}.pz2 .pzg{min-width:0}
+.pz1{justify-content:center}.pz1 .pzs{width:170px;flex-basis:170px}.pz1 .pzl{max-width:320px}.pz1 .pzl div{grid-template-columns:12px 1fr auto auto;gap:8px}.pz1 .pzl small{grid-column:auto;margin:0;order:3;font-size:13px;color:var(--mu)}.pz1 .pzl b{order:4;min-width:58px;text-align:right}
+.rv.mis{border-color:#ffb4a0;background:#fff6f3}.rv.mis .gom{display:block;padding:8px 0;border-top:1px solid #ffe1d6;color:#c0261b;text-decoration:none;font-size:14px}.rv.mis .gom:first-of-type{border-top:0}
+.rvr{margin:0;font-weight:600}.rvr .vz{color:#d93025;font-weight:400}.mu2{color:var(--mu);font-weight:400}
+#nx:disabled{opacity:.6}

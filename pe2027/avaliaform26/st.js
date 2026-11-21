@@ -20,11 +20,11 @@ window.AVST=function(D,X){X=X||{};var P=X.P||{},CT=X.CT||{},CA=X.CA||{},FIN=X.FI
   soc=ca.filter(s=>/^[FAWPC]$/.test(cat(s))).sort((a,b)=>a[19]-b[19]||a[0]-b[0]),pu25=yr(S,2025).filter(s=>s[15]>0&&!/drom/i.test(s[1]||"")&&!rev(s));
  var kq=L=>({n:L.length,md:med(L.map(s=>s[15])),av:avg(L.map(s=>s[15])),mx:L.length?Math.max(...L.map(s=>s[15])):0,mn:L.length?Math.min(...L.map(s=>s[15])):0});
  /* histórico de cachês: grupos e subgrupos do Painel, % do total financeiro (realizados + confirmados) */
- var tot=sum(A.map(s=>+s[15]||0)),hist=CGR.map(g=>{var subs=g[1].map(x=>{var L=A.filter(s=>sub(s)===x[1]);return{n:x[0],c:L.length,v:sum(L.map(s=>+s[15]||0)),m:avg(L.filter(s=>s[15]>0).map(s=>s[15]))}}).filter(x=>x.c);var L=A.filter(s=>g[1].some(x=>sub(s)===x[1]));return{n:g[0],c:L.length,v:sum(L.map(s=>+s[15]||0)),m:avg(L.filter(s=>s[15]>0).map(s=>s[15])),subs:subs}}).filter(g=>g.c),
+ var tot=sum(A.map(s=>+s[15]||0)),hist=CGR.map(g=>{var subs=g[1].map(x=>{var L=A.filter(s=>sub(s)===x[1]);return{n:x[0],c:L.length,v:sum(L.map(s=>+s[15]||0)),m:avg(L.map(s=>+s[15]||0))}}).filter(x=>x.c);var L=A.filter(s=>g[1].some(x=>sub(s)===x[1]));return{n:g[0],c:L.length,v:sum(L.map(s=>+s[15]||0)),m:avg(L.map(s=>+s[15]||0)),subs:subs}}).filter(g=>g.c),
   semc=A.filter(s=>!CGR.some(g=>g[1].some(x=>sub(s)===x[1])));
- if(semc.length)hist.push({n:"Sem categoria",c:semc.length,v:sum(semc.map(s=>+s[15]||0)),m:avg(semc.filter(s=>s[15]>0).map(s=>s[15])),subs:[]});
+ if(semc.length)hist.push({n:"Sem categoria",c:semc.length,v:sum(semc.map(s=>+s[15]||0)),m:avg(semc.map(s=>+s[15]||0)),subs:[]});
  /* 30%: comissão ≥ 29% do líquido de custos; a realizar com comissão projetada pelo Painel (custos pendentes estimados) */
- var c30=A.filter(s=>s[17]>0&&s[15]-(s[16]||0)>0&&s[17]/(s[15]-(s[16]||0))>=.29).sort((a,b)=>a[19]-b[19]||a[0]-b[0]).map(s=>({s:s,r:ok(s),c:ok(s)?s[17]:(PC[kl(s)]!=null?PC[kl(s)]:s[17]),pj:!ok(s)}));
+ var c30=A.filter(s=>s[17]>0&&s[15]-(s[16]||0)>0&&s[17]/(s[15]-(s[16]||0))>=.29).sort((a,b)=>a[19]-b[19]||a[0]-b[0]).map(s=>({s:s,r:ok(s),c:PC[kl(s)]!=null?PC[kl(s)]:s[17],pj:PC[kl(s)]!=null}));
  /* duração em faixas */
  var DB=[["até 45 min",0,50],["1 hora",51,75],["1h30",76,105],["2 horas",106,135],["mais de 2 horas",136,1e9]],du=A.filter(s=>s[5]>0);
  var dup=(function(){var C={};A.forEach(s=>{var k=s[19]+"|"+s[0];C[k]=(C[k]||0)+1});var v=Object.values(C);return{d:v.length,m:v.filter(x=>x>1).length,mx:Math.max(0,...v)}})();
