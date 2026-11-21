@@ -27,7 +27,7 @@ function secDone(i){var R=Q[i].i.filter(REQ);return!Q[i].home&&(R.length?R.every
 function nav(){$("nav").innerHTML=Q.map((s,i)=>'<button type="button" data-i="'+i+'" class="'+(i===CUR?"on ":"")+(secDone(i)?"dn":"")+'">'+es(s.s)+'</button>').join("")+'<button type="button" data-i="'+Q.length+'" class="'+(CUR===Q.length?"on":"")+'">Enviar</button>';
  $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>go(+b.dataset.i));var on=$("nav").querySelector(".on");if(on)on.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
  var ok=QA.filter(x=>filled(x[1].id)).length;$("pg").firstChild.style.width=(ok/QA.length*100)+"%";$("sv").textContent=(LOCK()?"prazo encerrado · ":SENT?"enviado ✓ · ":"")+ok+"/"+QA.length+" · "+Math.round(ok/QA.length*100)+"%"}
-var HOK=false;function hchk(){if(HOK||!Q[CUR]||!Q[CUR].home)return;if(innerHeight+scrollY>=document.documentElement.scrollHeight-60){HOK=true;var nx=$("nx");nx.disabled=false;nx.textContent="Começar ▶"}}
+var HOK=false;function hchk(){if(HOK||!Q[CUR]||!Q[CUR].home)return;if(innerHeight+scrollY>=document.documentElement.scrollHeight-60){HOK=true;$("nx").classList.remove("wait")}}
 addEventListener("scroll",hchk,{passive:true});addEventListener("resize",hchk);
 function go(i){if(Q[CUR]&&Q[CUR].home&&!HOK&&i>CUR){scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"});return}flush();CUR=Math.max(0,Math.min(Q.length,i));ls.s("c_"+LG,CUR);nav();draw();scrollTo({top:0,behavior:"smooth"})}
 /* salva no aparelho na hora e no servidor (rascunho, sem e-mail) alguns segundos depois */
@@ -45,7 +45,7 @@ function qh(q){var v=A[q.id],o=(q.d&&ST?(function(){var w=AVW(q.d,ST);return w?'
  else o+='<textarea rows="3" placeholder="Escreva aqui…">'+es(v||"")+'</textarea>';
  return o+'</div>'}
 function draw(){var m=$("mn");$("pv").disabled=CUR===0;var nx=$("nx");m.classList.toggle("locked",LOCK());nx.disabled=false;
- if(Q[CUR]&&Q[CUR].home){nx.className="";m.innerHTML=home();AVcount(m);if(!HOK){nx.disabled=true;nx.textContent="Role até o final ▼"}else nx.textContent="Começar ▶";setTimeout(hchk,400);return}
+ if(Q[CUR]&&Q[CUR].home){nx.className="";m.innerHTML=home();AVcount(m);nx.textContent="Começar ▶";nx.classList.toggle("wait",!HOK);setTimeout(hchk,400);return}
  if(CUR===Q.length){nx.textContent=SENT?"Reenviar respostas":"Enviar respostas";nx.className="snd";m.innerHTML=review();var pb=$("prb");if(pb)pb.onclick=prt;return}
  nx.textContent=CUR===Q.length-1?"Revisar e enviar ▶":"Próximo ▶";nx.className="";var s=Q[CUR];
  m.innerHTML=(LOCK()?'<p class="lkb">O prazo terminou em 27/11 às 12h. As respostas estão só para consulta.</p>':"")+'<section class="sec"><p class="sh">'+CUR+" de "+(Q.length-1)+'</p><h2>'+es(s.s)+'</h2>'+(s.h?'<p class="sh">'+es(s.h)+'</p>':"")+s.i.map(qh).join("")+'</section>';AVcount(m);
