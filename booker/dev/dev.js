@@ -44,7 +44,7 @@ function guard(fn){if(!dirty()){fn();return}
 function modal(html,init){var m=document.createElement("div");m.className="dvm";m.innerHTML='<div class="dvmc">'+html+"</div>";document.body.appendChild(m);m.addEventListener("click",function(e){if(e.target===m)m.remove()});init&&init(m);return m}
 var lastSel="";
 $("prop").onchange=function(){var v=$("prop").value;if(dirty()){$("prop").value=lastSel;guard(function(){$("prop").value=v;pick()})}else pick()};
-$("art").onchange=function(){};
+var lastArt="";$("art").onchange=function(){var v=$("art").value;if(dirty()){$("art").value=lastArt;guard(function(){$("art").value=v;lastArt=v;$("q").value="";fillProps()})}else{lastArt=v;$("q").value="";fillProps()}};
 var _cr=chooseRes;chooseRes=function(i){guard(function(){_cr(i)})};
 var _pick=pick;pick=function(){_pick();lastSel=$("prop").value;afterPick()};
 function afterPick(){bar();simil();calcInit()}
@@ -137,6 +137,6 @@ var css=document.createElement("style");css.textContent='.dvb{display:flex;flex-
 Promise.all([iget("ov"),iget("new")]).then(function(v){SAVED=v[0]||{};NEW=v[1]||[];
  NEW.forEach(function(p){if(!BASE[TA].p.some(function(x){return x.n===p.n}))BASE[TA].p.push(CL_(p))});
  Object.keys(SAVED).forEach(function(k){OV[k]=CL_(SAVED[k])});
- $("art").innerHTML='<option value="'+TA+'">'+TA+'</option>';$("art").value=TA;$("art").disabled=true;$("flt").value="all";fillProps();
+ $("art").innerHTML='<option value="">Selecione o artista</option><option value="'+TA+'">'+TA+'</option>';$("art").value="";$("flt").value="all";fillProps();
  document.querySelector(".hd").insertAdjacentHTML("beforeend",'<span class="dvdev" style="margin-left:8px">VERSÃO DEV</span>')})
 })();
