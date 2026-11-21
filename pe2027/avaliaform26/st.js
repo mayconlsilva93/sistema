@@ -16,7 +16,7 @@ function proj(S){var now=new Date(Date.now()-216e5),cm=(now.getFullYear()-B)*12+
  return R}
 var CATN={L:"Label DROM",N:"Casa noturna",U:"Universitário",P:"Particular",F:"Formatura",C:"Corporativo",B:"Bar",A:"Aniversário",O:"Outdoor",W:"Casamento","?":"Outros"};
 function rider(t){t=String(t||"").trim();var l=t.toLowerCase();if(!t||/^(-|confirmar|a confirmar|consumação a definir)$/i.test(t))return"Não informado";if(/rider/.test(l)&&!/universit/.test(l))return"Rider completo";if((t.match(/\+/g)||[]).length>=2||/pizza|aliment|hamb|frutas|balde com gelo/.test(l))return"Rider completo";if(/open bar e open food/.test(l))return"Open Bar e Open Food";if(/open bar/.test(l))return"Open Bar";if(/combo|circuito|rider universit|\+/.test(l))return"Combo";if(/consum|r\$/.test(l))return"Consumação";return"Outros"}
-function rev(s){var m=(s[19]-1)%12+1;return(m===12&&s[0]===31)||(m===1&&s[0]===1)||/r[eé]v[eé]ill?on|virada/i.test((s[1]||"")+" "+(s[12]||""))}
+function rev(s){var m=(s[19]-1)%12+1;return(m===12&&s[0]===31)||(m===1&&s[0]===1)||/r[eé]v[eé]ill?on|virada/i.test(s[1]||"")}
 window.AVST=function(D,PJ,CT,CA){CT=CT||{};CA=CA||{};var cs=s=>CA[s[3]+"|"+s[2]]||s[2];var cat=s=>{var k=s[19]+"|"+s[0]+"|"+String(s[3]).replace(/\/[A-Z]{2}$/,"");return CT[k+"|"+String(s[2]||"").trim().toLowerCase()]||CT[k]||""};var S=D.S||[],PR=D.PR||[],OT=D.OT||[],A=yr(S,Y),R=A.filter(ok),F=A.filter(s=>!ok(s)),P=PJ||{},mon=[];
  for(var i=1;i<=12;i++){var k=M0+i;mon.push({r:R.filter(s=>s[19]===k).length,f:F.filter(s=>s[19]===k).length,p:P[k]||0,y25:yr(S,2025).filter(s=>s[19]===k-12).length})}
  var pj=sum(mon.map(m=>m.p)),pv={};[2023,2024,2025].forEach(y=>pv[y]=yr(S,y).length);
