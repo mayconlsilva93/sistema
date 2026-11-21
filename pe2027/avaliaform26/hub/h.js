@@ -22,7 +22,7 @@ async function load(force){var PJ={},CT={};try{var p=await (await fetch("../pj.j
  await Promise.all(ADM.L.map(async x=>{try{var r=await (await fetch("../../../"+x.f+"/d.json?t="+Date.now(),{cache:"no-store"})).json();STS[x.k]=AVST(await dec(AK,r.iv,r.ct),PJ[x.f]||{},CT[x.f]||{})}catch(e){}}));
  try{var U=(await (await fetch("../u.json?v="+Date.now(),{cache:"no-store"})).json()).u;if(U){var j=await (await fetch(U+"?r="+encodeURIComponent(ADM.rk)+"&t="+Date.now())).json();if(j.ok){RS=j.L;DR=j.R||[]}$("sub").textContent="atualizado "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}else $("sub").textContent="envio ainda não ativado (u.json)"}catch(e){$("sub").textContent="sem conexão com as respostas"}
  draw()}
-var ART=()=>ADM.L.filter(x=>$("tst").checked||!x.teste),RES=()=>RS.filter(r=>ART().some(x=>x.k===r.k)),nm=k=>(ADM.L.find(x=>x.k===k)||{}).n||k,ic=k=>"../../../"+((ADM.L.find(x=>x.k===k)||{}).f||"")+"/icon-round-192.png",
+var ART=()=>ADM.L.filter(x=>$("tst").checked||!x.teste),RES=()=>RS.filter(r=>ART().some(x=>x.k===r.k)),nm=k=>(ADM.L.find(x=>x.k===k)||{}).n||k,ic=k=>"../av/"+((ADM.L.find(x=>x.k===k)||{}).f||"")+".png",
  nums=id=>RES().filter(r=>typeof r.a[id]==="number").map(r=>({k:r.k,v:r.a[id]})),avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,f2=n=>n==null?"-":n.toFixed(2).replace(".",","),
  sd=a=>{var m=avg(a);return a.length?Math.sqrt(avg(a.map(x=>(x-m)*(x-m)))):null};
 function prog(k){var d=DR.find(y=>y.k===k);if(!d)return"não começou";var n=QQ.filter(q=>{var v=d.a[q.id];return Array.isArray(v)?v.length:v!=null&&String(v).trim()!==""}).length;return"em andamento · "+n+"/"+QQ.length}

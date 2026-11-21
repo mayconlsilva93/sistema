@@ -14,12 +14,12 @@ function proj(S){var now=new Date(Date.now()-216e5),cm=(now.getFullYear()-B)*12+
   var se=h.length&&gm?Math.max(.4,Math.min(1.8,avg(h)/gm)):1,nd=new Date(B,mk,0).getDate(),rem=mk===cm?(nd-now.getDate())/nd:1,e=lvl*se*rem,
   fut=S.filter(s=>s[19]===mk&&!ok(s)).length,x=Math.max(0,Math.round(e-fut));if(x)R[mk]=x}
  return R}
-var CATN={L:"Label DROM",N:"Casa noturna",U:"Universitário",P:"Particular",F:"Formatura",C:"Corporativo",B:"Bar",A:"Aniversário",O:"Outdoor",W:"Casamento"};
+var CATN={L:"Label DROM",N:"Casa noturna",U:"Universitário",P:"Particular",F:"Formatura",C:"Corporativo",B:"Bar",A:"Aniversário",O:"Outdoor",W:"Casamento","?":"Outros"};
 function rider(t){t=String(t||"").trim();var l=t.toLowerCase();if(!t||/^(-|confirmar|a confirmar|consumação a definir)$/i.test(t))return"Não informado";if(/rider/.test(l)&&!/universit/.test(l))return"Rider completo";if((t.match(/\+/g)||[]).length>=2||/pizza|aliment|hamb|frutas|balde com gelo/.test(l))return"Rider completo";if(/open bar e open food/.test(l))return"Open Bar e Open Food";if(/open bar/.test(l))return"Open Bar";if(/combo|circuito|rider universit|\+/.test(l))return"Combo";if(/consum|r\$/.test(l))return"Consumação";return"Outros"}
 window.AVST=function(D,PJ,CT){CT=CT||{};var cat=s=>CT[s[19]+"|"+s[0]+"|"+s[3]]||"";var S=D.S||[],PR=D.PR||[],OT=D.OT||[],A=yr(S,Y),R=A.filter(ok),F=A.filter(s=>!ok(s)),P=PJ||{},mon=[];
  for(var i=1;i<=12;i++){var k=M0+i;mon.push({r:R.filter(s=>s[19]===k).length,f:F.filter(s=>s[19]===k).length,p:P[k]||0,y25:yr(S,2025).filter(s=>s[19]===k-12).length})}
  var pj=sum(mon.map(m=>m.p)),pv={};[2023,2024,2025].forEach(y=>pv[y]=yr(S,y).length);
- var ca=A.filter(s=>s[15]>0),flo=ca.filter(s=>FLO[s[3]]&&(!Object.keys(CT).length||cat(s)==="N")),fora=ca.filter(s=>!FLO[s[3]]),c25=yr(S,2025).filter(s=>s[15]>0),
+ var ca=A.filter(s=>s[15]>0),flo=ca.filter(s=>FLO[s[3]]&&(!Object.keys(CT).length||/^[NBOU]$/.test(cat(s)))),fora=ca.filter(s=>!FLO[s[3]]),c25=yr(S,2025).filter(s=>s[15]>0),
   liq=ca.map(s=>s[15]-(s[16]||0)),com=sum(A.map(s=>s[17]||0)),base=sum(ca.filter(s=>s[17]>0).map(s=>s[15]-(s[16]||0)));
  var dw=[0,0,0,0,0,0,0];A.forEach(s=>{var d=new Date(B,s[19]-1,s[0]);dw[d.getDay()]++});
  var pr=PR.filter(p=>String(p[6]||"").slice(0,4)==String(Y)||(p[0]>M0&&p[0]<=M0+12)),pst=cnt(pr,p=>p[2]),ot=OT.filter(o=>o[0]>M0&&o[0]<=M0+12),otc={};ot.forEach(o=>otc[o[1]]=(otc[o[1]]||0)+o[2]);
