@@ -29,7 +29,7 @@ function nav(){$("nav").innerHTML=Q.map((s,i)=>'<button type="button" data-i="'+
  var ok=QA.filter(x=>filled(x[1].id)).length;$("pg").firstChild.style.width=(ok/QA.length*100)+"%";$("sv").textContent=(LOCK()?"prazo encerrado · ":SENT?"enviado ✓ · ":"")+ok+"/"+QA.length+" · "+Math.round(ok/QA.length*100)+"%"}
 var HOK=false;function hchk(){if(HOK||!Q[CUR]||!Q[CUR].home)return;if(innerHeight+scrollY>=document.documentElement.scrollHeight-60){HOK=true;$("nx").classList.remove("wait")}}
 addEventListener("scroll",hchk,{passive:true});addEventListener("resize",hchk);
-function go(i){if(Q[CUR]&&Q[CUR].home&&!HOK&&i>CUR){scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"});return}flush();CUR=Math.max(0,Math.min(Q.length,i));ls.s("c_"+LG,CUR);nav();draw();scrollTo({top:0,behavior:"smooth"})}
+function go(i){JUST=false;if(Q[CUR]&&Q[CUR].home&&!HOK&&i>CUR){scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"});return}flush();CUR=Math.max(0,Math.min(Q.length,i));ls.s("c_"+LG,CUR);nav();draw();scrollTo({top:0,behavior:"smooth"})}
 /* salva no aparelho na hora e no servidor (rascunho, sem e-mail) alguns segundos depois */
 function save(){if(LOCK())return;TS=Date.now();ls.s("a_"+LG,{a:A,ts:TS});nav();clearTimeout(DT);DT=setTimeout(flush,2500);$("sv").textContent="salvando…"}
 async function flush(){if(!DT)return;clearTimeout(DT);DT=null;var W=await url();if(!W){nav();return}
@@ -73,9 +73,10 @@ function miss(){return[...new Set(QA.filter(x=>!filled(x[1].id)).map(x=>x[0]))]}
 function prt(){var p=$("prt");if(!p){p=document.createElement("div");p.id="prt";document.body.appendChild(p)}
  p.innerHTML='<div class="ph"><img src="av/'+C.f+'.png" alt=""><div><b>'+es(C.n)+'</b><span>Avaliação Anual 2026 · DROM'+(SENT?" · enviado em "+es(SENT):"")+'</span></div></div>'+Q.filter(s=>!s.home).map(s=>'<h3>'+es(s.s)+'</h3>'+s.i.map(q=>'<p class="pq">'+es(g(q.q))+'</p><p class="pa">'+(es(fa(q))||"—")+'</p>').join("")).join("")+'<p class="pf">DROM Entretenimento · dromentretenimento.com</p>';
  var t=document.title;document.title="DROM - Avaliação Anual 2026 - "+C.n;setTimeout(()=>{print();setTimeout(()=>document.title=t,500)},50)}
+var JUST=false;
 var fdt=t=>{if(/^\d{4}-\d\d-\d\dT/.test(String(t)))t=new Date(t).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});var m=/^(\d\d\/\d\d\/\d{4})[ ,]+(\d\d:\d\d)/.exec(String(t));return m?m[1]+", "+m[2]:String(t)};
 function review(){var M=QA.filter(x=>!filled(x[1].id)),n=M.length,ru=Q.flatMap(s=>s.i).find(q=>q.id==="reu"),ro=Q.flatMap(s=>s.i).find(q=>q.id==="reuo");if(LOCK())return'<div class="fim"><div class="big">🔒</div><h2>Prazo encerrado</h2><p>'+(SENT?"Sua última versão foi enviada em "+es(SENT)+".":"Não recebemos o envio das suas respostas.")+'</p></div>';
- return(SENT?'<div class="fim"><svg class="okc" viewBox="0 0 96 96"><circle cx="48" cy="48" r="44"/><path d="M28 50l13 13 27-29"/></svg><h2>Recebemos suas respostas</h2><p>Enviado em '+es(fdt(SENT))+'.<br>Você pode alterar e reenviar até sexta-feira, 27/11, ao meio-dia. Somente a última versão será considerada.</p><button type="button" class="prb" id="prb">Imprimir/Salvar PDF</button></div>':'<section class="sec"><h2>Revisar e enviar</h2><p class="sh">Para concluir, você deve clicar em "Enviar respostas". Você pode alterar suas respostas até sexta-feira, 27/11, ao meio-dia.</p></section>')+
+ return(JUST?'<div class="fim"><svg class="okc" viewBox="0 0 96 96"><circle cx="48" cy="48" r="44"/><path d="M28 50l13 13 27-29"/></svg><h2>Recebemos suas respostas</h2><p>Enviado em '+es(fdt(SENT))+'.<br>Você pode alterar e reenviar até sexta-feira, 27/11, ao meio-dia. Somente a última versão será considerada.</p><button type="button" class="prb" id="prb">Imprimir/Salvar PDF</button></div>':'<section class="sec"><h2>Revisar e enviar</h2><p class="sh">Para concluir, você deve clicar em "Enviar respostas". Você pode alterar suas respostas até sexta-feira, 27/11, ao meio-dia.</p>'+(SENT?'<p class="sh"><b>Última versão enviada em '+es(fdt(SENT))+'.</b> Se alterar algo, envie de novo.</p>':'')+'</section>')+
  (n?'<div class="rv mis"><h3>Ainda '+(n===1?"falta 1 resposta obrigatória":"faltam "+n+" respostas obrigatórias")+':</h3>'+M.map(x=>'<a href="#" data-i="'+x[0]+'" class="gom">'+es(Q[x[0]].s)+' · '+es(g(x[1].q))+'</a>').join("")+'</div>':"")+
  '<div class="rv"><h3>Horário de reunião</h3><p class="rvr">'+(filled("reu")?es(A.reu.join(" · ")):'<span class="vz">nenhum horário marcado</span>')+(filled("reuo")?'<br><span class="mu2">Outro: '+es(A.reuo)+'</span>':"")+'</p></div>'+
  '<p id="msg"></p>'}
@@ -88,7 +89,7 @@ $("nx").onclick=async()=>{if(CUR<Q.length)return go(CUR+1);if(LOCK())return;var 
  nx.disabled=true;nx.textContent="Enviando…";
  var R=Q.filter(s=>!s.home).map(s=>({s:s.s,i:s.i.map(q=>({q:g(q.q),a:fa(q)}))})),K={r:ST.r,f:ST.f,p:ST.p,tot:ST.tot};
  try{var r=await fetch(W,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({k:LG,t:C.t,n:C.n,a:A,ts:TS,r:R,st:K,teste:!!C.teste})}),j=await r.json();if(!j.ok)throw new Error(j.err||"falha");
-  SENT=j.em||new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});ls.s("s_"+LG,SENT);nav();draw();scrollTo({top:0,behavior:"smooth"})}
+  SENT=j.em||new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});ls.s("s_"+LG,SENT);JUST=true;nav();draw();scrollTo({top:0,behavior:"smooth"})}
  catch(er){msg.className="err";msg.textContent="Não foi possível enviar agora ("+es(er.message||"rede")+"). Suas respostas continuam salvas; tente de novo."}
  nx.disabled=false;if(!SENT)nx.textContent="Enviar respostas"};
 })();
