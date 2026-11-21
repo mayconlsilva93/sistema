@@ -27,6 +27,12 @@ HI=[i for i,r in enumerate(ROWS[:10]) if r and r[0] and str(r[0]).strip().starts
 def _load(name,path=None): return [(str(h).strip() if h else '') for h in ROWS[HI]],ROWS[HI+1:]
 sheets_load.load=_load;convert.load=_load;drom_data._rows=lambda name:(ROWS,HI)
 convert.PFX[TA]='11'
+try:   # detalhe dos custos (nota de DESPESAS) -> campo 26 do show; o .xlsx não leva as notas
+    sys.path.insert(0,R+'/tools/escrita');import notas as _nt
+    _n=_nt.fetch([TA]);_p=W+'/notas.json'
+    if TA not in _n and os.path.exists(_p): _n=json.load(open(_p,encoding='utf8'))   # falhou: usa o da rodada anterior
+    convert.NOTAS=_n
+except Exception as e: print('notas ignoradas:',e)
 import re as _re;_p0=convert._parc   # só no dev: entradas do app gravadas como "dd/mm/aaaa (R$ x), dd/mm/aaaa (R$ y)" viram uma por linha
 def _pz(x):
     try:

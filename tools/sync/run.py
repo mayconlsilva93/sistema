@@ -19,6 +19,13 @@ if X.get('bb'): json.dump(BBJ,open(W+'/bb.json','w',encoding='utf8'))
 print('BB:',sum(len(v) for v in BBJ.values()) or 'sem coluna BB (DROM Sync antigo)')
 b2=X.get('b2') or '-'
 if not re.match(r'^\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}$',b2): b2='-'
+# notas de DESPESAS (detalhe dos custos lançados pelo app): o IMPORTRANGE não leva notas; vêm do DROM Escrita (op notas, assinatura do Booker).
+# Artista que falhar mantém as notas da rodada anterior (notas.json no estado). O convert.py põe o detalhe no campo 26 do show.
+try:
+    sys.path.insert(0,R+'/tools/escrita');import notas as _nt
+    NJ=W+'/notas.json';_old=json.load(open(NJ,encoding='utf8')) if os.path.exists(NJ) else {}
+    _old.update(_nt.fetch(list(TN.values())));json.dump(_old,open(NJ,'w',encoding='utf8'),ensure_ascii=False,sort_keys=True)
+except Exception as e: print('notas: ignoradas (%s)'%e)
 sh(['python3','-I','lean.py','mark'],cwd=W)
 sh(['python3','-I','lean.py','apply',b2,'rows.json'],cwd=W,env=dict(E,DROM_NODEFER='1',DROM_DIFF='1' if E.get('DRY')=='1' else '0'),stdout=subprocess.DEVNULL)
 gh=json.load(open(W+'/gh.json'));print('mudaram:',', '.join(sorted(gh)) or 'nada')
