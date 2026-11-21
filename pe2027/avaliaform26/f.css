@@ -163,3 +163,4 @@ main.locked .q{pointer-events:none;opacity:.85}
  @page{margin:14mm}}
 #nx.wait{background:#b8b8c8;border-color:#b8b8c8;color:#fff}
 .okc{width:96px;height:96px}.okc circle{fill:#eef0ff;stroke:var(--bl);stroke-width:4;stroke-dasharray:277;stroke-dashoffset:277;animation:okd .6s ease-out forwards}.okc path{fill:none;stroke:var(--bl);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:70;stroke-dashoffset:70;animation:okd .45s .5s ease-out forwards}@keyframes okd{to{stroke-dashoffset:0}}
+textarea{overflow:hidden;min-height:80px}
