@@ -13,6 +13,7 @@ function sh_(){var p=PropertiesService.getScriptProperties(),id=p.getProperty("S
     ss.insertSheet("Histórico").appendRow(["login","nome","e-mail","enviado em","teste","respostas (json)"]);ss.insertSheet("Rascunhos").appendRow(["login","nome","salvo em","ts","respostas (json)"])}
   return ss}
 function doPost(e){try{var b=JSON.parse(e.postData.contents),T=JSON.parse(P_("TOKENS")||"{}");
+  if(b.agenda){if(b.r!==P_("READ"))return out_({ok:false,err:"não autorizado"});PropertiesService.getScriptProperties().setProperty("AGENDA",JSON.stringify(b.agenda));return out_({ok:true})}
   if(b.clear){if(b.r!==P_("READ")||b.clear!=="teste")return out_({ok:false,err:"não autorizado"});var ss0=sh_(),n=0;["Respostas","Rascunhos","Histórico"].forEach(function(nm){var sh=ss0.getSheetByName(nm);if(!sh)return;var v=sh.getDataRange().getValues();for(var i=v.length-1;i>=1;i--)if(v[i][0]==="teste"){sh.deleteRow(i+1);n++}});PropertiesService.getScriptProperties().setProperty("CLR_teste",String(Date.now()));return out_({ok:true,n:n})}
   if(!b.k||!T[b.k]||T[b.k]!==b.t)return out_({ok:false,err:"login inválido"});
   if(b.k!=="teste"&&new Date()>=PRAZO)return out_({ok:false,err:"prazo encerrado em 27/11 às 12h"});
@@ -44,6 +45,6 @@ function doGet(e){var p=e.parameter,ss=sh_(),rd=ss.getSheetByName("Rascunhos"),d
   if(!p.r||p.r!==P_("READ"))return out_({ok:false});
   var v=ss.getSheetByName("Respostas").getDataRange().getValues(),L=[],R=[];for(var j=1;j<dv.length;j++)R.push({k:dv[j][0],ts:+dv[j][3]||0,a:JSON.parse(dv[j][4]||"{}")});
   for(var i=1;i<v.length;i++)L.push({k:v[i][0],n:v[i][1],e:v[i][2],em:v[i][3],teste:v[i][4]==="sim",a:JSON.parse(v[i][5]||"{}"),st:JSON.parse(v[i][6]||"{}")});
-  return out_({ok:true,L:L,R:R})}
+  return out_({ok:true,L:L,R:R,ag:JSON.parse(P_("AGENDA")||"{}")})}
 /* rode uma vez pelo editor para autorizar planilha e e-mail */
 function autorizar(){sh_()}

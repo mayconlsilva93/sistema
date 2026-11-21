@@ -162,3 +162,4 @@ main.locked .q{pointer-events:none;opacity:.85}
  #prt h3{color:#0000FF;margin:18px 0 4px;font-size:13pt;break-after:avoid}#prt .pq{margin:8px 0 0;color:#555;font-size:10.5pt;break-after:avoid}#prt .pa{margin:2px 0 0;font-weight:700;white-space:pre-wrap}#prt .pf{margin-top:24px;color:#777;font-size:9pt}
  @page{margin:14mm}}
 #nx.wait{background:#b8b8c8;border-color:#b8b8c8;color:#fff}
+.okc{width:96px;height:96px}.okc circle{fill:#eef0ff;stroke:var(--bl);stroke-width:4;stroke-dasharray:277;stroke-dashoffset:277;animation:okd .6s ease-out forwards}.okc path{fill:none;stroke:var(--bl);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:70;stroke-dashoffset:70;animation:okd .45s .5s ease-out forwards}@keyframes okd{to{stroke-dashoffset:0}}
