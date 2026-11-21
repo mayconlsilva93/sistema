@@ -1,6 +1,10 @@
 /* DROM · aba Propostas, detalhes do show, gráfico de Shows e rolagem acima do rodapé */
 (function(){
 var PR=(window.DROMDATA&&DROMDATA.PR)||[],BB=2023,DW=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],P2=n=>String(n).padStart(2,"0");
+/*PRS*/(function(){/* Últimas atualizações: show da agenda (S) que não veio em PR entra como confirmado/realizado; confirmado com data passada conta como atualizado na data do show (ex.: Nº27 de 20/11 no Artista Teste) */
+ try{var S0=(window.DROMDATA&&DROMDATA.S)||[],h0=new Date(Date.now()-216e5),hj=new Date(h0.getFullYear(),h0.getMonth(),h0.getDate()),iso=(m,d)=>{var x=new Date(BB,m-1,d);return x.getFullYear()+"-"+P2(x.getMonth()+1)+"-"+P2(x.getDate())},has={};
+ PR.forEach(p=>{has[String(p[7])]=1;if(p[2]==="Show confirmado"&&new Date(BB,p[0]-1,p[1])<hj){var di=iso(p[0],p[1]);if(!p[6]||p[6]<di)p[6]=di}});
+ S0.forEach(x=>{if(!x||!x[14]||has[String(x[14])])return;var past=new Date(BB,x[19]-1,x[0])<hj;PR.push([x[19],x[0],past?"Show realizado":"Show confirmado",x[1]||"",x[2]||"",x[3]||"",past?iso(x[19],x[0]):"",String(x[14])])})}catch(e){}})();
 var LB={"Proposta emitida":"emitida","Em negociação":"em negociação","Data reservada":"reservada","Remarcar":"remarcar","Data indisponível":"indisponível","Proposta descartada":"descartada","Show cancelado":"cancelado","Show confirmado":"fechada","Show realizado":"show realizado"};
 var FECH={"Show confirmado":1,"Show realizado":1},RUIM={"Proposta descartada":1,"Show cancelado":1},FORA={"Show confirmado":1,"Show realizado":1,"Proposta descartada":1,"Show cancelado":1};
 var es=t=>String(t||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
@@ -9,7 +13,7 @@ function nm(p){return p[3]&&p[4]&&p[3]!==p[4]?p[3]+" ("+p[4]+")":(p[3]||p[4]||"L
 function ln(p,cls){if(p[2]==="Show confirmado"){var h0=new Date(Date.now()-216e5);if(new Date(BB,p[0]-1,p[1])<new Date(h0.getFullYear(),h0.getMonth(),h0.getDate())){p=p.slice();p[2]="Show realizado"}}/* confirmado com data passada = realizado */cls=(cls||"")+(({"Proposta emitida":" em","Data indisponível":" in","Show realizado":" re","Show confirmado":" fe","Em negociação":" ng","Data reservada":" rs","Remarcar":" rm","Show cancelado":" ca"})[p[2]]||"");return'<div class="prl'+(cls?" "+cls:"")+'"><div class="prd">'+dt(p)+'</div><div class="pri"><b>'+es(nm(p))+"</b><span>"+es(p[5]||"")+'</span></div><em class="prb">'+(LB[p[2]]||es(p[2]).toLowerCase())+(p[6]&&p[2]!=="Show realizado"?' '+p[6].slice(8,10)+"/"+p[6].slice(5,7)+(p[6].slice(0,4)!==String(new Date(Date.now()-216e5).getFullYear())?"/"+p[6].slice(2,4):""):"")+"</em></div>"}
 function view(){
  var hoje=new Date(Date.now()-216e5);hoje=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate());
- var ult=PR.filter(p=>p[6]).sort((a,b)=>a[6]<b[6]?1:a[6]>b[6]?-1:(+b[7])-(+a[7])).slice(0,10);
+ var hiso=hoje.getFullYear()+"-"+P2(hoje.getMonth()+1)+"-"+P2(hoje.getDate());var ult=PR.filter(p=>p[6]&&p[6]<=hiso)/* atualização com data futura (planilha) não entra */.sort((a,b)=>a[6]<b[6]?1:a[6]>b[6]?-1:(+b[7])-(+a[7])).slice(0,10);
  var and=PR.filter(p=>!FECH[p[2]]&&new Date(BB,p[0]-1,p[1])>=hoje).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
  return'<h3 class="prh">ÚLTIMAS ATUALIZAÇÕES</h3><div class="prc">'+(ult.length?ult.map(p=>ln(p,FECH[p[2]]?"ok":RUIM[p[2]]?"no":"")).join(""):'<p class="mu">Nenhuma proposta.</p>')+"</div>"+
   '<h3 class="prh">PROPOSTAS EM ANDAMENTO</h3><div class="prc">'+(and.length?and.map(p=>ln(p,RUIM[p[2]]?"no":"")).join(""):'<p class="mu">Nenhuma proposta em andamento.</p>')+"</div>"}

@@ -1,5 +1,5 @@
 /* DROM · Hub — cache offline + notificações push */
-var C="drom-hub-v26";
+var C="drom-hub-v27";
 self.addEventListener("install",e=>self.skipWaiting());
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;

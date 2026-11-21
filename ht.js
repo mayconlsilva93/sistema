@@ -5,7 +5,7 @@
 var URL="https://script.google.com/macros/s/AKfycbzk5iksIZVvdK27taLTcpQbdPebxGjP7ilwNxiQDYwUuTSaMz80Hifmgr-5aazWhI0R/exec";
 var TN={eq:"Envio de equipe",vc:"Vídeo de chamada",ot:"Outra tarefa",cm:"Custos do mês"},B=2023;
 var tn=t=>t.k==="ot"&&t.ti?t.ti:TN[t.k]||"Tarefa";
-var TX={eq:"Sua equipe será de até 3 pessoas, identificadas pelo nome completo e CPF. Indique em seu grupo artístico a equipe e a placa de carro, caso vá utilizar o estacionamento.",
+var TX={eq:"Sua equipe será de até 3 pessoas, identificadas pelo nome completo e CPF. Indique em seu grupo artístico a equipe e a placa de carro (caso vá utilizar o estacionamento).",
  vc:"O evento solicitou a gravação de vídeo de chamada. O vídeo deve ter 15s, convidando o público para o evento, citando data e local. Envie o vídeo em seu grupo artístico."};
 var REM={p:3,h:9,f:2};
 var b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),b6=u=>btoa(String.fromCharCode.apply(null,u)),p2=n=>String(n).padStart(2,"0");
@@ -23,7 +23,8 @@ var st=document.createElement("style");st.textContent=
 "#tv table{width:100%;border-collapse:collapse;font-size:13px;background:var(--cd);border-radius:14px;overflow:hidden}#tv th{background:#0000FF;color:#fff;text-align:left;padding:8px;font-size:12px}#tv td{padding:8px;border-bottom:1px solid var(--bd);vertical-align:top}"+
 "#tv .tt{display:inline-block;border-radius:8px;padding:2px 7px;font-weight:700;font-size:12px}#tv .tt.ok{background:var(--okb);color:var(--ok)}#tv .tt.pd{background:#fff6c8;color:#7a5d00}#tv .tt.rd{background:#ffe5e5;color:#c00}#tv .tt.gy{background:#eee;color:#666}"+
 "#tv .tg+.tch,#tv .tch+textarea,#tv .tcd>input,#tv #ttx{margin-top:10px}#tv .trh{font-size:13px;color:var(--mu);margin:12px 0 4px;font-weight:700}#tv select:invalid,#tv select.ph{color:var(--mu)}"+
-"#tv .tlk{border:0;background:none;color:var(--ac);font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;padding:4px 0}#tv .mu{color:var(--mu)}";
+"#tv .tlk{border:0;background:none;color:var(--ac);font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;padding:4px 0}#tv .mu{color:var(--mu)}#tv tr[data-v]{cursor:pointer}#tv tr[data-v]:hover td{background:rgba(0,0,255,.04)}"+
+".tvw{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:0 18px}.tvw>div{background:#fff;color:#111;border-radius:18px;width:100%;max-width:440px;max-height:88vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}.tvw .th{background:#0000FF;color:#fff;font-weight:800;font-size:16px;padding:12px 16px}.tvw .tb{padding:16px}.tvw h3{margin:0 0 10px;font-size:17px}.tvw .tz{display:inline-block;background:#eceeff;color:#0000FF;font-weight:800;border-radius:8px;padding:5px 10px;font-size:14px;margin-bottom:10px}.tvw p{margin:0 0 12px;font-size:15px;line-height:1.45;white-space:pre-line}.tvw small{display:block;color:#777;font-size:12px;margin-bottom:12px}.tvw .tbn{width:100%}";
 document.head.appendChild(st);
 function H(){return window.DROMHUB?window.DROMHUB():null}
 async function dec(K,x){var t=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(x.iv)},K,b64(x.ct));return JSON.parse(new TextDecoder().decode(t))}
@@ -71,16 +72,19 @@ function draw(){var h=H(),v=$("tv");if(!h||!h.CFG){v.innerHTML="";return}
  v.querySelectorAll(".tch button").forEach(b=>b.onclick=()=>{var f=b.dataset.f,P=CE?CE.f:apps().map(a=>a.f);if(f!=="*"&&P.indexOf(f)<0)return;if(f==="*")SEL=SEL.length===P.length?[]:P.slice();else SEL=SEL.indexOf(f)>=0?SEL.filter(x=>x!==f):SEL.concat(f);draw()});
  $("tgo").onclick=send;
  $("tcu").onclick=async()=>{if(BUSY)return;BUSY=1;ST.cfg.custos=!ST.cfg.custos;try{await save()}catch(e){}BUSY=0;draw()};
- v.querySelectorAll("[data-x]").forEach(b=>b.onclick=async()=>{var t=ST.T.find(x=>x.id===b.dataset.x);if(!t||!confirm("Encerrar a tarefa \""+tn(t)+(t.ev?" · "+t.ev:"")+"\" para todos?"))return;t.x=Date.now();await save();draw()})}
+ v.querySelectorAll("[data-x]").forEach(b=>b.onclick=async e=>{e.stopPropagation();var t=ST.T.find(x=>x.id===b.dataset.x),f=b.dataset.f,h=H(),a=h.CFG.apps.find(x=>x.f===f);if(!t||!confirm("Encerrar a tarefa \""+tn(t)+(t.ev?" · "+t.ev:"")+"\" para "+(a?h.nm(a):f)+"?"))return;t.xf=(t.xf||[]).concat(f);if(t.to.every(g=>t.xf.indexOf(g)>=0||OK.some(x=>x.id===t.id&&x.f===g)))t.x=Date.now();await save();draw()});
+ v.querySelectorAll("tr[data-v]").forEach(r=>r.onclick=()=>{var t=ST.T.find(x=>x.id===r.dataset.v);if(!t)return;var m=document.createElement("div");m.className="tvw";
+  m.innerHTML='<div role="dialog" aria-modal="true"><div class="th">'+esc(tn(t))+'</div><div class="tb">'+(t.ev?"<h3>"+esc(t.ev)+"</h3>":"")+'<span class="tz">Prazo: '+fdt(t.due)+'</span><p>'+esc(t.tx||"")+'</p><small>Enviada em '+fdt(t.cr)+" para "+esc(r.dataset.n)+'</small><button type="button" class="tbn">Fechar</button></div></div>';
+  document.body.appendChild(m);m.onclick=e=>{if(e.target===m||e.target.tagName==="BUTTON")m.remove()}})}
 function trk(){var h=H(),now=Date.now(),R=[];ST.T.slice().sort((a,b)=>(!!a.x-!!b.x)||a.due-b.due).forEach(t=>(t.to||[]).forEach(f=>{var a=h.CFG.apps.find(x=>x.f===f),ok=OK.filter(x=>x.id===t.id&&x.f===f).sort((p,q)=>p.ts-q.ts)[0];
-  var sit=ok?'<span class="tt ok">Já enviei '+fdt(ok.ts)+"</span>":t.x?'<span class="tt gy">encerrada</span>':t.due<now?'<span class="tt rd">atrasada</span>':'<span class="tt pd">pendente</span>';
-  R.push("<tr><td><b>"+esc(tn(t))+"</b>"+(t.ev?" · "+esc(t.ev):"")+"<br>"+esc(a?h.nm(a):f)+'</td><td>'+fdt(t.due)+'</td><td>'+fdt(t.cr)+"</td><td>"+sit+(!t.x&&!ok&&f===t.to.find(g=>!OK.some(x=>x.id===t.id&&x.f===g))?'<br><button class="tlk" data-x="'+t.id+'">Encerrar</button>':"")+"</td></tr>")}));
+  var xx=t.x||(t.xf||[]).indexOf(f)>=0,sit=ok?'<span class="tt ok">Enviado '+fdt(ok.ts)+"</span>":xx?'<span class="tt gy">encerrada</span>':t.due<now?'<span class="tt rd">atrasada</span>':'<span class="tt pd">pendente</span>';
+  R.push('<tr data-v="'+t.id+'" data-n="'+esc(a?h.nm(a):f)+'" title="Ver texto completo"><td><b>'+esc(tn(t))+"</b>"+(t.ev?" · "+esc(t.ev):"")+"<br>"+esc(a?h.nm(a):f)+'</td><td>'+fdt(t.due)+'</td><td>'+fdt(t.cr)+"</td><td>"+sit+(!xx&&!ok?'<br><button class="tlk" data-x="'+t.id+'" data-f="'+esc(f)+'">Encerrar</button>':"")+"</td></tr>")}));
  return R.length?"<table><tr><th>Tarefa · artista</th><th>Prazo</th><th>Enviada</th><th>Situação</th></tr>"+R.join("")+"</table>":'<p class="mu">Nenhuma tarefa enviada ainda.</p>'}
 async function send(){var v=$("tv"),m=$("tms"),k=$("tk").value,tx=$("ttx").value.trim(),du=$("tdu").value,e=evs().find(x=>x.k===$("tev").value);
  if(e)SEL=SEL.filter(f=>e.f.indexOf(f)>=0);if(!SEL.length){m.textContent="Escolha para quem.";return}var ti=k==="ot"?($("tti").value||"").trim():"";if(k==="ot"&&!ti){m.textContent="Escreva o título da tarefa.";return}if(!tx){m.textContent="Escreva o texto.";return}if(!du){m.textContent="Escolha o prazo.";return}
- var t=new Date(du).getTime(),n=x=>Math.max(0,parseInt($(x).value,10)||0);if(!(t>Date.now())){m.textContent="O prazo precisa ser no futuro.";return}
+ var t=new Date(du).getTime(),n=x=>{var s=String($(x).value||"").trim();return s===""?null:Math.max(0,parseInt(s,10)||0)}/* em branco = lembrete desligado (null) */;if(!(t>Date.now())){m.textContent="O prazo precisa ser no futuro.";return}
  $("tgo").disabled=true;m.textContent="Enviando…";
- try{await load();ST.T.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),k:k,ti:ti||undefined,ev:e?e.n:"",tx:tx,due:t,to:SEL.slice(),rem:{p:n("rp")||3,h:n("rh"),f:n("rf")},cr:Date.now()});await save();
+ try{await load();ST.T.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),k:k,ti:ti||undefined,ev:e?e.n:"",tx:tx,due:t,to:SEL.slice(),rem:{p:n("rp"),h:n("rh"),f:n("rf")},cr:Date.now()});await save();
   SEL=[];["tx","du","duu","ev","ti"].forEach(x=>delete v.dataset[x]);draw();$("tms").textContent="✓ Tarefa enviada. O push chega aos artistas em até 10 minutos."}
  catch(er){m.textContent="Não foi possível enviar: "+(er.message||er);$("tgo").disabled=false}}
 window.DROMHT=async function(){var h=H();if(!h||!h.AK){draw();return}draw();try{await load()}catch(e){ST=ST||{ts:0,cfg:{custos:false},T:[]}}draw()};

@@ -1,6 +1,6 @@
 // DROM · busca inscrições novas no Google Apps Script (criptografadas com a chave do PIN) e junta às existentes
 import fs from "fs";import path from "path";import crypto from "crypto";
-export async function pull(app,key,subs){
+export async function pull(app,key,subs){app=path.basename(String(app)); /* dev/artistateste → artistateste (chave usada pelo app no Apps Script) */
   const url=fs.readFileSync(path.resolve("tools/suburl.txt"),"utf8").trim();
   let l=[];try{const r=await fetch(url+"?app="+encodeURIComponent(app));l=await r.json()}catch(e){console.log("subpull: falha",e.message);return subs}
   const seen=new Set(subs.map(s=>s.endpoint));let n=0;
@@ -12,6 +12,6 @@ export async function pull(app,key,subs){
 let HUBS=null;
 export async function hubSubs(key){if(HUBS)return HUBS;HUBS=[];await pull("hub",key,HUBS);return HUBS}
 export async function hubSend(webpush,app,key,m,opt){const subs=await hubSubs(key);if(!subs.length)return;
-  let nm=app;try{nm=JSON.parse(fs.readFileSync(path.resolve("tools/names.json"),"utf8"))[app]||app}catch(e){}
+  let nm=path.basename(String(app));try{nm=JSON.parse(fs.readFileSync(path.resolve("tools/names.json"),"utf8"))[nm]||nm}catch(e){}
   const x=Object.assign({},m,{t:"["+String(nm).replace(/^DJ /,"")+"] "+m.t});if(m.tag)x.tag="h-"+m.tag;if(m.close)x.close="h-"+m.close;
   for(const s of subs){try{await webpush.sendNotification(s,JSON.stringify(x),opt||{TTL:86400})}catch(e){console.log("hub erro",e.statusCode||e.message)}}}

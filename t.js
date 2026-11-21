@@ -18,7 +18,7 @@ var st=document.createElement("style");st.textContent=
 ".tpo p{margin:0 0 12px;font-size:15px;line-height:1.45;white-space:pre-line}.tpo .tl{background:#f3f3f3;border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:12px}.tpo .tl ul{margin:6px 0 0;padding-left:20px}"+
 ".tpo .tbt{display:flex;gap:8px}.tpo .tbt button{flex:1;border-radius:10px;padding:12px 8px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;border:1.5px solid #0000FF}.tpo .t0{background:#fff;color:#0000FF}.tpo .t1{background:#0000FF;color:#fff}"+
 ".tpo.cf{z-index:131;background:rgba(0,0,0,.25)}"+
-".tbr{position:fixed;left:10px;right:10px;bottom:calc(var(--nvh,58px) + env(safe-area-inset-bottom,0px) + 30px);z-index:44;background:#fff;border:2px solid #0000FF;border-radius:14px;display:flex;align-items:center;gap:10px;padding:9px 10px;box-shadow:0 4px 14px rgba(0,0,0,.15);cursor:pointer;max-width:560px;margin:0 auto;color:#111}"+
+".tbr{position:fixed;left:10px;right:10px;bottom:calc(var(--nvh,58px) + env(safe-area-inset-bottom,0px) + 40px);z-index:44;background:#fff;border:2px solid #0000FF;border-radius:14px;display:flex;align-items:center;gap:10px;padding:9px 10px;box-shadow:0 4px 14px rgba(0,0,0,.15);cursor:pointer;max-width:560px;margin:0 auto;color:#111}"+
 ".tbr i{flex:none;width:28px;height:28px;border-radius:50%;background:#0000FF;color:#fff;font-weight:800;font-size:16px;line-height:28px;font-style:normal;text-align:center}.tbr span{flex:1;font-size:14.5px;font-weight:600}.tbr span b{color:#0000FF}"+
 ".tbr.rd{border-color:#d50000}.tbr.rd i{background:#d50000}.tbr.rd span b{color:#d50000}.tbr button{border:0;background:none;font-size:20px;color:#555;cursor:pointer;padding:0 4px}";
 document.head.appendChild(st);
@@ -41,11 +41,11 @@ function custos(cfg){if(!cfg||!cfg.custos)return[];var n=new Date(),now=n.getTim
   o.push({id:"cm-"+mi,k:"cm",ev:"Shows de "+c.mn+" finalizados!",tx:"Você deve informar os custos até "+p2(dd.getDate())+"/"+p2(dd.getMonth()+1)+" dentro do aplicativo ou em seu grupo financeiro.",due:c.due,rem:{p:3},L:c.L})});return o}
 async function load(){var A=await list("tarefas"),cur=A.filter(x=>x&&x.ts).sort((a,b)=>b.ts-a.ts)[0]||{T:[],cfg:{}};
  var ok=await list("tarok");ok.forEach(x=>{if(x&&(x.f===F||String(x.f).endsWith("/"+F)))DONE[x.id]=x.ts});(ls.g("done")||[]).forEach(id=>DONE[id]=DONE[id]||1);
- T=(cur.T||[]).filter(x=>{if(x.x)return false;x._f=(x.to||[]).find(g=>g===F||g.endsWith("/"+F));return !!x._f}).concat(custos(cur.cfg)).filter(x=>!DONE[x.id]).sort((a,b)=>a.due-b.due);
+ T=(cur.T||[]).filter(x=>{if(x.x)return false;x._f=(x.to||[]).find(g=>(g===F||g.endsWith("/"+F))&&!(x.xf||[]).includes(g));return !!x._f}).concat(custos(cur.cfg)).filter(x=>!DONE[x.id]).sort((a,b)=>a.due-b.due);
  bar();bell();auto()}
 function bell(){if(!window.DROMNADD)return;var sn=ls.g("bell")||[],L=T.filter(x=>sn.indexOf(x.id)<0);if(!L.length)return;L.forEach(x=>sn.push(x.id));ls.s("bell",sn.slice(-100));DROMNADD(L.map(x=>({t:lb(x),b:"Prazo: "+pz(x.due)})))}
 function auto(){if(document.querySelector(".tpo"))return;var seen=ls.g("seen")||{},now=Date.now();
- var x=T.find(x=>{var s=seen[x.id];if(!s)return true;var p=((x.rem&&x.rem.p)||3)*H;return red(x)&&now-s>=p});if(x)pop(x)}
+ var x=T.find(x=>{var s=seen[x.id];if(!s)return true;var rp=x.rem&&"p" in x.rem?x.rem.p:3;if(rp===null)return false;/* em branco no Hub = sem popups repetidos */var p=(rp||3)*H;return red(x)&&now-s>=p});if(x)pop(x)}
 function bar(){var o=document.querySelector(".tbr");if(o)o.remove();var x=T[0];if(!x||sessionStorage.getItem("tbrx"+F)===x.id)return;
  var b=document.createElement("div");b.className="tbr"+(red(x)?" rd":"");b.innerHTML="<i>!</i><span>"+esc(lb(x))+". Prazo: <b>"+esc(pz(x.due))+"</b></span><button type=button aria-label=Fechar>✕</button>";
  b.onclick=e=>{if(e.target.tagName==="BUTTON"){sessionStorage.setItem("tbrx"+F,x.id);b.remove();return}pop(x)};document.body.appendChild(b)}

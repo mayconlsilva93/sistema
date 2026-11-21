@@ -7,7 +7,7 @@
 import fs from "fs";import path from "path";import crypto from "crypto";import webpush from "web-push";import {createRequire} from "module";import {pull,hubSend,hubSubs} from "./subpull.mjs";
 if(!process.env.DROM_PIN){console.error("Falta DROM_PIN");process.exit(1)}
 const URL=process.env.TARURL||fs.readFileSync("tools/suburl.txt","utf8").trim(),H=36e5,now=Date.now(),B=2023,DRY=!!process.env.DRY;
-const APPS=fs.readdirSync(".").filter(f=>fs.existsSync(path.join(f,"d.json"))&&fs.existsSync(path.join(f,"vp.json")));
+const APPS=fs.readdirSync(".").concat(fs.existsSync("dev")?fs.readdirSync("dev").map(f=>"dev/"+f):[]).filter(f=>fs.existsSync(path.join(f,"d.json"))&&fs.existsSync(path.join(f,"vp.json"))); /* inclui o app de teste dev/artistateste */
 if(!APPS.length)process.exit(0);
 const KEYS={};const keyOf=a=>{const s=JSON.parse(fs.readFileSync(path.join(a,"d.json"))).salt;return KEYS[s]||(KEYS[s]=crypto.pbkdf2Sync(process.env.DROM_PIN,Buffer.from(s,"base64"),200000,32,"sha256"))};
 const dec=(key,iv,ct)=>{ct=Buffer.from(ct,"base64");const d=crypto.createDecipheriv("aes-256-gcm",key,Buffer.from(iv,"base64"));d.setAuthTag(ct.subarray(-16));return JSON.parse(Buffer.concat([d.update(ct.subarray(0,-16)),d.final()]).toString())};
@@ -30,22 +30,22 @@ const lb=t=>t.k==="cm"?TN.cm:(t.k==="ot"&&t.ti?t.ti:TN[t.k]||"Pendência")+(t.ev
 const done=(id,f)=>OK.some(x=>x.id===id&&x.f===f);
 /* tarefas por artista */
 const J=[];
-for(const t of cur.T||[]){if(t.x)continue;for(const f of t.to||[])if(APPS.includes(f))J.push({t,f})}
+for(const t of cur.T||[]){if(t.x)continue;for(const f of t.to||[])if(APPS.includes(f)&&!(t.xf||[]).includes(f))J.push({t,f})}/* xf: encerrada só para esses artistas */
 if(cur.cfg&&cur.cfg.custos){const n=new Date(),m=(n.getFullYear()-B)*12+n.getMonth()+1;
   for(const f of APPS){try{const D=JSON.parse(fs.readFileSync(path.join(f,"d.json"))),S=dec(keyOf(f),D.iv,D.ct).S||[];
     for(const mi of [m-1,m]){const c=cmT(S,mi);if(!c||now<c.cr||now>c.due+3*24*H)continue;
       J.push({f,t:{id:"cm-"+mi,k:"cm",ev:"",tx:"Shows de "+c.mn+" finalizados! Você deve informar os custos até "+fdt(c.due)+" dentro do aplicativo ou em seu grupo financeiro.",due:c.due,rem:{h:9,f:2},cr:c.cr}})}}catch(e){}}}
 const out={}; // f -> [msg]
-for(const {t,f} of J){if(done(t.id,f))continue;const sk=t.id+"|"+f,s=ST.s[sk]=ST.s[sk]||{},r=t.rem||{},ph=r.h==null?9:r.h,fh=r.f==null?2:r.f,hr=new Date().getHours();let why=null;
+for(const {t,f} of J){if(done(t.id,f))continue;const sk=t.id+"|"+f,s=ST.s[sk]=ST.s[sk]||{},r=t.rem||{},ph=!("h" in r)||r.h===undefined?9:r.h,fh=!("f" in r)||r.f===undefined?2:r.f/* null = campo em branco no Hub = esse lembrete não é enviado */,hr=new Date().getHours();let why=null;
   if(!s.n){if(now>=(t.cr||0))why="nova"}
-  else if(now>=t.due-fh*H&&now<=t.due+24*H&&hr>=8&&hr<=22&&now-(s.h||0)>=55*60e3&&now-(s.n||0)>=55*60e3)why="hora";
-  else if(hr>=ph&&dk(now)!==s.d&&now>=new Date(new Date(t.due).setHours(0,0,0,0)).getTime()&&now<=t.due+3*24*H&&now-(s.h||0)>=55*60e3)why="dia";
+  else if(fh!==null&&now>=t.due-fh*H&&now<=t.due+24*H&&hr>=8&&hr<=22&&now-(s.h||0)>=55*60e3&&now-(s.n||0)>=55*60e3)why="hora";
+  else if(ph!==null&&hr>=ph&&dk(now)!==s.d&&now>=new Date(new Date(t.due).setHours(0,0,0,0)).getTime()&&now<=t.due+3*24*H&&now-(s.h||0)>=55*60e3)why="dia";
   if(!why)continue;
   const late=now>t.due,b=(late?"Prazo vencido: ":"Prazo: ")+fdt(t.due)+"\n"+t.tx;
   (out[f]=out[f]||[]).push({t:lb(t),b:b.length>230?b.slice(0,227)+"…":b,tag:"tar-"+t.id,keep:1,f});
   if(why==="nova")s.n=now;else s.h=now;s.d=dk(now)}
 /* "Já enviei" → aviso no Hub */
-const hubOk=[];for(const x of OK){const k=x.id+"|"+x.f;if(ST.ok.includes(k))continue;ST.ok.push(k);const t=(cur.T||[]).find(y=>y.id===x.id)||(String(x.id).startsWith("cm-")?{k:"cm",ev:""}:null);if(t&&APPS.includes(x.f))hubOk.push({f:x.f,m:{t:lb(t)+" ✓",b:"Já enviei",tag:"tar-"+x.id}})}
+const hubOk=[];for(const x of OK){const k=x.id+"|"+x.f;if(ST.ok.includes(k))continue;ST.ok.push(k);const t=(cur.T||[]).find(y=>y.id===x.id)||(String(x.id).startsWith("cm-")?{k:"cm",ev:""}:null);if(t&&APPS.includes(x.f))hubOk.push({f:x.f,m:{t:lb(t)+" ✓",b:"Enviado",tag:"tar-"+x.id}})}
 ST.ok=ST.ok.slice(-500);
 /* limpa estado de tarefas que não existem mais */
 for(const k of Object.keys(ST.s)){const id=k.split("|")[0];if(!J.some(j=>j.t.id===id))delete ST.s[k]}
