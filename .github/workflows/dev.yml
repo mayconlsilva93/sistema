@@ -1,4 +1,4 @@
-name: DROM · DEV (planilha falsa → app dev e Booker dev)
+name: DROM · DEV (planilha falsa → app dev e Booker (artista de teste))
 on:
   schedule:
     - cron: "43 * * * *"   # de hora em hora
@@ -24,6 +24,6 @@ jobs:
           DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
       - run: |
           git config user.name "drom-bot"; git config user.email "drom-bot@users.noreply.github.com"
-          git add dev/artistateste/d.json booker/dev/dv.json tools/dev/hash.txt
+          git add dev/artistateste/d.json booker/dv.json tools/dev/hash.txt
           if git diff --cached --quiet; then exit 0; fi
           git commit -qm "dados dev (planilha falsa)" && (git push -q || (git pull -q --rebase && git push -q))

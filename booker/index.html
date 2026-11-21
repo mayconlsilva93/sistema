@@ -29,36 +29,51 @@
 <div id="empty" class="empty" hidden>Nenhuma proposta com esse filtro.</div>
 <div id="app">
   <div class="sum" id="sum"></div>
-  <div class="tabs" role="tablist"><button data-t="d" class="on">Dados</button><button data-t="p">Proposta</button><button data-t="c">Contrato</button></div>
+  <div class="tabs" role="tablist"><button data-t="d" class="on">Dados</button><button data-t="p">Emissão</button><button data-t="c">Contrato</button></div>
 
   <section id="t-d">
-    <div id="forms"></div>
-    <div class="p">
-      <h2>Google Agenda</h2>
-      <div class="act"><button class="pri" id="gen">Gerar versão para Google Agenda</button><button id="rst">Restaurar dados da base</button></div>
-      <div id="agout" hidden>
-        <label class="mu">Título</label>
-        <textarea id="ag-t" rows="2" readonly></textarea>
-        <div class="act" style="margin-top:6px"><button data-copy="ag-t">Copiar título</button></div>
-        <label class="mu">Descrição</label>
-        <textarea id="ag-d" rows="13" readonly></textarea>
-        <p class="note" id="cal" style="margin:0 0 6px"></p><div class="act" style="margin-top:6px"><button data-copy="ag-d">Copiar descrição</button><a id="ag-l" target="_blank" rel="noopener"><button class="pri" type="button">Abrir no Google Agenda</button></a><span class="mu" id="ag-i"></span></div>
+    <div class="p dvbar" id="dvbar"></div>
+    <div class="dvgrid">
+      <div class="dvmain">
+        <div class="p" id="calcp"></div>
+        <div id="forms"></div>
+        <div class="p" id="opt"><h2>Condições do documento</h2><div class="fg" id="optg"></div><p class="note">Valem para o texto de WhatsApp e para os arquivos Word e PDF. Campos [PREENCHER] aparecem em amarelo nos arquivos.</p></div>
+        <div class="p">
+          <h2>Pedir dados ao contratante</h2>
+          <label class="wf"><span>Texto para copiar e enviar (evento já preenchido; dados do contratante em branco)</span><textarea id="cdd" rows="5"></textarea></label>
+          <div class="act"><button class="pri" data-copy="cdd">Copiar texto</button></div>
+        </div>
+        <div class="p">
+          <h2>Dados do contratante (contrato)</h2>
+          <label class="wf"><span>Colar resposta do contratante (modelo "Dados para elaboração de contrato")</span><textarea id="cpaste" rows="5" placeholder="Cole aqui a mensagem preenchida pelo contratante"></textarea></label>
+          <div class="act"><button type="button" id="cpbtn">Preencher campos com o texto colado</button><span class="note" id="cpmsg"></span></div>
+          <div class="fg" id="cform"></div>
+        </div>
+        <div class="p">
+          <h2>Google Agenda</h2>
+          <div class="act"><button class="pri" id="gen">Gerar versão para Google Agenda</button><button id="rst">Restaurar dados salvos</button></div>
+          <div id="agout" hidden>
+            <label class="mu">Título</label><textarea id="ag-t" rows="2" readonly></textarea>
+            <div class="act" style="margin-top:6px"><button data-copy="ag-t">Copiar título</button></div>
+            <label class="mu">Descrição</label><textarea id="ag-d" rows="13" readonly></textarea>
+            <p class="note" id="cal" style="margin:0 0 6px"></p><div class="act" style="margin-top:6px"><button data-copy="ag-d">Copiar descrição</button><a id="ag-l" target="_blank" rel="noopener"><button class="pri" type="button">Abrir no Google Agenda</button></a><span class="mu" id="ag-i"></span></div>
+          </div>
+        </div>
       </div>
-      <p class="note">As edições feitas nos campos valem só nesta tela. Nada é gravado nas planilhas.</p>
+      <aside class="dvside p" id="simp"></aside>
     </div>
   </section>
 
-  <div class="p" id="opt" hidden><h2>Condições do documento</h2><div class="fg" id="optg"></div><p class="note">Valem para o texto de WhatsApp e para os arquivos Word e PDF. Campos [PREENCHER] aparecem em amarelo nos arquivos.</p></div>
   <section id="t-p" hidden>
     <div class="two">
       <div class="p">
         <h2>Versão WhatsApp</h2>
-        <div class="act"><div class="seg" id="wseg"><button data-w="c" class="on">Proposta ao contratante</button><button data-w="a">Confirmação ao artista</button></div></div>
+        <div class="act"><div class="seg" id="wseg"><button data-w="c" class="on">Proposta Simples</button><button data-w="a">Confirmação Simples</button></div></div>
         <textarea id="wa" rows="16"></textarea>
         <div class="act" style="margin-top:6px"><button class="pri" data-copy="wa">Copiar texto</button></div>
       </div>
       <div class="p">
-        <h2>Versão formal</h2>
+        <h2>Proposta formal</h2>
         <div class="act"><button class="pri" data-dl="docx" data-doc="p">Baixar Word</button><button data-dl="pdf" data-doc="p">Baixar PDF</button></div>
         <div class="doc" id="pv-p"></div>
       </div>
@@ -66,18 +81,6 @@
   </section>
 
   <section id="t-c" hidden>
-    <div class="p">
-      <h2>Pedir dados ao contratante</h2>
-      <label class="wf"><span>Texto para copiar e enviar (evento já preenchido; dados do contratante em branco)</span><textarea id="cdd" rows="5"></textarea></label>
-      <div class="act"><button class="pri" data-copy="cdd">Copiar texto</button></div>
-    </div>
-    <div class="p">
-      <h2>Dados do contrato</h2>
-      <label class="wf"><span>Colar resposta do contratante (modelo "Dados para elaboração de contrato")</span><textarea id="cpaste" rows="5" placeholder="Cole aqui a mensagem preenchida pelo contratante"></textarea></label>
-      <div class="act"><button type="button" id="cpbtn">Preencher campos com o texto colado</button><span class="note" id="cpmsg"></span></div>
-      <div class="fg" id="cform"></div>
-      <p class="note">Campos em branco aparecem como [PREENCHER] em amarelo no documento. Os dados do artista vêm do cadastro; os do contratante não constam na base.</p>
-    </div>
     <div class="p">
       <h2>Contrato formal</h2>
       <div class="act"><button class="pri" data-dl="docx" data-doc="c">Baixar Word</button><button data-dl="pdf" data-doc="c">Baixar PDF</button><a id="signed" target="_blank" rel="noopener" hidden><button type="button">Abrir contrato assinado</button></a></div>
