@@ -11,7 +11,7 @@ var TESTE='1_FIaPSZjz7rr1QwDvC7jL6qCXu09Wh1ZsgTTdearxGs';   /* ARTISTATESTE - Ge
 /* app -> artistas (nome -> id da planilha) e operações permitidas. Para liberar um artista real, acrescente-o aqui (ver docs/INTEGRACAO.md). */
 var APPS={
   artistateste:{planilhas:{'Artista Teste':TESTE}, ops:['custos','cache'], recebidoPor:'Artista'},
-  booker:      {planilhas:{'Artista Teste':TESTE}, ops:['criar','editar','ler']}
+  booker:      {planilhas:{'Artista Teste':TESTE}, ops:['criar','editar','ler','custos','cache','comissao'], recebidoPor:'Artista'}
 };
 /* planilhas que recebem o carimbo de edição (gatilho onEdit instalado por installTriggers) */
 var CARIMBO=[TESTE];
@@ -68,7 +68,7 @@ function opCustos(S,p){
 function opCache(S,p,A){
   var r=S.row(p.n),v=+p.v,d=dmy(p.d),cR=S.col('CACHÊ RECEBIDO?'),cA=S.col('STATUS ARTISTA'),cP=S.col('RECEBIDO POR'),cD=S.col('DATA RECEBIMENTO');
   if(!(v>0))throw new Error('valor inválido');
-  var sh=S.sh,quem=A.recebidoPor||p.a,tipo=p.tipo;
+  var sh=S.sh,quem=(p.por==='Artista'||p.por==='DROM')?p.por:(A.recebidoPor||p.a),tipo=p.tipo;   /* booker pode informar quem recebeu (Artista ou DROM) */
   if(tipo==='total'||tipo==='s30'||tipo==='s50'){
     var st=tipo==='total'?'Pago':tipo==='s30'?'Entrada 30%':'Entrada 50%';
     sh.getRange(r,cR).setValue(st);sh.getRange(r,cA).setValue(st);sh.getRange(r,cP).setValue(quem);sh.getRange(r,cD).setValue(d)}
@@ -81,6 +81,12 @@ function opCache(S,p,A){
     if(!/\(R\$/.test(old)){var pc=/ENTRADA (\d+)%/.exec(st0);if(pc&&old)pg+=br*(+pc[1])/100}
     if(br>0&&pg>=br-0.01){sh.getRange(r,cR).setValue('Pago');sh.getRange(r,cA).setValue('Pago');tipo='quitado'}}
   S.stamp(r);return {n:+p.n,tipo:tipo}}
+
+function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pago" */
+  var r=S.row(p.n),c=S.sh.getRange(r,S.col('STATUS COMISSÃO'));
+  if(c.getFormula())throw new Error('STATUS COMISSÃO tem fórmula nesta linha (edite direto na planilha)');
+  if(nh(c.getValue())==='PAGO')return {n:+p.n,ja:1};
+  c.setValue('Pago');S.stamp(r);return {n:+p.n,scom:'Pago'}}
 
 function opEditar(S,p){
   var r=S.row(p.n),h=p.h||{},ks=Object.keys(h);if(!ks.length)throw new Error('nada para gravar');
@@ -111,7 +117,7 @@ function run(env){
   if(p.op==='ler'){res={ok:1,id:p.id,r:opLer(Sheet(v.sid))};return res}
   var lk=LockService.getScriptLock();if(!lk.tryLock(25000))throw new Error('planilha ocupada, tente de novo');
   try{old=C.get(ck);if(old)return JSON.parse(old);
-    var S=Sheet(v.sid),r=p.op==='custos'?opCustos(S,p):p.op==='cache'?opCache(S,p,v.A):p.op==='editar'?opEditar(S,p):opCriar(S,p);
+    var S=Sheet(v.sid),r=p.op==='custos'?opCustos(S,p):p.op==='cache'?opCache(S,p,v.A):p.op==='comissao'?opComissao(S,p):p.op==='editar'?opEditar(S,p):opCriar(S,p);
     SpreadsheetApp.flush();res={ok:1,id:p.id,op:p.op,r:r,em:agora()}}
   finally{lk.releaseLock()}
   C.put(ck,JSON.stringify(res),21600);return res}

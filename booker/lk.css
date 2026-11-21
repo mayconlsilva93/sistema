@@ -21,14 +21,18 @@
 /*HDF*/.hd{padding-left:50px!important;padding-right:50px!important;box-sizing:border-box;gap:min(12px,1.6vw)!important}.hd .hlogo{height:min(34px,4.7vw)!important;width:auto}.hd .hic{height:min(30px,4.4vw)!important}.hd b{font-size:min(22px,3.3vw)!important;padding:min(6px,.8vw) min(20px,2.6vw) min(6px,.8vw) min(17px,2.3vw)!important;gap:min(9px,1.2vw)!important}
 
 /*RF*/.bkrf{left:auto!important;right:0}
-/*NAV*/#bknav{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#FF5B1F;display:grid;grid-template-columns:repeat(3,1fr);padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+/*NAV*/#bkft{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;flex-direction:column;background:#FF5B1F;padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);transform:translateZ(0)}
+#bkft:has(#bknav[hidden]){background:#FFF602}
+#bkft .dbrand{position:static!important;inset:auto!important;padding:5px 0!important;margin:0 calc(-1*env(safe-area-inset-right,0px)) 0 calc(-1*env(safe-area-inset-left,0px))}
+#bkft .dbrand img{height:12px}
+#bknav{position:static;display:grid;grid-template-columns:repeat(3,1fr);width:100%;max-width:560px;margin:0 auto;background:transparent}
 #bknav[hidden]{display:none}
-#bknav button{display:flex;align-items:center;justify-content:center;height:58px;padding:0;margin:0;border:0;border-radius:0;background:transparent;color:#0a0a0a;opacity:.45;font-size:0;line-height:0;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:0;transform:none!important}
+#bknav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:56px;padding:0;margin:0;border:0;border-radius:0;background:transparent;color:#0a0a0a;opacity:.5;font:600 11px/1 system-ui,-apple-system,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:0;transform:none!important;box-shadow:none}
 #bknav button.on{opacity:1}
-#bknav svg{display:block;width:26px;height:26px;flex:none}
+#bknav button:focus-visible{outline:2px solid #0a0a0a;outline-offset:-4px}
+#bknav svg{display:block;width:24px;height:24px;flex:none}
 #bknav svg *{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-body.hasnav .dbrand{bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:5px 0}
-body.hasnav .dbrand img{height:12px}
-body.hasnav{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+body.hasft{padding-bottom:calc(var(--ft,82px) + 18px)!important}
+body.hasft #toast{bottom:calc(var(--ft,82px) + 12px)!important;z-index:70}
 /*OR*/.bkrf{background:#FF5B1F!important;border-color:#FF5B1F!important;color:#0a0a0a!important}
 .tabs button.on{background:#FF5B1F!important;border-color:#FF5B1F!important;color:#0a0a0a!important}

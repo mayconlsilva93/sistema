@@ -15,6 +15,10 @@ O que passa a funcionar depois deste guia:
   - qualquer outro valor → só RECEBIDO POR e DATA RECEBIMENTO no formato `DD/MM/AAAA (R$ 0,00)`, somando às entradas que já existem (separadas por ", "). Os status não mudam.
   - O card mostra **"⏳ lançado · sincronizando"** até a próxima sincronização trazer o valor da planilha; aí aparece **"✓ conferido com a planilha"**.
 - **Booker → Artista Teste:** botão **Salvar** grava os campos alterados na linha do Nº; **+ Nova proposta** cria uma linha nova no fim, com o próximo Nº (fórmulas e formatação copiadas da linha anterior).
+- **Booker → Artista Teste → Lançar custos / Cachê recebido / Comissão paga:** mesmas janelas do app do artista.
+  Custos e cachê usam as operações `custos` e `cache` (no cachê, o Booker informa **Recebido por**: Artista ou DROM).
+  **Comissão paga** usa a operação `comissao`: grava **"Pago"** em **STATUS COMISSÃO** (coluna achada pelo título). Se já estiver Pago, não muda nada.
+  Depois da comissão paga, custos e cachê ficam bloqueados no app.
 - Toda gravação atualiza o **carimbo da coluna BB** (gravação por script não dispara o onEdit).
 
 Tempo total: uns 15 minutos.
@@ -116,6 +120,11 @@ Rodar `installTriggers` de novo é seguro: ele apaga os acionadores antigos dele
 
 ---
 
+## Atualizar o código já implantado (a cada mudança no escrita.gs)
+
+1. Abra o projeto **DROM Escrita** em https://script.google.com e cole o `tools/escrita/escrita.gs` atual no **Código.gs** (Ctrl+A, colar) → **Salvar**.
+2. **Implantar → Gerenciar implantações → lápis ✏️ → Versão: Nova versão → Implantar.** A URL não muda.
+
 ## Como testar depois de tudo
 
 1. App de teste (`/sistema/dev/artistateste/`, PIN 123321): abra um show → **Custos** → preencha → OK.
@@ -132,7 +141,7 @@ Para cada artista real:
 2. No `escrita.gs`, acrescente o artista em `APPS`:
    ```js
    cenoura173: {planilhas:{'Cenoura':'<id da planilha>'}, ops:['custos','cache'], recebidoPor:'Cenoura'},
-   booker:     {planilhas:{'Artista Teste':TESTE, 'Cenoura':'<id da planilha>'}, ops:['criar','editar','ler']}
+   booker:     {planilhas:{'Artista Teste':TESTE, 'Cenoura':'<id da planilha>'}, ops:['criar','editar','ler','custos','cache','comissao'], recebidoPor:'Artista'}
    ```
    e o id em `CARIMBO` (se quiser o carimbo centralizado). Salve e faça **Implantar → Gerenciar implantações → ✏️ → Nova versão** (a URL não muda).
    Rode `installTriggers` de novo se mexeu em `CARIMBO`.
@@ -154,5 +163,5 @@ gere outra (`chave.py nova` após apagar `key.enc.json`), troque a propriedade K
 | `tools/escrita/mock.cjs` | simulador local do Apps Script para testes |
 | `ew.js` | cliente comum (assina e envia) |
 | `dev/artistateste/w.json`, `booker/w.json` | URL + chave do app (cifrada); URL vazia = escrita desligada |
-| `booker/bx.js` | recursos novos do Booker (Salvar, nova proposta, copiar, semelhantes, calculadora) |
+| `booker/bx.js` | recursos novos do Booker (barra Nova/Copiar/Salvar/Descartar, Lançar custos, Cachê recebido, Comissão paga, semelhantes, calculadora) |
 | `booker/dv.json` | dados do Artista Teste no Booker (gerado por `tools/dev/devsync.py`) |
