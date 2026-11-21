@@ -112,7 +112,7 @@ textarea:focus,.q input:focus{outline:2px solid var(--bl);background:#fff}
 .cwl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.cwl>div{background:var(--bg);border-radius:12px;padding:10px}.cwl i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.cwl span{font-size:12px;color:var(--mu)}.cwl b{display:block;font-size:16px;font-weight:900;white-space:nowrap;margin-top:2px}.cwl small{font-size:11px;color:var(--mu)}
 @media(max-width:480px){.cwl{grid-template-columns:1fr}.cwl>div{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.cwl b{margin:0 0 0 auto}.cwl small{width:100%}}
 /* escala única: notas em cima do termômetro */
-.nsl{position:relative;padding:4px 0 2px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+.nsl{position:relative;padding:4px 0 2px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:pointer}
 .nnum{display:grid;grid-template-columns:repeat(11,1fr);text-align:center}
 .nnum span{font-weight:800;font-size:15px;color:var(--mu);height:34px;display:flex;align-items:center;justify-content:center;transition:transform .2s,color .2s}
 .nnum span.on{color:var(--c);transform:scale(1.55)}
@@ -122,3 +122,5 @@ textarea:focus,.q input:focus{outline:2px solid var(--bl);background:#fff}
 .ntr i{position:absolute;top:50%;left:var(--x,0%);width:30px;height:30px;border-radius:50%;background:#fff;border:5px solid var(--c,#bbb);transform:translate(-50%,-50%);box-shadow:0 3px 10px rgba(0,0,0,.25);transition:left .25s cubic-bezier(.3,1.5,.5,1),border-color .2s}
 .nsl.drag .ntr i,.nsl.drag .ntr::before{transition:none}.nsl.drag .ntr i{transform:translate(-50%,-50%) scale(1.15)}
 .nsl:not(.has) .ntr i{opacity:.5}
+
+.ntr i{touch-action:none;cursor:grab}.ntr i::after{content:"";position:absolute;inset:-12px;border-radius:50%}

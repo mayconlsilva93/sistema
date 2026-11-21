@@ -48,8 +48,11 @@ function draw(){var m=$("mn");$("pv").disabled=CUR===0;var nx=$("nx");
  m.querySelectorAll(".q").forEach(el=>{var id=el.dataset.id,q=s.i.find(x=>x.id===id),mark=()=>el.classList.toggle("ok",filled(id));
   var sc=el.querySelector(".nsl");if(sc){var set=n=>{if(A[id]===n)return;A[id]=n;sc.classList.add("has");sc.style.setProperty("--x",n*10+"%");sc.style.setProperty("--c",COL(n));sc.setAttribute("aria-valuenow",n);sc.querySelectorAll(".nnum span").forEach((s,k)=>s.classList.toggle("on",k===n));var f=el.querySelector(".nfb");f.innerHTML=fb(n);f.classList.remove("go");void f.offsetWidth;f.classList.add("go");try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}mark();save()},
    at=e=>{var r=sc.querySelector(".ntr").getBoundingClientRect();set(Math.max(0,Math.min(10,Math.round((e.clientX-r.left)/r.width*10))))};
-   sc.addEventListener("pointerdown",e=>{sc.setPointerCapture(e.pointerId);sc.classList.add("drag");at(e)});sc.addEventListener("pointermove",e=>{if(sc.classList.contains("drag"))at(e)});
-   ["pointerup","pointercancel"].forEach(t=>sc.addEventListener(t,()=>sc.classList.remove("drag")));
+   /* só muda com toque (sem arrastar) ou arrastando a bolinha; passar o dedo para rolar não altera */
+   var P0=null;sc.addEventListener("pointerdown",e=>{if(e.target.closest(".ntr i")&&sc.classList.contains("has")){sc.setPointerCapture(e.pointerId);sc.classList.add("drag");P0=null}else P0={x:e.clientX,y:e.clientY,t:Date.now()}});
+   sc.addEventListener("pointermove",e=>{if(sc.classList.contains("drag"))at(e);else if(P0&&Math.hypot(e.clientX-P0.x,e.clientY-P0.y)>8)P0=null});
+   sc.addEventListener("pointerup",e=>{if(sc.classList.contains("drag"))sc.classList.remove("drag");else if(P0&&Date.now()-P0.t<600&&Math.hypot(e.clientX-P0.x,e.clientY-P0.y)<=8)at(e);P0=null});
+   sc.addEventListener("pointercancel",()=>{sc.classList.remove("drag");P0=null});
    sc.addEventListener("keydown",e=>{var v=typeof A[id]==="number"?A[id]:5;if(e.key==="ArrowRight"||e.key==="ArrowUp"){set(Math.min(10,v+1));e.preventDefault()}if(e.key==="ArrowLeft"||e.key==="ArrowDown"){set(Math.max(0,v-1));e.preventDefault()}})}
 
 
