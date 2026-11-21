@@ -25,5 +25,5 @@ jobs:
           DROM_PIN: ${{ secrets.DROM_PIN }}
       - run: |
           git config user.name "drom-bot"; git config user.email "drom-bot@users.noreply.github.com"
-          git add pe2027/avaliaform26/pj.json
+          git add pe2027/avaliaform26/pj.json pe2027/avaliaform26/adm.json pe2027/avaliaform26/a.json pe2027/avaliaform26/data
           git diff --cached --quiet || (git commit -qm "avaliação: projeção" && (git push -q || (git pull -q --rebase && git push -q)))

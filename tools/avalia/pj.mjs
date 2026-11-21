@@ -24,9 +24,24 @@ const FIN={},PC={},m0=(Y-2023)*12;AR.forEach((n,i)=>{const f=FD[n],L=DD.ALL.filt
  for(let mk=m0+1;mk<=m0+12;mk++){if(mk<cmk)continue;const r=C.PJmon(i,mk);if(r&&r.n){pn+=r.n;pf+=r.fat;pcu+=r.cu;pco+=r.com}}
  const R=x=>Math.round(x*100)/100;FIN[f]={fat:R(fat),cu:R(cu),com:R(com),ecu:R(ecu),ecom:R(ecom),pn,pf:R(pf),pcu:R(pcu),pco:R(pco)}});
 const CK={};AR.forEach((n,i)=>{const L=DD.ALL.filter(r=>r[1]===i&&r[14]>m0&&r[14]<=m0+12);CK[FD[n]]={n:L.length,fat:Math.round(L.reduce((a,r)=>a+(+r[6]||0),0)),com:Math.round(L.reduce((a,r)=>a+(+r[8]||0),0)),cu:Math.round(L.reduce((a,r)=>a+(+r[7]||0),0))}});console.log("CK",JSON.stringify(CK));
-const out={P,CT,CA,FIN,PC,up:pd.up||"",dia:now.toISOString().slice(0,10)},iv=crypto.randomBytes(12),ci=crypto.createCipheriv("aes-256-gcm",AK,iv);
-const enc=Buffer.concat([ci.update(JSON.stringify(out)),ci.final(),ci.getAuthTag()]);
-const f="pe2027/avaliaform26/pj.json";let old=null;try{old=JSON.parse(fs.readFileSync(f,"utf8"))}catch(e){}
-if(old&&old.h===crypto.createHash("sha256").update(JSON.stringify(out)).digest("hex").slice(0,16)){console.log("sem mudança");process.exit(0)}
-fs.writeFileSync(f,JSON.stringify({iv:iv.toString("base64"),ct:enc.toString("base64"),h:crypto.createHash("sha256").update(JSON.stringify(out)).digest("hex").slice(0,16)}));
-console.log("pj.json",JSON.stringify(Object.fromEntries(Object.entries(P).map(([k,v])=>[k,Object.values(v).reduce((x,y)=>x+y,0)]))));
+/* ===== saída: tudo determinístico (só muda quando o conteúdo muda) =====
+   pj.json   → só o hub (chave do Painel, DROM_BKK)
+   adm.json  → só o hub (chave do Painel): chave dos apps, códigos, tokens, chave de leitura
+   a.json    → config de cada artista, cifrada com login+código dele (sem a chave dos apps)
+   data/<login>.json → shows e números SÓ daquele artista, cifrados com a chave própria dele */
+const BK=b64(process.env.DROM_BKK),hm=m=>crypto.createHmac("sha256",BK).update(m).digest(),sha=t=>crypto.createHash("sha256").update(t).digest();
+const ABC="abcdefghjkmnpqrstuvwxyz23456789",code=k=>k==="teste"?"123321":[...hm("av26c:"+k)].slice(0,6).map(x=>ABC[x%31]).join(""),tok=k=>hm("av26t:"+k).toString("base64url").slice(0,24),RK=hm("av26r").toString("base64url").slice(0,32);
+function enc(key,obj,tag){const t=JSON.stringify(obj),iv=sha(tag+"|"+t).subarray(0,12),c=crypto.createCipheriv("aes-256-gcm",key,iv);return{iv:iv.toString("base64"),ct:Buffer.concat([c.update(t),c.final(),c.getAuthTag()]).toString("base64")}}
+function decf(key,f){const j=JSON.parse(fs.readFileSync(f,"utf8")),c=b64(j.ct),d=crypto.createDecipheriv("aes-256-gcm",key,b64(j.iv));d.setAuthTag(c.subarray(c.length-16));return{o:JSON.parse(Buffer.concat([d.update(c.subarray(0,c.length-16)),d.final()]).toString("utf8")),up:j.up||""}}
+const DIR="pe2027/avaliaform26/";fs.mkdirSync(DIR+"data",{recursive:true});
+const ART=[["amaro","amaro095","Amaro"],["caduvieira","caduvieira089","Cadu Vieira"],["carloto","carloto453","Carloto"],["cenoura","cenoura173","Cenoura"],["josu","josu185","Josu"],["maneira","maneira038","Maneira"],["ramonstro","ramonstro003","Ramonstro"],["sena","sena089","Sena"],["teste","sena089","Artista Teste"]];
+const AJ={},L=[],TOK={};
+ART.forEach(([k,f,n])=>{const Kd=hm("av26k:"+k),dj=decf(AK,f+"/d.json");
+ fs.writeFileSync(DIR+"data/"+k+".json",JSON.stringify(enc(Kd,{S:dj.o.S||[],up:dj.up,X:{P:P[f]||{},CT:CT[f]||{},CA,FIN:FIN[f]||null,PC:PC[f]||{}}},"d"+k)));
+ const salt=hm("salt:"+k).subarray(0,16),key=crypto.pbkdf2Sync(k+"\n"+code(k),salt,200000,32,"sha256");
+ AJ[k]=Object.assign({salt:salt.toString("base64")},enc(key,{f,n,K:Kd.toString("base64"),t:tok(k),fem:k==="maneira",teste:k==="teste"},"a"+k));
+ TOK[k]=tok(k);L.push({k,f,n,c:code(k),teste:k==="teste"})});
+fs.writeFileSync(DIR+"a.json",JSON.stringify(AJ));
+fs.writeFileSync(DIR+"adm.json",JSON.stringify(enc(BK,{ak:AK.toString("base64"),rk:RK,L,tok:TOK},"adm")));
+fs.writeFileSync(DIR+"pj.json",JSON.stringify(enc(BK,{P,CT,CA,FIN,PC,up:pd.up||""},"pj")));
+console.log("ok",ART.length,"artistas");
