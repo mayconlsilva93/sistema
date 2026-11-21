@@ -16,8 +16,8 @@ def get(**q):
     if r.get('err'):sys.exit('Apps Script: '+r['err'])
     return r
 def art(folder):
-    f=re.sub(r'^DJ\s+','',folder or '');f=re.sub(r'\s*-\s*DROM$','',f).strip()
-    return next((a for a in ARTS if a.lower()==f.lower()),None)
+    f=(folder or '').lower()
+    return next((a for a in sorted(ARTS,key=len,reverse=True) if a.lower() in f),None)
 state.unpack(W)
 since=open(SINCE).read().strip() if os.path.exists(SINCE) else str(int(time.time()*1000)-11*3600*1000)
 S=get(scan=1,since=since)
