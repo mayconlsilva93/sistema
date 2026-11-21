@@ -5,7 +5,7 @@
 var URL="https://script.google.com/macros/s/AKfycbzk5iksIZVvdK27taLTcpQbdPebxGjP7ilwNxiQDYwUuTSaMz80Hifmgr-5aazWhI0R/exec";
 var TN={eq:"Envio de equipe",vc:"Vídeo de chamada",cm:"Custos do mês"},B=2023;
 var TX={eq:"Sua equipe será de até 3 pessoas, identificadas pelo nome completo e CPF. Indique em seu grupo artístico a equipe e a placa de carro, caso vá utilizar o estacionamento.",
- vc:"O evento solicitou a gravação de vídeo de chamada. Envie o vídeo em seu grupo artístico."};
+ vc:"O evento solicitou a gravação de vídeo de chamada. O vídeo deve ter 15s, convidando o público para o evento, citando data e local. Envie o vídeo em seu grupo artístico."};
 var REM={p:3,h:9,f:2};
 var b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),b6=u=>btoa(String.fromCharCode.apply(null,u)),p2=n=>String(n).padStart(2,"0");
 var esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
@@ -15,7 +15,7 @@ var st=document.createElement("style");st.textContent=
 "#tv .tcd{background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:14px}#tv .tg{display:grid;grid-template-columns:1fr 1fr;gap:10px}"+
 "#tv label{display:block;font-size:13px;color:var(--mu);margin:10px 0 5px}#tv select,#tv input,#tv textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--bd);border-radius:10px;font-family:inherit;font-size:15px;background:var(--cd);color:var(--tx)}"+
 "#tv textarea{min-height:96px;resize:vertical}#tv .tch{display:flex;flex-wrap:wrap;gap:6px}#tv .tch button{border:1.5px solid var(--ac);background:none;color:var(--ac);border-radius:16px;padding:5px 11px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}#tv .tch button.on{background:var(--ac);color:var(--acx)}"+
-"#tv .trm{font-size:14px;line-height:2;color:var(--tx)}#tv .trm input{width:52px;padding:4px 6px;text-align:center;display:inline-block}"+
+"#tv .trm{font-size:12.5px;line-height:1.35;color:var(--tx)}#tv .trm>div{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:1px solid var(--bd)}#tv .trm>div:first-child{border-top:0}#tv .trm input{width:50px;padding:3px 5px;text-align:center;font-size:13px;flex:none}#tv .trm small{display:block;color:var(--mu);font-size:11.5px;margin-top:1px}"+"#tv .tch button:disabled{opacity:.3;cursor:not-allowed}"+
 "#tv .tbn{width:100%;margin-top:14px;background:var(--ac);color:var(--acx);border:0;border-radius:12px;padding:13px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}#tv .tbn:disabled{opacity:.5}"+
 "#tv .tms{font-size:13px;color:var(--mu);margin:8px 0 0;min-height:1em}#tv .tau{display:flex;align-items:center;gap:10px}#tv .tau div{flex:1}#tv .tau small{display:block;color:var(--mu);font-size:12.5px}"+
 "#tv .tsw{position:relative;width:46px;height:26px;border-radius:13px;border:0;background:#c9c9c9;cursor:pointer;flex:none}#tv .tsw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}#tv .tsw.on{background:var(--ac)}#tv .tsw.on::after{left:23px}"+
@@ -39,21 +39,25 @@ function dflt(k,e){if(!e)return"";var d=new Date(B,e.m-1,e.d,k==="vc"?12:18,0);v
 function draw(){var h=H(),v=$("tv");if(!h||!h.CFG){v.innerHTML="";return}
  if(!h.AK){v.innerHTML='<p class="mu" style="padding:20px">Tarefas: use o DROM Hub do GitHub (dromentretenimento.com/sistema).</p>';return}
  if(!ST){v.innerHTML='<p class="mu" style="padding:20px">Carregando tarefas…</p>';return}
- var E=evs(),k=v.dataset.k||"eq";
+ var E=evs(),k=v.dataset.k||"eq",CE=E.find(x=>x.k===v.dataset.ev)||null;if(CE)SEL=SEL.filter(f=>CE.f.indexOf(f)>=0);
  var o='<h2>Nova tarefa</h2><div class="tcd"><div class="tg"><div><label>Tipo</label><select id="tk"><option value="eq">Envio de equipe</option><option value="vc">Vídeo de chamada</option></select></div>'+
   '<div><label>Evento (da agenda)</label><select id="tev"><option value="">—</option>'+E.map((e,i)=>'<option value="'+esc(e.k)+'">'+p2(e.d)+"/"+p2((e.m-1)%12+1)+" · "+esc(e.n)+"</option>").join("")+"</select></div></div>"+
-  '<label>Para quem</label><div class="tch"><button type="button" data-f="*">Todos</button>'+apps().map(a=>'<button type="button" data-f="'+a.f+'" class="'+(SEL.indexOf(a.f)>=0?"on":"")+'">'+esc(h.nm(a))+"</button>").join("")+"</div>"+
+  '<label>Para quem</label><div class="tch"><button type="button" data-f="*">Todos</button>'+apps().map(a=>'<button type="button" data-f="'+a.f+'" class="'+(SEL.indexOf(a.f)>=0?"on":"")+'"'+(CE&&CE.f.indexOf(a.f)<0?" disabled":"")+'>'+esc(h.nm(a))+"</button>").join("")+"</div>"+(CE?'<p class="tms" style="margin-top:4px">Só os artistas que tocam neste evento podem ser escolhidos.</p>':"")+
   '<label>Texto (já vem do modelo do tipo, editável)</label><textarea id="ttx"></textarea>'+
-  '<label>Prazo</label><input id="tdu" type="datetime-local"><div><label>Lembretes (padrão, editável)</label><div class="trm">Popup a cada <input id="rp" type="number" min="1" max="24" value="'+REM.p+'"> h no dia · push às <input id="rh" type="number" min="0" max="23" value="'+REM.h+'"> h · de hora em hora nas <input id="rf" type="number" min="0" max="12" value="'+REM.f+'"> h finais e depois de vencer</div></div>'+
+  '<label>Prazo</label><input id="tdu" type="datetime-local"><div><label>Lembretes (padrão, editável)</label><div class="trm">'+
+   '<div><input id="rp" type="number" min="1" max="24" value="'+REM.p+'"><span><b>horas entre popups no dia do prazo</b><small>No dia do prazo, o aviso abre de novo no app a cada tantas horas, até o artista tocar em "Já enviei".</small></span></div>'+
+   '<div><input id="rh" type="number" min="0" max="23" value="'+REM.h+'"><span><b>hora do push diário</b><small>No dia do prazo (e nos dias de atraso), o celular recebe um push a partir desta hora.</small></span></div>'+
+   '<div><input id="rf" type="number" min="0" max="12" value="'+REM.f+'"><span><b>horas finais com push de hora em hora</b><small>Nas últimas horas antes do prazo, e depois que ele vencer, chega um push a cada hora (das 8h às 22h).</small></span></div>'+
+  '</div></div>'+
   '<button class="tbn" id="tgo" type="button">Enviar tarefa</button><p class="tms" id="tms"></p></div>'+
-  '<h2>Tarefas automáticas</h2><div class="tcd tau"><div><b>Custos do mês</b><small>No dia 1º, pede os custos dos shows do mês anterior (prazo dia 7). '+(ST.cfg.custos?"Ativada.":"Desativada.")+'</small></div><button type="button" class="tsw'+(ST.cfg.custos?" on":"")+'" id="tcu" aria-label="Ativar Custos do mês"></button></div>'+
+  '<h2>Tarefas automáticas</h2><div class="tcd tau"><div><b>Custos do mês</b><small>Pede os custos dos shows do mês 2 dias depois do último show do mês na agenda, ou no dia 1º do mês seguinte, o que vier primeiro. Prazo: 5º dia útil do mês seguinte (segunda a sexta, sem feriados nacionais). '+(ST.cfg.custos?"Ativada.":"Desativada.")+'</small></div><button type="button" class="tsw'+(ST.cfg.custos?" on":"")+'" id="tcu" aria-label="Ativar Custos do mês"></button></div>'+
   "<h2>Acompanhamento</h2>"+trk();
  v.innerHTML=o;$("tk").value=k;
  var tx=$("ttx"),du=$("tdu"),ev=$("tev");tx.value=v.dataset.tx||TX[k];du.value=v.dataset.du||"";ev.value=v.dataset.ev||"";
  tx.oninput=()=>v.dataset.tx=tx.value;du.oninput=()=>v.dataset.du=du.value;
  $("tk").onchange=()=>{var nk=$("tk").value;if(!v.dataset.tx||v.dataset.tx===TX[k])delete v.dataset.tx;v.dataset.k=nk;var e=E.find(x=>x.k===ev.value);if(e)v.dataset.du=dflt(nk,e);draw()};
  ev.onchange=()=>{v.dataset.ev=ev.value;var e=E.find(x=>x.k===ev.value);if(e){SEL=e.f.slice();v.dataset.du=dflt(k,e)}draw()};
- v.querySelectorAll(".tch button").forEach(b=>b.onclick=()=>{var f=b.dataset.f;if(f==="*")SEL=SEL.length===apps().length?[]:apps().map(a=>a.f);else SEL=SEL.indexOf(f)>=0?SEL.filter(x=>x!==f):SEL.concat(f);draw()});
+ v.querySelectorAll(".tch button").forEach(b=>b.onclick=()=>{var f=b.dataset.f,P=CE?CE.f:apps().map(a=>a.f);if(f!=="*"&&P.indexOf(f)<0)return;if(f==="*")SEL=SEL.length===P.length?[]:P.slice();else SEL=SEL.indexOf(f)>=0?SEL.filter(x=>x!==f):SEL.concat(f);draw()});
  $("tgo").onclick=send;
  $("tcu").onclick=async()=>{if(BUSY)return;BUSY=1;ST.cfg.custos=!ST.cfg.custos;try{await save()}catch(e){}BUSY=0;draw()};
  v.querySelectorAll("[data-x]").forEach(b=>b.onclick=async()=>{var t=ST.T.find(x=>x.id===b.dataset.x);if(!t||!confirm("Encerrar a tarefa \""+TN[t.k]+(t.ev?" · "+t.ev:"")+"\" para todos?"))return;t.x=Date.now();await save();draw()})}
@@ -62,7 +66,7 @@ function trk(){var h=H(),now=Date.now(),R=[];ST.T.slice().sort((a,b)=>(!!a.x-!!b
   R.push("<tr><td><b>"+esc(TN[t.k])+"</b>"+(t.ev?" · "+esc(t.ev):"")+"<br>"+esc(a?h.nm(a):f)+'</td><td>'+fdt(t.due)+'</td><td>'+fdt(t.cr)+"</td><td>"+sit+(!t.x&&!ok&&f===t.to.find(g=>!OK.some(x=>x.id===t.id&&x.f===g))?'<br><button class="tlk" data-x="'+t.id+'">Encerrar</button>':"")+"</td></tr>")}));
  return R.length?"<table><tr><th>Tarefa · artista</th><th>Prazo</th><th>Enviada</th><th>Situação</th></tr>"+R.join("")+"</table>":'<p class="mu">Nenhuma tarefa enviada ainda.</p>'}
 async function send(){var v=$("tv"),m=$("tms"),k=$("tk").value,tx=$("ttx").value.trim(),du=$("tdu").value,e=evs().find(x=>x.k===$("tev").value);
- if(!SEL.length){m.textContent="Escolha para quem.";return}if(!tx){m.textContent="Escreva o texto.";return}if(!du){m.textContent="Escolha o prazo.";return}
+ if(e)SEL=SEL.filter(f=>e.f.indexOf(f)>=0);if(!SEL.length){m.textContent="Escolha para quem.";return}if(!tx){m.textContent="Escreva o texto.";return}if(!du){m.textContent="Escolha o prazo.";return}
  var t=new Date(du).getTime(),n=x=>Math.max(0,parseInt($(x).value,10)||0);if(!(t>Date.now())){m.textContent="O prazo precisa ser no futuro.";return}
  $("tgo").disabled=true;m.textContent="Enviando…";
  try{await load();ST.T.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),k:k,ev:e?e.n:"",tx:tx,due:t,to:SEL.slice(),rem:{p:n("rp")||3,h:n("rh"),f:n("rf")},cr:Date.now()});await save();

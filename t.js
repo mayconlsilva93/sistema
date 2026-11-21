@@ -27,17 +27,27 @@ function pz(t,full){var d=new Date(t),h=d.getHours()===23&&d.getMinutes()===59?"
  if(day(t)===today())return"hoje, "+dm+h;return dm+(full?" ("+W[d.getDay()]+")":"")+h}
 var red=x=>day(x.due)<=today();
 var T=[],DONE={};
-function custos(cfg){if(!cfg||!cfg.custos)return[];var n=new Date(),m=(n.getFullYear()-B)*12+n.getMonth()+1,pm=m-1,S=(window.DROMDATA&&DROMDATA.S)||[];
- if(n.getDate()>10)return[];var L=S.filter(s=>s[19]===pm);if(!L.length)return[];var due=new Date(n.getFullYear(),n.getMonth(),7,23,59).getTime(),mn=MS[(pm-1)%12];
- return[{id:"cm-"+pm,k:"cm",ev:"Shows de "+mn+" finalizados!",tx:"Você deve informar os custos até "+p2(7)+"/"+p2(n.getMonth()+1)+" dentro do aplicativo ou em seu grupo financeiro.",due:due,rem:{p:3},L:L}]}
+var lb=x=>x.k==="cm"?TN.cm:(TN[x.k]||"Tarefa")+(x.ev?" ("+x.ev+")":"");
+/* Custos do mês: criada 2 dias após o último show do mês na agenda ou no dia 1º do mês seguinte (o que vier primeiro); prazo: 5º dia útil do mês seguinte (seg–sex, sem feriados nacionais) */
+function eas(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h-22*l)/451),x=h+l-7*m+114;return new Date(y,Math.floor(x/31)-1,x%31+1)}
+function bd5(y,mo){var D=new Date(y,mo,1);y=D.getFullYear();mo=D.getMonth();var gf=eas(y);gf.setDate(gf.getDate()-2);
+ var F=["0-1","3-21","4-1","8-7","9-12","10-2","10-15","10-20","11-25",gf.getMonth()+"-"+gf.getDate()],n=0;
+ for(var d=1;d<32;d++){var w=new Date(y,mo,d).getDay();if(w&&w<6&&F.indexOf(mo+"-"+d)<0&&++n===5)return new Date(y,mo,d,23,59).getTime()}}
+function cmT(S,mi){var L=S.filter(s=>s[19]===mi);if(!L.length)return null;var M0=new Date(B,mi-1,1),y=M0.getFullYear(),mo=M0.getMonth(),last=Math.max.apply(null,L.map(s=>s[0]));
+ var cr=Math.min(new Date(y,mo,last+2,9).getTime(),new Date(y,mo+1,1,9).getTime());return{mi:mi,L:L,cr:cr,due:bd5(y,mo+1),mn:["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"][mo]}}
+
+function custos(cfg){if(!cfg||!cfg.custos)return[];var n=new Date(),now=n.getTime(),m=(n.getFullYear()-B)*12+n.getMonth()+1,S=(window.DROMDATA&&DROMDATA.S)||[],o=[];
+ [m-1,m].forEach(mi=>{var c=cmT(S,mi);if(!c||now<c.cr||now>c.due+3*24*H)return;var dd=new Date(c.due);
+  o.push({id:"cm-"+mi,k:"cm",ev:"Shows de "+c.mn+" finalizados!",tx:"Você deve informar os custos até "+p2(dd.getDate())+"/"+p2(dd.getMonth()+1)+" dentro do aplicativo ou em seu grupo financeiro.",due:c.due,rem:{p:3},L:c.L})});return o}
 async function load(){var A=await list("tarefas"),cur=A.filter(x=>x&&x.ts).sort((a,b)=>b.ts-a.ts)[0]||{T:[],cfg:{}};
  var ok=await list("tarok");ok.forEach(x=>{if(x&&(x.f===F||String(x.f).endsWith("/"+F)))DONE[x.id]=x.ts});(ls.g("done")||[]).forEach(id=>DONE[id]=DONE[id]||1);
  T=(cur.T||[]).filter(x=>{if(x.x)return false;x._f=(x.to||[]).find(g=>g===F||g.endsWith("/"+F));return !!x._f}).concat(custos(cur.cfg)).filter(x=>!DONE[x.id]).sort((a,b)=>a.due-b.due);
- bar();auto()}
+ bar();bell();auto()}
+function bell(){if(!window.DROMNADD)return;var sn=ls.g("bell")||[],L=T.filter(x=>sn.indexOf(x.id)<0);if(!L.length)return;L.forEach(x=>sn.push(x.id));ls.s("bell",sn.slice(-100));DROMNADD(L.map(x=>({t:lb(x),b:"Prazo: "+pz(x.due)})))}
 function auto(){if(document.querySelector(".tpo"))return;var seen=ls.g("seen")||{},now=Date.now();
  var x=T.find(x=>{var s=seen[x.id];if(!s)return true;var p=((x.rem&&x.rem.p)||3)*H;return red(x)&&now-s>=p});if(x)pop(x)}
 function bar(){var o=document.querySelector(".tbr");if(o)o.remove();var x=T[0];if(!x||sessionStorage.getItem("tbrx"+F)===x.id)return;
- var b=document.createElement("div");b.className="tbr"+(red(x)?" rd":"");b.innerHTML="<i>!</i><span>"+esc(TN[x.k]||"Tarefa")+". Prazo: <b>"+esc(pz(x.due))+"</b></span><button type=button aria-label=Fechar>✕</button>";
+ var b=document.createElement("div");b.className="tbr"+(red(x)?" rd":"");b.innerHTML="<i>!</i><span>"+esc(lb(x))+". Prazo: <b>"+esc(pz(x.due))+"</b></span><button type=button aria-label=Fechar>✕</button>";
  b.onclick=e=>{if(e.target.tagName==="BUTTON"){sessionStorage.setItem("tbrx"+F,x.id);b.remove();return}pop(x)};document.body.appendChild(b)}
 function pop(x){var seen=ls.g("seen")||{};seen[x.id]=Date.now();ls.s("seen",seen);var cm=x.k==="cm",m=document.createElement("div");m.className="tpo"+(red(x)?" rd":"");
  var lst=cm&&x.L?'<div class="tl">Shows do mês: <b>'+x.L.length+"</b><ul>"+x.L.slice(0,8).map(s=>"<li>"+esc(W[new Date(B,s[19]-1,s[0]).getDay()].replace(/^./,c=>c.toUpperCase())+" "+p2(s[0])+"/"+p2((s[19]-1)%12+1)+" · "+(s[1]||s[2]||""))+"</li>").join("")+"</ul></div>":"";
