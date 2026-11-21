@@ -28,7 +28,13 @@ def _load(name,path=None): return [(str(h).strip() if h else '') for h in ROWS[H
 sheets_load.load=_load;convert.load=_load;drom_data._rows=lambda name:(ROWS,HI)
 convert.PFX[TA]='11'
 import re as _re;_p0=convert._parc   # só no dev: entradas do app gravadas como "dd/mm/aaaa (R$ x), dd/mm/aaaa (R$ y)" viram uma por linha
-convert._parc=lambda x:_p0(dict(x,drec=_re.sub(r',\s*(?=\d{1,2}/\d{1,2}/\d{2,4})','\n',x['drec'])) if isinstance(x.get('drec'),str) else _p0(x))
+def _pz(x):
+    try:
+        if isinstance(x,dict) and isinstance(x.get('drec'),str): x=dict(x,drec=_re.sub(r',\s*(?=\d{1,2}/\d{1,2}/\d{2,4})','\n',x['drec']))
+        return _p0(x)
+    except Exception as e:
+        print('parcelas ignoradas:',type(x).__name__,e); return []
+convert._parc=_pz
 # ---- app dev: S (shows), OT (outras propostas por mês), BK, CL, PR ----
 S=[];O=collections.Counter()
 for x in convert.rows(TA):
