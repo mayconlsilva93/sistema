@@ -7,7 +7,7 @@ var fr=n=>"R$ "+(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFr
  du=m=>!m?"-":m<60?m+" min":Math.floor(m/60)+"h"+(m%60?String(m%60).padStart(2,"0"):"");
 function kp(v,l,x,c){return'<div class="kp'+(c?" "+c:"")+'"><b class="cnt" data-v="'+(typeof v==="number"?v:"")+'">'+(typeof v==="number"?v:v)+'</b><span>'+l+'</span>'+(x||"")+'</div>'}
 function bars(L,max,fmt){max=max||Math.max(1,...L.map(x=>x[1]));return'<div class="hb">'+L.map(x=>'<div class="hbr"><span class="hbl">'+es(x[0])+'</span><span class="hbt"><i style="--w:'+(x[1]/max*100)+'%"></i></span><span class="hbv">'+(fmt?fmt(x[1]):x[1])+'</span></div>').join("")+'</div>'}
-function chart(st){var mx=Math.max(1,...st.mon.map(m=>Math.max(m.r+m.f+m.p,m.y25))),H=150,w=100/12,o='<svg class="ch" viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="Shows por mês em 2026">';
+function chart(st){var mx=Math.max(1,...st.mon.map(m=>Math.max(m.r+m.f+m.p,m.y25))),H=150,w=100/12,o='<svg class="ch" viewBox="0 0 600 190" role="img" aria-label="Shows por mês em 2026">';
  for(var g=0;g<=4;g++){var y=10+H-H*g/4;o+='<line x1="0" x2="600" y1="'+y+'" y2="'+y+'" class="gl"/>'}
  st.mon.forEach((m,i)=>{var x=i*50+9,bw=32,y=10+H,seg=[[m.r,"cr"],[m.f,"cf"],[m.p,"cp"]];seg.forEach((q,j)=>{if(!q[0])return;var h=H*q[0]/mx;y-=h;o+='<rect class="'+q[1]+' gr" style="--d:'+(i*40+j*80)+'ms" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="3"><title>'+MN[i]+"/2026 · "+["realizados","a realizar","projetados"][j]+": "+q[0]+'</title></rect>'});
   var t=m.r+m.f+m.p;if(t)o+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" class="tv">'+t+'</text>';o+='<text x="'+(x+bw/2)+'" y="183" class="tx">'+MN[i]+'</text>'});
