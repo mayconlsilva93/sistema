@@ -4,7 +4,7 @@
 var URL="https://script.google.com/macros/s/AKfycbzk5iksIZVvdK27taLTcpQbdPebxGjP7ilwNxiQDYwUuTSaMz80Hifmgr-5aazWhI0R/exec";
 var K=window.DROMKEY;if(!K||!window.crypto||!crypto.subtle)return;
 var F=(location.pathname.match(/([^\/]+)\/(?:index\.html)?$/)||[])[1]||"",B=2023,H=36e5;
-var TN={eq:"Envio de equipe",vc:"Vídeo de chamada",cm:"Custos do mês"},W=["dom","seg","ter","qua","qui","sex","sáb"],MS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+var TN={eq:"Envio de equipe",vc:"Vídeo de chamada",ot:"Tarefa",cm:"Custos do mês"},W=["dom","seg","ter","qua","qui","sex","sáb"],MS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 var b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),b6=u=>btoa(String.fromCharCode.apply(null,u)),p2=n=>String(n).padStart(2,"0");
 var esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
 var ls={g:k=>{try{return JSON.parse(localStorage.getItem("tar_"+F+"_"+k))}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem("tar_"+F+"_"+k,JSON.stringify(v))}catch(e){}}};
@@ -27,7 +27,7 @@ function pz(t,full){var d=new Date(t),h=d.getHours()===23&&d.getMinutes()===59?"
  if(day(t)===today())return"hoje, "+dm+h;return dm+(full?" ("+W[d.getDay()]+")":"")+h}
 var red=x=>day(x.due)<=today();
 var T=[],DONE={};
-var lb=x=>x.k==="cm"?TN.cm:(TN[x.k]||"Tarefa")+(x.ev?" ("+x.ev+")":"");
+var tn=x=>x.k==="ot"&&x.ti?x.ti:TN[x.k]||"Tarefa",lb=x=>x.k==="cm"?TN.cm:tn(x)+(x.ev?" ("+x.ev+")":"");
 /* Custos do mês: criada 2 dias após o último show do mês na agenda ou no dia 1º do mês seguinte (o que vier primeiro); prazo: 5º dia útil do mês seguinte (seg–sex, sem feriados nacionais) */
 function eas(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h-22*l)/451),x=h+l-7*m+114;return new Date(y,Math.floor(x/31)-1,x%31+1)}
 function bd5(y,mo){var D=new Date(y,mo,1);y=D.getFullYear();mo=D.getMonth();var gf=eas(y);gf.setDate(gf.getDate()-2);
@@ -51,7 +51,7 @@ function bar(){var o=document.querySelector(".tbr");if(o)o.remove();var x=T[0];i
  b.onclick=e=>{if(e.target.tagName==="BUTTON"){sessionStorage.setItem("tbrx"+F,x.id);b.remove();return}pop(x)};document.body.appendChild(b)}
 function pop(x){var seen=ls.g("seen")||{};seen[x.id]=Date.now();ls.s("seen",seen);var cm=x.k==="cm",m=document.createElement("div");m.className="tpo"+(red(x)?" rd":"");
  var lst=cm&&x.L?'<div class="tl">Shows do mês: <b>'+x.L.length+"</b><ul>"+x.L.slice(0,8).map(s=>"<li>"+esc(W[new Date(B,s[19]-1,s[0]).getDay()].replace(/^./,c=>c.toUpperCase())+" "+p2(s[0])+"/"+p2((s[19]-1)%12+1)+" · "+(s[1]||s[2]||""))+"</li>").join("")+"</ul></div>":"";
- m.innerHTML='<div role="dialog" aria-modal="true"><div class="th">'+esc(TN[x.k]||"Tarefa")+'</div><div class="tb">'+(x.ev?"<h3>"+esc(x.ev)+"</h3>":"")+'<span class="tz">Prazo: '+esc(pz(x.due,1))+"</span><p>"+esc(x.tx||"")+"</p>"+lst+
+ m.innerHTML='<div role="dialog" aria-modal="true"><div class="th">'+esc(tn(x))+'</div><div class="tb">'+(x.ev?"<h3>"+esc(x.ev)+"</h3>":"")+'<span class="tz">Prazo: '+esc(pz(x.due,1))+"</span><p>"+esc(x.tx||"")+"</p>"+lst+
   '<div class="tbt"><button class="t0" type="button">'+(cm?"Depois":"Lembrar depois")+'</button><button class="t1" type="button">'+(cm?"Informar custos agora":"Já enviei")+"</button></div></div></div>";
  document.body.appendChild(m);m.onclick=e=>{if(e.target===m)m.remove()};m.querySelector(".t0").onclick=()=>m.remove();
  m.querySelector(".t1").onclick=()=>{if(cm){m.remove();var f=document.querySelector('nav button[data-t="f"]');if(f)f.click();return}conf(x,m)}}

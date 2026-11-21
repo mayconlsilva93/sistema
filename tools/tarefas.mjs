@@ -17,7 +17,7 @@ const A=await list("tarefas"),OK=await list("tarok");
 if(!A||!OK){console.log("tarefas: Apps Script indisponível");process.exit(0)}
 const cur=A.filter(x=>x&&x.ts).sort((a,b)=>b.ts-a.ts)[0]||{T:[],cfg:{}};
 const SF="tools/tarst.json";let ST={};try{ST=JSON.parse(fs.readFileSync(SF))}catch(e){}ST.s=ST.s||{};ST.ok=ST.ok||[];
-const TN={eq:"Envio de equipe",vc:"Vídeo de chamada",cm:"Custos do mês"},MS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const TN={eq:"Envio de equipe",vc:"Vídeo de chamada",ot:"Tarefa",cm:"Custos do mês"},MS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const p2=n=>String(n).padStart(2,"0"),fdt=t=>{const d=new Date(t);return p2(d.getDate())+"/"+p2(d.getMonth()+1)+(d.getHours()===23&&d.getMinutes()===59?"":" "+p2(d.getHours())+":"+p2(d.getMinutes()))};
 const dk=t=>{const d=new Date(t);return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())};
 function eas(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h-22*l)/451),x=h+l-7*m+114;return new Date(y,Math.floor(x/31)-1,x%31+1)}
@@ -26,7 +26,7 @@ function bd5(y,mo){var D=new Date(y,mo,1);y=D.getFullYear();mo=D.getMonth();var 
  for(var d=1;d<32;d++){var w=new Date(y,mo,d).getDay();if(w&&w<6&&F.indexOf(mo+"-"+d)<0&&++n===5)return new Date(y,mo,d,23,59).getTime()}}
 function cmT(S,mi){var L=S.filter(s=>s[19]===mi);if(!L.length)return null;var M0=new Date(B,mi-1,1),y=M0.getFullYear(),mo=M0.getMonth(),last=Math.max.apply(null,L.map(s=>s[0]));
  var cr=Math.min(new Date(y,mo,last+2,9).getTime(),new Date(y,mo+1,1,9).getTime());return{mi:mi,L:L,cr:cr,due:bd5(y,mo+1),mn:["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"][mo]}}
-const lb=t=>t.k==="cm"?TN.cm:(TN[t.k]||"Pendência")+(t.ev?" ("+t.ev+")":"");
+const lb=t=>t.k==="cm"?TN.cm:(t.k==="ot"&&t.ti?t.ti:TN[t.k]||"Pendência")+(t.ev?" ("+t.ev+")":"");
 const done=(id,f)=>OK.some(x=>x.id===id&&x.f===f);
 /* tarefas por artista */
 const J=[];
