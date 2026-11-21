@@ -43,3 +43,4 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 @media(max-width:560px){.agp span{display:none}.agp{padding:0 2px}.ag{grid-template-columns:36px repeat(3,1fr)}}
 .ags{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--bg);flex-wrap:wrap}.ags img{width:34px;height:34px;border-radius:50%}.ags b{min-width:110px}.ags span{flex:1;font-size:13px;color:var(--mu)}.ags em{font-style:normal;font-weight:700}.ags em.ok{color:var(--bl)}.ags em.no{color:#d93025}
 .agx{height:30px;padding:0 12px;border-radius:15px;border:1px solid var(--ln);background:#fff;font-size:12px;display:inline-flex;align-items:center;line-height:1}
+.tsh{background:var(--ye);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:14px}
