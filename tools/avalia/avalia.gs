@@ -2,13 +2,14 @@
    grava numa planilha da conta DROM (sem e-mail). O hub lê tudo com ?r=<READ>.
    Propriedades do script (Configurações do projeto → Propriedades): TOKENS = JSON {login: token}, READ = chave de leitura do hub.
    Implantar como app da Web: Executar como "Eu", acesso "Qualquer pessoa". */
-var DROM_MAIL="contato@dromentretenimento.com",PRAZO=new Date("2026-11-27T12:00:00-03:00");
+var PASTA="1jZU1c-vJMVTa2ABpDdtZ-6PMnpsjyess" /* Meu Drive/DROM/ADMINISTRATIVO/CADASTRO DE ARTISTAS */,DROM_MAIL="contato@dromentretenimento.com",PRAZO=new Date("2026-11-27T12:00:00-03:00");
 function P_(k){return PropertiesService.getScriptProperties().getProperty(k)}
 function out_(o){return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON)}
 function sh_(){var p=PropertiesService.getScriptProperties(),id=p.getProperty("SHEET"),ss;
   if(id){try{ss=SpreadsheetApp.openById(id)}catch(e){ss=null}}
   if(!ss){ss=SpreadsheetApp.create("DROM · Avaliação 2026 (respostas)");p.setProperty("SHEET",ss.getId());
     var a=ss.getSheets()[0];a.setName("Respostas");a.appendRow(["login","nome","e-mail","enviado em","teste","respostas (json)","números (json)","texto (json)"]);
+    try{DriveApp.getFileById(ss.getId()).moveTo(DriveApp.getFolderById(PASTA))}catch(e){}
     ss.insertSheet("Histórico").appendRow(["login","nome","e-mail","enviado em","teste","respostas (json)"]);ss.insertSheet("Rascunhos").appendRow(["login","nome","salvo em","ts","respostas (json)"])}
   return ss}
 function doPost(e){try{var b=JSON.parse(e.postData.contents),T=JSON.parse(P_("TOKENS")||"{}");
@@ -27,8 +28,14 @@ function doPost(e){try{var b=JSON.parse(e.postData.contents),T=JSON.parse(P_("TO
       v=r.getDataRange().getValues(),at=-1;
   for(var i=1;i<v.length;i++)if(v[i][0]===b.k){at=i+1;break}
   if(at>0)r.getRange(at,1,1,row.length).setValues([row]);else r.appendRow(row);
-  ss.getSheetByName("Histórico").appendRow(row.slice(0,6));lock.releaseLock();
+  ss.getSheetByName("Histórico").appendRow(row.slice(0,6));tabela_(ss,b,now);lock.releaseLock();
   return out_({ok:true,em:now})}catch(err){return out_({ok:false,err:String(err)})}}
+/* aba "Tabela": uma linha por artista e uma coluna por pergunta (backup legível) */
+function tabela_(ss,b,now){var t=ss.getSheetByName("Tabela")||ss.insertSheet("Tabela",0),H=["Artista","Login","Enviado em"],V=[b.n,b.k,now];
+  (b.r||[]).forEach(function(s){s.i.forEach(function(q){H.push(s.s+" · "+q.q);V.push(q.a||"")})});
+  t.getRange(1,1,1,H.length).setValues([H]).setFontWeight("bold").setWrap(true);t.setFrozenRows(1);t.setFrozenColumns(1);
+  var v=t.getLastRow()>1?t.getRange(2,2,t.getLastRow()-1,1).getValues():[],at=-1;for(var i=0;i<v.length;i++)if(v[i][0]===b.k){at=i+2;break}
+  if(at<0)at=t.getLastRow()+1;t.getRange(at,1,1,V.length).setValues([V])}
 function esc_(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function doGet(e){var p=e.parameter,ss=sh_(),rd=ss.getSheetByName("Rascunhos"),dv=rd?rd.getDataRange().getValues():[];
   if(p.k){var T=JSON.parse(P_("TOKENS")||"{}");if(!T[p.k]||T[p.k]!==p.t)return out_({ok:false});var o={ok:true,clr:P_("CLR_"+p.k)||""};
