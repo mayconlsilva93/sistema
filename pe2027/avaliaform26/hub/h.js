@@ -8,12 +8,13 @@ async function kget(n){try{var d=await db();return await new Promise(ok=>{var q=
 async function kput(n,v){try{var d=await db();await new Promise(ok=>{var t=d.transaction("k","readwrite");t.objectStore("k").put(v,n);t.oncomplete=ok;t.onerror=ok})}catch(e){}}
 async function derive(p,salt){var k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(salt),iterations:200000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["decrypt"])}
 async function dec(k,iv,ct){return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(iv)},k,b64(ct))))}
-var H=null;
-async function start(){try{H=await (await fetch("../../../h.json",{cache:"no-store"})).json()}catch(e){$("lkm").textContent="Sem conexão.";return}
- var st=await kget("hub");if(st&&st.salt===H.salt&&Date.now()<FW(st.ts)){try{return go(await dec(st.key,H.iv,H.ct))}catch(e){}}$("usr").focus()}
-$("lkf").onsubmit=async e=>{e.preventDefault();var u=$("usr").value.trim().toLowerCase(),p=$("pin").value;if(!u||!p)return;$("lkm").textContent="Verificando…";
- try{var k=await derive(u+"\n"+p,H.salt),c=await dec(k,H.iv,H.ct);await kput("hub",{key:k,salt:H.salt,ts:Date.now()});go(c)}catch(er){$("lkm").textContent="Login ou senha incorretos.";$("pin").value=""}};
-async function go(c){AK=await crypto.subtle.importKey("raw",b64(c.ak),"AES-GCM",false,["decrypt"]);var a=await (await fetch("../adm.json?v="+Date.now(),{cache:"no-store"})).json();ADM=await dec(AK,a.iv,a.ct);
+/* acesso exclusivo da DROM: login "drom" + senha própria do hub de avaliação (adm.json cifrado só com ela; nada do hub fica acessível com a chave dos apps) */
+var AJ=null;
+async function start(){try{AJ=await (await fetch("../adm.json?v="+Date.now(),{cache:"no-store"})).json()}catch(e){$("lkm").textContent="Sem conexão.";return}
+ var st=await kget("av26adm");if(st&&st.salt===AJ.salt&&Date.now()-st.ts<30*864e5){try{return go(await dec(st.key,AJ.iv,AJ.ct))}catch(e){}}$("usr").focus()}
+$("lkf").onsubmit=async e=>{e.preventDefault();var u=$("usr").value.trim().toLowerCase(),p=$("pin").value.trim();if(!u||!p)return;$("lkm").textContent="Verificando…";
+ try{var k=await derive(u+"\n"+p,AJ.salt),c=await dec(k,AJ.iv,AJ.ct);await kput("av26adm",{key:k,salt:AJ.salt,ts:Date.now()});go(c)}catch(er){$("lkm").textContent="Login ou senha incorretos.";$("pin").value=""}};
+async function go(c){ADM=c;AK=await crypto.subtle.importKey("raw",b64(c.ak),"AES-GCM",false,["decrypt"]);
  $("lk").remove();$("app").hidden=false;$("tst").checked=localStorage.getItem("av26_hubt")==="1";
  $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{TAB=b.dataset.t;$("nav").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));draw()});
  $("tst").onchange=()=>{localStorage.setItem("av26_hubt",$("tst").checked?"1":"0");draw()};$("rf").onclick=()=>load(1);$("clt").hidden=!$("tst").checked;$("tst").addEventListener("change",()=>$("clt").hidden=!$("tst").checked);
