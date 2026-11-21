@@ -25,3 +25,4 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 .cmp{font-size:12px;font-weight:700;margin-left:6px}.cmp.up{color:#0a8f06}.cmp.dn{color:#d93025}
 .code{font-family:ui-monospace,Consolas,monospace;font-weight:800;background:var(--ye);padding:2px 8px;border-radius:6px}
 .empty{color:var(--mu);text-align:center;padding:30px}
+.clt{height:32px;padding:0 12px;border-radius:16px;border:1px solid #fff;background:#fff;color:#d93025;font-weight:700;font-size:13px;display:flex;align-items:center;line-height:1;white-space:nowrap}
