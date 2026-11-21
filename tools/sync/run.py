@@ -12,6 +12,11 @@ X=json.load(urllib.request.urlopen(u,timeout=300))
 if X.get('err'): sys.exit('web app: '+X['err'])
 rows=[{'tab':t,'v':[str(c).replace('\r\n','\n').replace('\r','\n') for c in v]} for t,L in X['tabs'].items() for v in L if v and re.match(r'^\s*\d+\s*$',str(v[0]))]
 json.dump(rows,open(W+'/rows.json','w',encoding='utf8'),ensure_ascii=False);print(len(rows),'linhas')
+# BB (ALTERAÇÃO, coluna 54) por Nº, se o DROM Sync mandar (campo "bb"): o Booker ordena o seletor por ela (drom_data._mt)
+TN={'01-RAMONSTRO':'Ramonstro','02-BRINQUINHO':'Brinquinho','03-CARLOTO':'Carloto','04-SENA':'Sena','05-CENOURA':'Cenoura','06-LIQUINHO':'Liquinho','07-MANEIRA':'Maneira','08-AMARO':'Amaro','09-JOSU':'Josu','10-CADU VIEIRA':'Cadu Vieira'}
+BBJ={TN[t]:{str(int(n)):v for n,v in (D or {}).items() if re.match(r'^\d{4}-\d\d-\d\dT\d\d:\d\d',str(v))} for t,D in (X.get('bb') or {}).items() if t in TN}
+if X.get('bb'): json.dump(BBJ,open(W+'/bb.json','w',encoding='utf8'))
+print('BB:',sum(len(v) for v in BBJ.values()) or 'sem coluna BB (DROM Sync antigo)')
 b2=X.get('b2') or '-'
 if not re.match(r'^\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}$',b2): b2='-'
 sh(['python3','-I','lean.py','mark'],cwd=W)

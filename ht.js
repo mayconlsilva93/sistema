@@ -23,6 +23,7 @@ var st=document.createElement("style");st.textContent=
 "#tv table{width:100%;border-collapse:collapse;font-size:13px;background:var(--cd);border-radius:14px;overflow:hidden}#tv th{background:#0000FF;color:#fff;text-align:left;padding:8px;font-size:12px}#tv td{padding:8px;border-bottom:1px solid var(--bd);vertical-align:top}"+
 "#tv .tt{display:inline-block;border-radius:8px;padding:2px 7px;font-weight:700;font-size:12px}#tv .tt.ok{background:var(--okb);color:var(--ok)}#tv .tt.pd{background:#fff6c8;color:#7a5d00}#tv .tt.rd{background:#ffe5e5;color:#c00}#tv .tt.gy{background:#eee;color:#666}"+
 "#tv .tg+.tch,#tv .tch+textarea,#tv .tcd>input,#tv #ttx{margin-top:10px}#tv .trh{font-size:13px;color:var(--mu);margin:12px 0 4px;font-weight:700}#tv select:invalid,#tv select.ph{color:var(--mu)}"+
+"#tv .tpz{margin-top:10px}#tv .tpz label{margin:0 2px 6px;font-weight:700}#tv .tpq{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}#tv .tpq button{border:1.5px solid var(--ac);background:none;color:var(--ac);border-radius:16px;padding:6px 11px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;touch-action:manipulation}#tv .tpq button:active{background:var(--ac);color:var(--acx)}#tv .tpz .tms{margin-top:6px}#tv input[type=date]{min-height:44px;-webkit-appearance:none;appearance:none}"+
 "#tv .tlk{border:0;background:none;color:var(--ac);font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;padding:4px 0}#tv .mu{color:var(--mu)}#tv tr[data-v]{cursor:pointer}#tv tr[data-v]:hover td{background:rgba(0,0,255,.04)}"+
 ".tvw{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:0 18px}.tvw>div{background:#fff;color:#111;border-radius:18px;width:100%;max-width:440px;max-height:88vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}.tvw .th{background:#0000FF;color:#fff;font-weight:800;font-size:16px;padding:12px 16px}.tvw .tb{padding:16px}.tvw h3{margin:0 0 10px;font-size:17px}.tvw .tz{display:inline-block;background:#eceeff;color:#0000FF;font-weight:800;border-radius:8px;padding:5px 10px;font-size:14px;margin-bottom:10px}.tvw p{margin:0 0 12px;font-size:15px;line-height:1.45;white-space:pre-line}.tvw small{display:block;color:#777;font-size:12px;margin-bottom:12px}.tvw .tbn{width:100%}";
 document.head.appendChild(st);
@@ -46,6 +47,27 @@ function dflt(k,e,now){now=now||Date.now();if(k==="vc")return loc(up(now+48*36e5
  if(w>now&&w<ev)return loc(w);var v=new Date(D.getFullYear(),D.getMonth(),D.getDate()-1,22,0).getTime();if(v>now&&v<ev)return loc(v);
  return loc(Math.max(now+60e3,Math.min(up(now+2*36e5),ev)))}
 window.DROMHTD=dflt;
+/* Prazo: dia (Hoje, Amanhã, próximos dias ou "Outra data…" com calendário) + hora (lista), sem trocar o tipo do campo
+   (a troca text->datetime-local no foco falhava no iPhone e perdia valor incompleto). Valor final em #tdu (hidden, "AAAA-MM-DDTHH:MM"). */
+var WD=["dom","seg","ter","qua","qui","sex","sáb"],ymd=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+function hrs(){var L=[];for(var h=0;h<24;h++){L.push(p2(h)+":00");L.push(p2(h)+":30")}L.push("23:59");return L}
+function pzo(du){var now=new Date(),dd=du?du.slice(0,10):"",hh=du?du.slice(11,16):"",O=[],has=0;
+ for(var i=0;i<15;i++){var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i),k=ymd(d),l=(i===0?"Hoje":i===1?"Amanhã":WD[d.getDay()])+" · "+p2(d.getDate())+"/"+p2(d.getMonth()+1);if(k===dd)has=1;O.push('<option value="'+k+'"'+(k===dd?" selected":"")+">"+l+"</option>")}
+ var oth=dd&&!has,H=hrs();if(hh&&H.indexOf(hh)<0){H.push(hh);H.sort()}
+ return '<div class="tpz"><label for="tpd">Prazo</label><div class="tpq" role="group" aria-label="Atalhos de prazo"><button type="button" data-q="h18">Hoje 18:00</button><button type="button" data-q="h2359">Hoje 23:59</button><button type="button" data-q="a12">Amanhã 12:00</button><button type="button" data-q="a18">Amanhã 18:00</button><button type="button" data-q="s7">Em 1 semana</button></div>'+
+  '<div class="tg"><select id="tpd" aria-label="Dia do prazo"'+(dd?"":' class="ph"')+'><option value="">Dia</option>'+O.join("")+'<option value="*"'+(oth?" selected":"")+'>Outra data…</option></select>'+
+  '<select id="tph" aria-label="Hora do prazo"'+(hh?"":' class="ph"')+'><option value="">Hora</option>'+H.map(x=>'<option value="'+x+'"'+(x===hh?" selected":"")+">"+x+"</option>").join("")+"</select></div>"+
+  '<input id="tpo" type="date" aria-label="Outra data do prazo" min="'+ymd(now)+'"'+(oth?' value="'+dd+'"':' hidden')+' style="margin-top:8px">'+
+  '<input id="tdu" type="hidden" value="'+esc(du)+'"><p class="tms" id="tpm"></p></div>'}
+function pzw(v){var d=$("tpd"),h=$("tph"),o=$("tpo"),du=$("tdu"),m=$("tpm");
+ var sync=()=>{var day=d.value==="*"?o.value:d.value,hr=h.value;d.classList.toggle("ph",!d.value);h.classList.toggle("ph",!hr);o.hidden=d.value!=="*";
+  if(day&&!hr){var n=new Date(),t=day===ymd(n);hr=t?(n.getHours()<18?"18:00":"23:59"):"18:00";if(t&&n.getHours()===23&&n.getMinutes()>=30)hr="23:59";h.value=hr;h.classList.remove("ph")}
+  du.value=day&&hr?day+"T"+hr:"";v.dataset.du=du.value;v.dataset.duu=1;
+  var x=du.value?new Date(du.value).getTime():0;m.textContent=x&&x<=Date.now()?"Esse horário já passou: escolha um horário depois de agora.":x?"Prazo: "+fdt(x)+(x-Date.now()<864e5?" (em "+Math.max(1,Math.round((x-Date.now())/36e5))+" h)":""):""};
+ d.onchange=()=>{if(d.value==="*"){o.hidden=false;try{o.showPicker&&o.showPicker()}catch(e){}o.focus()}sync()};h.onchange=sync;o.onchange=o.oninput=sync;
+ document.querySelectorAll("#tv .tpq button").forEach(b=>b.onclick=()=>{var n=new Date(),q=b.dataset.q,dt=new Date(n.getFullYear(),n.getMonth(),n.getDate()+(q[0]==="a"?1:q==="s7"?7:0)),hr=q==="h18"||q==="a18"||q==="s7"?"18:00":q==="a12"?"12:00":"23:59";
+  if(q==="h18"&&n.getHours()>=18)hr="23:59";var k=ymd(dt);if([].some.call(d.options,x=>x.value===k)){d.value=k}else{d.value="*";o.value=k}h.value=hr;sync()});
+ if(du.value)sync()}
 function draw(){var h=H(),v=$("tv");if(!h||!h.CFG){v.innerHTML="";return}
  if(!h.AK){v.innerHTML='<p class="mu" style="padding:20px">Tarefas: use o DROM Hub do GitHub (dromentretenimento.com/sistema).</p>';return}
  if(!ST){v.innerHTML='<p class="mu" style="padding:20px">Carregando tarefas…</p>';return}
@@ -55,7 +77,7 @@ function draw(){var h=H(),v=$("tv");if(!h||!h.CFG){v.innerHTML="";return}
   (k==="ot"?'<input id="tti" type="text" maxlength="60" placeholder="Título da tarefa (aparece na notificação)" aria-label="Título da tarefa" style="margin-top:10px">':"")+
   '<div class="tch" style="margin-top:10px" aria-label="Para quem"><button type="button" data-f="*">Todos os artistas</button>'+apps().map(a=>'<button type="button" data-f="'+a.f+'" class="'+(SEL.indexOf(a.f)>=0?"on":"")+'"'+(CE&&CE.f.indexOf(a.f)<0?" disabled":"")+'>'+esc(h.nm(a))+"</button>").join("")+"</div>"+(CE?'<p class="tms" style="margin-top:4px">Só os artistas que tocam neste evento podem ser escolhidos.</p>':"")+
   '<textarea id="ttx" placeholder="'+(k==="ot"?"Texto da tarefa: o que o artista deve fazer":"Texto da tarefa (editável)")+'" aria-label="Texto da tarefa"></textarea>'+
-  '<input id="tdu" type="text" placeholder="Prazo: escolha data e hora" aria-label="Prazo" style="margin-top:10px"><div><div class="trh">Lembretes</div><div class="trm">'+
+  pzo(v.dataset.du||"")+'<div><div class="trh">Lembretes</div><div class="trm">'+
 '<div><input id="rp" type="number" min="1" max="24" value="'+REM.p+'"><span><b>horas entre popups no dia do prazo</b><small>No dia do prazo, o aviso abre de novo no app a cada tantas horas, até o artista tocar em "Já enviei".</small></span></div>'+
    '<div><input id="rh" type="number" min="0" max="23" value="'+REM.h+'"><span><b>hora do push diário</b><small>No dia do prazo (e nos dias de atraso), o celular recebe um push a partir desta hora.</small></span></div>'+
    '<div><input id="rf" type="number" min="0" max="12" value="'+REM.f+'"><span><b>horas finais com push de hora em hora</b><small>Nas últimas horas antes do prazo, e depois que ele vencer, chega um push a cada hora (das 8h às 22h).</small></span></div>'+
@@ -64,9 +86,8 @@ function draw(){var h=H(),v=$("tv");if(!h||!h.CFG){v.innerHTML="";return}
   '<h2>Tarefas automáticas</h2><div class="tcd tau"><div><b>Custos do mês</b><small>Pede os custos dos shows do mês 2 dias depois do último show do mês na agenda, ou no dia 1º do mês seguinte, o que vier primeiro. Prazo: 5º dia útil do mês seguinte (segunda a sexta, sem feriados nacionais). '+(ST.cfg.custos?"Ativada.":"Desativada.")+'</small></div><button type="button" class="tsw'+(ST.cfg.custos?" on":"")+'" id="tcu" aria-label="Ativar Custos do mês"></button></div>'+
   "<h2>Acompanhamento</h2>"+trk();
  v.innerHTML=o;$("tk").value=k;
- var tx=$("ttx"),du=$("tdu"),ev=$("tev"),ti=$("tti");if(v.dataset.du===undefined&&k==="vc")v.dataset.du=dflt(k,CE);tx.value=v.dataset.tx!=null?v.dataset.tx:(TX[k]||"");du.value=v.dataset.du||"";if(du.value)du.type="datetime-local";ev.value=v.dataset.ev||"";ev.classList.toggle("ph",!ev.value);if(ti){ti.value=v.dataset.ti||"";ti.oninput=()=>v.dataset.ti=ti.value}
- du.onfocus=()=>{if(du.type!=="datetime-local"){du.type="datetime-local";try{du.showPicker&&du.showPicker()}catch(e){}}};du.onblur=()=>{if(!du.value)du.type="text"};
- tx.oninput=()=>v.dataset.tx=tx.value;du.oninput=du.onchange=()=>{v.dataset.du=du.value;v.dataset.duu=1};
+ var tx=$("ttx"),du=$("tdu"),ev=$("tev"),ti=$("tti");if(v.dataset.du===undefined&&k==="vc")v.dataset.du=dflt(k,CE);tx.value=v.dataset.tx!=null?v.dataset.tx:(TX[k]||"");du.value=v.dataset.du||"";ev.value=v.dataset.ev||"";ev.classList.toggle("ph",!ev.value);if(ti){ti.value=v.dataset.ti||"";ti.oninput=()=>v.dataset.ti=ti.value}
+ tx.oninput=()=>v.dataset.tx=tx.value;pzw(v);
  $("tk").onchange=()=>{var nk=$("tk").value;if(v.dataset.tx==null||v.dataset.tx===(TX[k]||""))delete v.dataset.tx;v.dataset.k=nk;var e=E.find(x=>x.k===ev.value);if(nk==="ot"){if(!v.dataset.duu)v.dataset.du=""}else{v.dataset.du=dflt(nk,e);delete v.dataset.duu}draw()};
  ev.onchange=()=>{v.dataset.ev=ev.value;var e=E.find(x=>x.k===ev.value);if(e)SEL=e.f.slice();if(k!=="ot"){v.dataset.du=dflt(k,e);delete v.dataset.duu}draw()};
  v.querySelectorAll(".tch button").forEach(b=>b.onclick=()=>{var f=b.dataset.f,P=CE?CE.f:apps().map(a=>a.f);if(f!=="*"&&P.indexOf(f)<0)return;if(f==="*")SEL=SEL.length===P.length?[]:P.slice();else SEL=SEL.indexOf(f)>=0?SEL.filter(x=>x!==f):SEL.concat(f);draw()});

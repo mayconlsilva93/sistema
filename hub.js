@@ -29,7 +29,7 @@ async function goArt(){CFG=window.HUBCFG;document.body.classList.remove("locked"
 async function go(c){if(c&&c.apps&&!c.apps.some(a=>a.f==="dev/artistateste"))c.apps.push({k:"artistateste",f:"dev/artistateste",idb:"artistateste",n:"Artista Teste",img:"dev/artistateste/icon-192.png",url:"dev/artistateste/"});/*TESTE: artista de teste no Hub*/CFG=c;$("lk").remove();document.body.classList.remove("locked");
  AK=await crypto.subtle.importKey("raw",b64(c.ak),"AES-GCM",false,["decrypt","encrypt"]);
  /* libera os apps dos artistas neste aparelho (mesma chave do PIN deles), para abrirem aqui dentro sem pedir PIN */
- for(var a of c.apps)await kput(a.idb,{key:AK,salt:c.as,ts:Date.now(),v:2});
+ for(var a of c.apps)await kput(a.idb,{key:AK,salt:c.as,ts:Date.now(),v:2});await kput("hubak",{key:AK,ts:Date.now()});/* sw.js usa para reinscrever sozinho (pushsubscriptionchange) */
  draw();icons();
  await Promise.all(c.apps.map(async a=>{try{var r=await fetch(a.f+"/d.json",{cache:"no-store"}),d=await r.json();var dd=await dec(AK,d.iv,d.ct);DATA[a.f]={S:dd.S||[],OT:dd.OT||[],BK:dd.BK||[],up:d.up||""}}catch(e){DATA[a.f]={S:[],up:"",err:1}}}));
  notif();draw();if(TAB!=="h")hview();setTimeout(keepSub,1500)}
@@ -100,8 +100,8 @@ function fd(ts){var d=new Date(ts),p=n=>String(n).padStart(2,"0");return p(d.get
 function pushOk(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window}
 function pdraw(){pn.innerHTML='<div class="nh"><b>Notificações</b><button class="nx" aria-label="Fechar">✕</button></div>'+
  (LOG.length?LOG.slice(0,NV).map(x=>'<div class="ni'+(x.h?" nu":"")+'"><b>'+esc(x.t)+"</b><span>"+esc(x.b).split("\n").map(l=>l.replace(/^((?:Dom|Seg|Ter|Qua|Qui|Sex|Sáb) \d\d\/\d\d(?:\/\d{2,4})?(?: \d\d:\d\d)?|\d\d:\d\d(?:-\d\d:\d\d)?|horário a definir)/,"<b>$1</b>")).join("<br>")+"</span><em>"+fd(x.ts)+"</em></div>").join("")+(LOG.length>NV?'<button class="np nm">Ver mais antigas</button>':""):'<p class="ne">Nenhuma notificação ainda.</p>')+
- '<div class="nf">'+(window.HUBCFG?'<p class="ne">Notificações no celular: use o DROM Hub do GitHub (dromentretenimento.com/sistema).</p>':pushOk()?(Notification.permission==="granted"&&ls.g("subok")?'<p class="ne">✓ Notificações de todos os artistas ativadas neste aparelho.</p><button class="np">Ativar de novo</button>':'<button class="np">Ativar notificações</button>'):'<p class="ne">Para receber notificações no celular, adicione o Hub à tela de início (Safari: Compartilhar → Adicionar à Tela de Início) e abra por lá.</p>')+"</div>";
- pn.querySelector(".nx").onclick=pcls;var nm=pn.querySelector(".nm");if(nm)nm.onclick=()=>{NV=LOG.length;pdraw()};var np=pn.querySelector(".np:not(.nm)");if(np)np.onclick=sub}
+ '<div class="nf">'+(window.HUBCFG?'<p class="ne">Notificações no celular: use o DROM Hub do GitHub (dromentretenimento.com/sistema).</p>':pushOk()?(Notification.permission==="granted"?'<p class="ne">✓ Notificações de todos os artistas ativadas neste aparelho.</p><button class="np nr">Reenviar inscrição</button>':Notification.permission==="denied"?'<p class="ne">As notificações estão bloqueadas para o Hub. Libere nas configurações do celular (Ajustes → Notificações) e toque abaixo.</p><button class="np">Ativar notificações</button>':'<button class="np">Ativar notificações</button>'):'<p class="ne">Para receber notificações no celular, adicione o Hub à tela de início (Safari: Compartilhar → Adicionar à Tela de Início) e abra por lá.</p>')+"</div>";
+ pn.querySelector(".nx").onclick=pcls;var nm=pn.querySelector(".nm");if(nm)nm.onclick=()=>{NV=LOG.length;pdraw()};var np=pn.querySelector(".np:not(.nm)");if(np)np.onclick=np.classList.contains("nr")?()=>{ls.s("subt",0);keepSub(1);np.outerHTML='<p class="ne">✓ Inscrição reenviada.</p>'}:sub;if(!window.HUBCFG&&pushOk()&&Notification.permission==="granted")keepSub()}
 function pcls(){pn.hidden=true;LOG.forEach(x=>delete x.h);ls.s("log",LOG);draw()}
 $("bell").onclick=()=>{if(!LOG)return;if(pn.hidden){NV=10;LOG.forEach(x=>{x.h=!x.r;x.r=1});ls.s("log",LOG);pdraw();pn.hidden=false;badge()}else pcls()};
 function u8(b){var p="=".repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(r,c=>c.charCodeAt(0))}
@@ -114,15 +114,19 @@ async function sub(){var nf=pn.querySelector(".nf");try{
  nf.innerHTML='<p class="ne">✓ Notificações ativadas neste aparelho. Os avisos começam a chegar em até 1 hora.</p>'}
  catch(e){nf.insertAdjacentHTML("beforeend",'<p class="ne">Não foi possível ativar: '+(e.message||e)+"</p>")}}
 
-/*KEEP*/ async function keepSub(){try{if(window.HUBCFG||!pushOk()||Notification.permission!=="granted"||typeof AK==="undefined"||!AK)return;
- var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();
- /* inscrição renovada diariamente (o Android às vezes invalida a antiga sem avisar) */
+/*KEEP*/ /* inscrição que nunca precisa ser reativada (mesma lógica dos apps): recria se sumiu ou se a chave VAPID mudou, renova 1x/dia,
+   reenvia ao servidor se mudou ou a cada 24 h; roda ao entrar, ao voltar ao app (máx. 1x/h) e quando o sw.js avisa (pushsubscriptionchange). */
+var KB=0,KT=0;async function keepSub(force){if(KB)return;KB=1;try{if(window.HUBCFG||!pushOk()||Notification.permission!=="granted"||typeof AK==="undefined"||!AK)return;KT=Date.now();
+ var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription(),ak=u8(VAPID);
+ try{var ok=s&&s.options&&s.options.applicationServerKey&&new Uint8Array(s.options.applicationServerKey);if(ok&&ok.length&&ok.join()!==ak.join()){await s.unsubscribe();s=null}}catch(e){}
  if(s&&(ls.g("subv")!==2||Date.now()-(ls.g("subt")||0)>864e5)){try{await s.unsubscribe()}catch(e){}s=null}
- if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
- if(s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<864e5)return;
+ if(!s){try{s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:ak})}catch(e){await new Promise(r=>setTimeout(r,3000));s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:ak})}}
+ if(!force&&s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<864e5)return;
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},AK,new TextEncoder().encode(JSON.stringify(s))));
  await fetch(SURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:"hub",iv:b6(iv),ct:b6(ct)})});
- ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2)}catch(e){}}
+ ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2)}catch(e){ls.s("subt",0)}finally{KB=0}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-KT>36e5)keepSub()});
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.drom==="subchg"){ls.s("subt",0);keepSub(1)}});
 
 /* ---------- menu inferior: Início, Agenda, Calendário (Painel e Booker ainda não habilitados) ---------- */
 var TAB="h",HV="m",HM=null,HY=null,HF="P",HSD=null,MNS=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],WD=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];

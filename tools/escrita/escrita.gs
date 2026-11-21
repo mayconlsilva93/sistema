@@ -202,7 +202,7 @@ function prop(k){return PropertiesService.getScriptProperties().getProperty(k)}
    AUTO_CONTRATO=1  -> PDF "[assinado]" em "Contratos com Contratantes" marca CONTRATO = "Sim" na proposta */
 function rotina(){var L=[];
   if(prop('AUTO_REALIZADO')==='1')try{L.push('realizados: '+autoRealizado(new Date()))}catch(e){L.push('realizados: erro '+e)}
-  if(prop('AUTO_DESCARTE')==='1')try{L.push('descartadas: '+autoDescarte(new Date(),true))}catch(e){L.push('descartadas: erro '+e)}
+  if(prop('AUTO_DESCARTE')==='1')try{L.push('descartadas: '+resumoDesc(autoDescarte(new Date(),true)))}catch(e){L.push('descartadas: erro '+e)}
   if(prop('AUTO_CONTRATO')==='1')try{L.push('contratos: '+autoContrato())}catch(e){L.push('contratos: erro '+e)}
   Logger.log(L.join(' · ')||'rotina: nada ligado (AUTO_REALIZADO / AUTO_CONTRATO)');return L}
 
@@ -225,20 +225,23 @@ function autoRealizado(now){var tot=0;
     V.forEach(function(r,i){if(nh(r[cS-1])!=='SHOW CONFIRMADO'||F[i][0])return;var e=fimShow(r[cD-1],r[cI-1],r[cU-1],(NI[i][0]||'')+'\n'+(cO?r[cO-1]:''));
       if(e&&now>=e){sh.getRange(DADOS+i,cS).setValue('Show realizado');S.stamp(DADOS+i);tot++}})}catch(e){Logger.log(id+': '+e)}});
   return tot}
-/* AUTO_DESCARTE: passado o dia do evento, proposta que nunca virou Show confirmado/realizado passa a "Proposta descartada".
+/* AUTO_DESCARTE: passado o dia do evento, STATUS "Proposta emitida", "Em negociação" ou "Data reservada" passa a "Proposta descartada".
    Fim do dia = 06:00 do dia seguinte à DATA DO SHOW (regra da madrugada: show 00:00–05:59 é a noite da data), ou o fim do show, se for depois.
-   Não mexe em Show confirmado, Show realizado, Show cancelado, já descartada, STATUS vazio ou com fórmula. grava=false: só lista (testeRotina).*/
-var NAO_DESC=['SHOW CONFIRMADO','SHOW REALIZADO','SHOW CANCELADO','PROPOSTA DESCARTADA',''];
-function autoDescarte(now,grava){var tot=0;
-  CARIMBO.forEach(function(id){try{var S=Sheet(id),sh=S.sh,n=sh.getLastRow()-DADOS+1;if(n<1)return;
-    var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,lc=Math.max(cS,cD,cI,cU,cO);
+   Qualquer outro STATUS (Show confirmado/realizado/cancelado, já descartada, vazio...) e STATUS com fórmula: não mexe.
+   grava=false: só simula (testeRotina). Retorna {tot, por:{artista:n}, L:[linhas]} */
+var SIM_DESC=['PROPOSTA EMITIDA','EM NEGOCIAÇÃO','DATA RESERVADA'];
+function nomeArt(id){for(var a in ARTS)if(ARTS[a].id===id)return a;return id===TESTE?'Artista Teste':id}
+function autoDescarte(now,grava){var R={tot:0,por:{},L:[]};
+  CARIMBO.forEach(function(id){var an=nomeArt(id);try{var S=Sheet(id),sh=S.sh,n=sh.getLastRow()-DADOS+1;if(n<1)return;
+    var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,cL=S.has('LOCAL')?S.col('LOCAL'):0,lc=Math.max(cS,cD,cI,cU,cO,cL,S.cN);
     var V=sh.getRange(DADOS,1,n,lc).getValues(),F=sh.getRange(DADOS,cS,n,1).getFormulas();
-    V.forEach(function(r,i){var st=nh(r[cS-1]);if(NAO_DESC.indexOf(st)>=0||F[i][0]||!(r[cD-1] instanceof Date))return;
+    V.forEach(function(r,i){var st0=nh(r[cS-1]);if(SIM_DESC.indexOf(st0)<0||F[i][0]||!(r[cD-1] instanceof Date))return;
       var d=r[cD-1],e=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,6,0),f=fimShow(r[cD-1],r[cI-1],r[cU-1],cO?r[cO-1]:'');if(f&&f>e)e=f;
-      if(now<e)return;tot++;
-      if(grava){sh.getRange(DADOS+i,cS).setValue('Proposta descartada');S.stamp(DADOS+i)}
-      else Logger.log(SpreadsheetApp.openById(id).getName()+' · Nº '+r[S.cN-1]+' · '+r[cS-1]+' · '+Utilities.formatDate(d,TZ,'dd/MM/yyyy')+' -> viraria Proposta descartada')})}catch(e){Logger.log(id+': '+e)}});
-  return tot}
+      if(now<e)return;R.tot++;R.por[an]=(R.por[an]||0)+1;
+      R.L.push(an+' · Nº '+r[S.cN-1]+' · '+r[cS-1]+' · '+Utilities.formatDate(d,TZ,'dd/MM/yyyy')+' · '+(cL?String(r[cL-1]||'-'):'-'));
+      if(grava){sh.getRange(DADOS+i,cS).setValue('Proposta descartada');S.stamp(DADOS+i)}})}catch(e){Logger.log(an+': '+e)}});
+  return R}
+function resumoDesc(R){var k=Object.keys(R.por);return R.tot+(k.length?' ('+k.map(function(a){return a+': '+R.por[a]}).join(', ')+')':'')}
 /* contratos assinados: "DROM Entretenimento - Contrato 50028-2026 [assinado].pdf" em .../<artista>/Contratos com Contratantes[/ano]/
    nº do contrato = prefixo do artista + Nº com 4 dígitos (Booker: numero()). Só marca se CONTRATO estiver vazio, "Não" ou "Pendente". */
 var PFX={'1':'Ramonstro','2':'Brinquinho','3':'Carloto','4':'Sena','5':'Cenoura','6':'Liquinho','7':'Maneira','8':'Amaro','9':'Josu','10':'Cadu Vieira'};
@@ -259,7 +262,10 @@ function testeRotina(){CARIMBO.forEach(function(id){try{var S=Sheet(id),sh=S.sh,
   var cS=S.col('STATUS'),cD=S.col('DATA DO SHOW'),cI=S.col('INÍCIO DO SHOW'),cU=S.col('DURAÇÃO'),cO=S.has('OBSERVAÇÕES')?S.col('OBSERVAÇÕES'):0,lc=Math.max(cS,cD,cI,cU,cO),V=sh.getRange(DADOS,1,n,lc).getValues();
   V.forEach(function(r,i){if(nh(r[cS-1])!=='SHOW CONFIRMADO')return;var e=fimShow(r[cD-1],r[cI-1],r[cU-1],cO?r[cO-1]:'');
     Logger.log(SpreadsheetApp.openById(id).getName()+' · Nº '+r[S.cN-1]+' · fim '+(e?Utilities.formatDate(e,TZ,'dd/MM/yyyy HH:mm'):'?')+(e&&new Date()>=e?' -> viraria Show realizado':''))})}catch(e){Logger.log(id+': '+e)}});
-  Logger.log('AUTO_DESCARTE (simulação, nada gravado): '+autoDescarte(new Date(),false)+' proposta(s) virariam Proposta descartada')}
+  var R=autoDescarte(new Date(),false);
+  Logger.log('AUTO_DESCARTE (simulação, nada gravado; STATUS Proposta emitida / Em negociação / Data reservada com data passada): '+R.tot+' proposta(s) virariam Proposta descartada');
+  Object.keys(R.por).forEach(function(a){Logger.log('  '+a+': '+R.por[a])});
+  R.L.slice(0,30).forEach(function(x){Logger.log('  '+x)});if(R.L.length>30)Logger.log('  ... e mais '+(R.L.length-30))}
 function carimbo(e){try{   /* mesmo comportamento dos scripts antigos de cada planilha: aba ativa, linha >= 5, coluna 54 (BB); edição no próprio BB é ignorada */
   var aba=e.source.getActiveSheet(),g=e.range;
   var r0=Math.max(g.getRow(),DADOS),r1=g.getLastRow();if(r1<r0)return;

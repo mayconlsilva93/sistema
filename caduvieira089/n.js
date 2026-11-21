@@ -25,9 +25,9 @@ function fd(ts){var d=new Date(ts);return String(d.getDate()).padStart(2,"0")+"/
 function pushOk(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window}
 function draw(){pn.innerHTML='<div class="nh"><b>Notificações</b><button class="nx" aria-label="Fechar">✕</button></div>'+
  (log.length?log.slice(0,NV).map(x=>'<div class="ni'+(x.r&&!x.h?"":" nu")+'"><b>'+esc(x.t)+"</b><span>"+esc(x.b).split("\n").map(l=>l.replace(/^(\d\d:\d\d(?:-\d\d:\d\d)?|horário a definir)/,"<b>$1</b>").replace(/((?:(?:Dom|Seg|Ter|Qua|Qui|Sex|Sáb) )?\d\d\/\d\d(?:\/\d{2,4})?(?: \d\d:\d\d)?)/g,"<b>$1</b>")).join("<br>")+"</span><em>"+fd(x.ts)+"</em></div>").join("")+(log.length>NV?'<button class="np nm">Ver mais antigas</button>':""):'<p class="ne">Nenhuma notificação ainda.</p>')+
- '<div class="nf">'+(pushOk()?(Notification.permission==="granted"&&ls.g("subok")?'<p class="ne">✓ Notificações ativadas neste aparelho.</p><button class="np">Ativar de novo</button>':'<button class="np">Ativar notificações</button>'):'<p class="ne">Para receber notificações no celular, adicione este app à tela de início (Safari: Compartilhar → Adicionar à Tela de Início) e abra por lá.</p>')+
+ '<div class="nf">'+(pushOk()?(Notification.permission==="granted"?'<p class="ne">✓ Notificações ativadas neste aparelho.</p><button class="np nr">Reenviar inscrição</button>':Notification.permission==="denied"?'<p class="ne">As notificações estão bloqueadas para este app. Libere nas configurações do celular (Ajustes → Notificações) e toque abaixo.</p><button class="np">Ativar notificações</button>':'<button class="np">Ativar notificações</button>'):'<p class="ne">Para receber notificações no celular, adicione este app à tela de início (Safari: Compartilhar → Adicionar à Tela de Início) e abra por lá.</p>')+
  (window.DROMUPD?'<p class="ne">Dados atualizados em '+window.DROMUPD+"</p>":"")+"</div>";
- pn.querySelector(".nx").onclick=cls;var nm=pn.querySelector(".nm");if(nm)nm.onclick=()=>{NV=log.length;draw()};var np=pn.querySelector(".np:not(.nm)");if(np)np.onclick=sub}
+ pn.querySelector(".nx").onclick=cls;var nm=pn.querySelector(".nm");if(nm)nm.onclick=()=>{NV=log.length;draw()};var np=pn.querySelector(".np:not(.nm)");if(np)np.onclick=np.classList.contains("nr")?()=>{ls.s("subt",0);keep(1);np.outerHTML='<p class="ne">✓ Inscrição reenviada.</p>'}:sub;if(pushOk()&&Notification.permission==="granted")keep()}
 function u8(b){var p="=".repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(r,c=>c.charCodeAt(0))}
 async function sub(){var nf=pn.querySelector(".nf");try{var hr=(await navigator.serviceWorker.getRegistrations()).find(r=>/\/sistema\/$/.test(r.scope));if(hr&&await hr.pushManager.getSubscription()){nf.insertAdjacentHTML("beforeend",'<p class="ne">Este aparelho já recebe as notificações pelo DROM Hub, com o nome do artista entre [ ]. Para não chegar duplicado, elas não são ativadas aqui.</p>');return}
  if(await Notification.requestPermission()!=="granted"){nf.insertAdjacentHTML("beforeend",'<p class="ne">Permissão negada. Libere as notificações nas configurações do navegador.</p>');return}
@@ -35,7 +35,7 @@ async function sub(){var nf=pn.querySelector(".nf");try{var hr=(await navigator.
  var K=window.DROMKEY;if(!K)throw new Error("saia do app e entre de novo com o PIN");
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},K,new TextEncoder().encode(JSON.stringify(s)))),b6=u=>btoa(String.fromCharCode.apply(null,u));
  await fetch("https://script.google.com/macros/s/AKfycbzk5iksIZVvdK27taLTcpQbdPebxGjP7ilwNxiQDYwUuTSaMz80Hifmgr-5aazWhI0R/exec",{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:location.pathname.split("/").filter(Boolean).pop(),iv:b6(iv),ct:b6(ct)})});
- ls.s("subok",s.endpoint);ls.s("subt",Date.now());try{var w0=new Date(),qa=new Date(w0.getFullYear(),w0.getMonth(),w0.getDate()+((3-w0.getDay()+7)%7||7),23,59).getTime(),nx=S.map(x=>[dromStart(x,B)||new Date(B,x[19]-1,x[0],23,59).getTime(),x]).filter(y=>y[0]>Date.now()&&y[0]<=qa+6*36e5).sort((p,q)=>p[0]-q[0]).map(y=>dromLn(y[1],B,{hora:1}));
+ ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2);try{var w0=new Date(),qa=new Date(w0.getFullYear(),w0.getMonth(),w0.getDate()+((3-w0.getDay()+7)%7||7),23,59).getTime(),nx=S.map(x=>[dromStart(x,B)||new Date(B,x[19]-1,x[0],23,59).getTime(),x]).filter(y=>y[0]>Date.now()&&y[0]<=qa+6*36e5).sort((p,q)=>p[0]-q[0]).map(y=>dromLn(y[1],B,{hora:1}));
  setTimeout(()=>reg.showNotification("Notificações ativadas!",{body:nx.length?"Próximos shows:\n"+nx.join("\n"):"Nenhum show até a próxima quarta.",icon:"icon-192.png",badge:"badge.png"}),1500)}catch(e){}nf.innerHTML='<p class="ne">✓ Notificações ativadas neste aparelho. Os avisos começam a chegar em até 1 hora.</p>';
  }catch(e){nf.insertAdjacentHTML("beforeend",'<p class="ne">Não foi possível ativar: '+(e.message||e)+"</p>")}}
 var SURL="https://script.google.com/macros/s/AKfycbzk5iksIZVvdK27taLTcpQbdPebxGjP7ilwNxiQDYwUuTSaMz80Hifmgr-5aazWhI0R/exec";var NV=10;function cls(){pn.hidden=true;log.forEach(x=>delete x.h);ls.s("log",log)}bell.onclick=()=>{if(pn.hidden){NV=10;log.forEach(x=>{x.h=!x.r;x.r=1});ls.s("log",log);draw();pn.hidden=false;badge()}else cls()};
@@ -43,16 +43,20 @@ var nv=document.querySelector("nav");if(nv)nv.addEventListener("click",()=>{if(!
 badge();
 if(log.some(x=>!x.r&&x.ts===now)){var t=document.createElement("div");t.className="ntoast";var q=log.filter(x=>!x.r&&x.ts===now).length;t.textContent=(q===1?"1 novidade":q+" novidades")+" — toque no sino";document.body.appendChild(t);setTimeout(()=>t.remove(),5000)}
 
-/*KEEP*/ /* mantém a inscrição viva: ao abrir, se a permissão já foi dada, recria a inscrição se sumiu (ex.: após atualização do app) e reenvia ao servidor se mudou ou a cada 7 dias */
-(async function(){try{if(!pushOk()||Notification.permission!=="granted"||!window.DROMKEY)return;
+/*KEEP*/ /* inscrição que nunca precisa ser reativada: com a permissão já dada, recria a inscrição se sumiu (atualização do app, troca de chave, aviso do sw.js),
+   renova 1x/dia (o Android às vezes invalida a antiga sem avisar) e reenvia ao servidor se mudou ou a cada 24 h. Roda ao abrir, ao voltar ao app (no máx. 1x/h) e quando o sw.js avisa. */
+var KB=0,KT=0;async function keep(force){if(KB)return;KB=1;try{if(!pushOk()||Notification.permission!=="granted"||!window.DROMKEY)return;KT=Date.now();
  var hr=(await navigator.serviceWorker.getRegistrations()).find(r=>/\/sistema\/$/.test(r.scope));if(hr&&await hr.pushManager.getSubscription())return;
- var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();
+ var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription(),ak=u8(VAPID);
+ try{var ok=s&&s.options&&s.options.applicationServerKey&&new Uint8Array(s.options.applicationServerKey);if(ok&&ok.length&&ok.join()!==ak.join()){await s.unsubscribe();s=null}}catch(e){}
  if(s&&(ls.g("subv")!==2||Date.now()-(ls.g("subt")||0)>864e5)){try{await s.unsubscribe()}catch(e){}s=null}
- if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
- if(s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<864e5)return;
+ if(!s){try{s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:ak})}catch(e){await new Promise(r=>setTimeout(r,3000));s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:ak})}}
+ if(!force&&s.endpoint===ls.g("subok")&&Date.now()-(ls.g("subt")||0)<864e5)return;
  var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},window.DROMKEY,new TextEncoder().encode(JSON.stringify(s)))),b6=u=>btoa(String.fromCharCode.apply(null,u));
  await fetch(SURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({app:location.pathname.split("/").filter(Boolean).pop(),iv:b6(iv),ct:b6(ct)})});
- ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2)}catch(e){}})();
+ ls.s("subok",s.endpoint);ls.s("subt",Date.now());ls.s("subv",2)}catch(e){ls.s("subt",0)}finally{KB=0}}
+keep();document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-KT>36e5)keep()});
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.drom==="subchg"){ls.s("subt",0);keep(1)}});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)badge()});
 window.DROMNADD=function(L){var t=Date.now();(L||[]).forEach(x=>log.unshift({t:x.t,b:x.b,ts:t,r:0}));log=log.slice(0,50);ls.s("log",log);ls.s("snap",S);badge();if(!pn.hidden)draw()};
 function DROMPQ(add){if(!("caches" in self)||!("serviceWorker" in navigator))return;navigator.serviceWorker.ready.then(r=>{var k="q"+r.scope;return caches.open("drom-push").then(c=>c.match(k).then(x=>x?x.json():[]).then(L=>{if(!L.length)return;c.delete(k);add(L)}))}).catch(()=>{})}
