@@ -23,6 +23,7 @@ const FIN={},PC={},m0=(Y-2023)*12;AR.forEach((n,i)=>{const f=FD[n],L=DD.ALL.filt
  L.forEach(r=>{fat+=+r[6]||0;cu+=+r[7]||0;com+=+r[8]||0;const p=C.PJpc(r);if(p&&(p.cu||p.com)){ecu+=p.cu;ecom+=p.com;(PC[f]=PC[f]||{})[r[14]+"|"+r[0]+"|"+r[3]+"|"+String(r[2]||"").split(" · ")[0].trim().toLowerCase()]=Math.round(((+r[8]||0)-p.com)*100)/100}});
  for(let mk=m0+1;mk<=m0+12;mk++){if(mk<cmk)continue;const r=C.PJmon(i,mk);if(r&&r.n){pn+=r.n;pf+=r.fat;pcu+=r.cu;pco+=r.com}}
  const R=x=>Math.round(x*100)/100;FIN[f]={fat:R(fat),cu:R(cu),com:R(com),ecu:R(ecu),ecom:R(ecom),pn,pf:R(pf),pcu:R(pcu),pco:R(pco)}});
+const CK={};AR.forEach((n,i)=>{const L=DD.ALL.filter(r=>r[1]===i&&r[14]>m0&&r[14]<=m0+12);CK[FD[n]]={n:L.length,fat:Math.round(L.reduce((a,r)=>a+(+r[6]||0),0)),com:Math.round(L.reduce((a,r)=>a+(+r[8]||0),0)),cu:Math.round(L.reduce((a,r)=>a+(+r[7]||0),0))}});console.log("CK",JSON.stringify(CK));
 const out={P,CT,CA,FIN,PC,up:pd.up||"",dia:now.toISOString().slice(0,10)},iv=crypto.randomBytes(12),ci=crypto.createCipheriv("aes-256-gcm",AK,iv);
 const enc=Buffer.concat([ci.update(JSON.stringify(out)),ci.final(),ci.getAuthTag()]);
 const f="pe2027/avaliaform26/pj.json";let old=null;try{old=JSON.parse(fs.readFileSync(f,"utf8"))}catch(e){}
