@@ -51,7 +51,7 @@ main{padding-bottom:calc(50px + env(safe-area-inset-bottom,0px))!important}
 /*HOME*/#bk{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0!important;border-radius:50%!important}#bk svg{display:block}
 
 /*HNAV*/.brand{bottom:calc(58px + env(safe-area-inset-bottom,0px))!important;padding-bottom:5px!important}main{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important}body.locked #hnav{display:none}#fr~#hnav,#hnav{z-index:45}
-#hnav{grid-template-columns:repeat(5,1fr)!important}
+#hnav{grid-template-columns:repeat(6,1fr)!important}
 
 /*NB0*/.npn .ni b::before,.npn .ni.nu b::before,.npn .ni.nu>b::before{content:none!important}
 

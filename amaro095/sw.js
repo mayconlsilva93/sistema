@@ -1,5 +1,5 @@
 /* DROM · DJ Amaro — cache offline + notificações push */
-var C="drom-amaro095-v36";
+var C="drom-amaro095-v37";
 self.addEventListener("install",e=>self.skipWaiting());
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;

@@ -21,7 +21,10 @@ jobs:
       - run: for a in */d.json; do NODE_PATH=tools/node_modules node tools/notify.mjs "${a%/d.json}" || true; done
         env:
           DROM_PIN: ${{ secrets.DROM_PIN }}
+      - run: NODE_PATH=tools/node_modules node tools/tarefas.mjs || true
+        env:
+          DROM_PIN: ${{ secrets.DROM_PIN }}
       - run: |
           git config user.name "drom-bot"; git config user.email "drom-bot@users.noreply.github.com"
-          for f in */st.json */subs.json; do [ -f "$f" ] && git add "$f"; done
+          for f in */st.json */subs.json tools/tarst.json; do [ -f "$f" ] && git add "$f"; done
           git diff --cached --quiet || (git commit -m "estado das notificações" && git pull --rebase && git push)

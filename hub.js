@@ -40,6 +40,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){hrt();if(
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.drom==="push"){hrt();setTimeout(hrt,40000);setTimeout(hrt,120000)}});
 var HIDE=ls.g("hide")||false,fm=v=>Number(v||0).toFixed(2).replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
 var nm=a=>a.n.replace(/^DJ /,"");
+window.DROMHUB=()=>({CFG:CFG,DATA:DATA,AK:AK,nm:nm,ini:ini});
 function st(a){var d=DATA[a.f];if(!d)return null;var now=Date.now(),y=a.old?null:2026,A=d.S.filter(s=>a.old||(s[19]>=37&&s[19]<=48)),v=A.reduce((x,s)=>x+(+s[15]||0),0),
  rz=A.filter(s=>{var t=dromStart(s,B)||new Date(B,s[19]-1,s[0]+1,6).getTime();return t+(+s[5]||0)*6e4<now}).length,
  pr=d.S.map(s=>[dromStart(s,B)||new Date(B,s[19]-1,s[0],23,59).getTime(),s]).filter(x=>x[0]>now).sort((p,q)=>p[0]-q[0])[0],
@@ -133,7 +134,7 @@ function fal(ms){var m=Math.max(1,Math.ceil(ms/6e4)),h=Math.floor(m/60);m=m%60;r
 function hcard(x){var s=x[0],a=x[1],c='<div class="cd hcd"><div class="hd"><div class="dt"><small>'+WD[new Date(B,s[19]-1,s[0]).getDay()]+"</small><b>"+s[0]+'</b></div><div class="in"><b>'+esc(s[1]||s[2]||"")+"</b><span>"+esc([s[1]?s[2]:"",s[3]].filter(Boolean).join(" · "))+"</span><span>"+hmF(s)+"</span></div></div></div>",t=dromStart(s,B),n=Date.now();
  if(t){var e=fim(s);if(n>=t&&n<e)c='<div class="ag now hag"><div class="agl" data-en="'+e+'">Agora</div>'+c+"</div>";else if(t>n&&t-n<=864e5)c='<div class="ag soon hag"><div class="agl" data-st="'+t+'">'+fal(t-n)+"</div>"+c+"</div>"}
  return'<div class="hrw"><img class="hav" alt="'+nm(a)+'" title="'+nm(a)+'" src="'+a.img+'">'+c+"</div>"}
-setInterval(function(){if(TAB==="h")return;var n=Date.now(),rd=0;document.querySelectorAll(".hag.soon .agl[data-st]").forEach(x=>{var a=+x.dataset.st;if(a<=n)rd=1;else x.textContent=fal(a-n)});document.querySelectorAll(".hag.now .agl[data-en]").forEach(x=>{if(+x.dataset.en<=n)rd=1});if(rd)hview()},30000);
+setInterval(function(){if(TAB==="h"||TAB==="t")return;var n=Date.now(),rd=0;document.querySelectorAll(".hag.soon .agl[data-st]").forEach(x=>{var a=+x.dataset.st;if(a<=n)rd=1;else x.textContent=fal(a-n)});document.querySelectorAll(".hag.now .agl[data-en]").forEach(x=>{if(+x.dataset.en<=n)rd=1});if(rd)hview()},30000);
 var curM=()=>{var n=new Date(Date.now()-216e5);return(n.getFullYear()-B)*12+n.getMonth()+1},mLab=m=>MNS[(m-1)%12]+" "+(B+Math.floor((m-1)/12)),YF=m=>B+Math.floor((m-1)/12);
 var HMQ=window.matchMedia("(max-width:600px)");
 function hsel(){var A=ALL(),L=[];CFG.apps.forEach(a=>{var d=DATA[a.f];if(!d)return;if(d.R)L.push(d.R[0],d.R[1]);else{d.S.forEach(s=>L.push(s[19]));(d.OT||[]).forEach(o=>L.push(o[0]));(d.BK||[]).forEach(z=>L.push(z[0]))}});var lo=Math.min(...L),hi=Math.max(...L),o="";
@@ -141,8 +142,8 @@ function hsel(){var A=ALL(),L=[];CFG.apps.forEach(a=>{var d=DATA[a.f];if(!d)retu
  else{for(var y=YF(lo);y<=YF(hi);y++)o+='<option value="'+y+'">'+y+"</option>";$("hms").innerHTML=o+'<option value="0">Todos</option>';$("hms").value=HY}
  document.querySelectorAll("#hbar .seg button").forEach(b=>b.classList.toggle("on",b.dataset.v===HV));document.querySelectorAll("#hpl button").forEach(b=>b.classList.toggle("on",b.dataset.f===HF))}
 HMQ.addEventListener&&HMQ.addEventListener("change",()=>{if(TAB!=="h")hsel()});
-function tab(t){if(t==="b"){if(window.HUBCFG){window.open("https://claude.ai/artifact/7XmTAPhYmz3Ezh434tke4Y","_blank","noopener");return}open({n:"Booker",f:"booker"});return}if(t==="p"){if(window.HUBCFG){window.open("https://claude.ai/artifact/TYWjWAjkE91sdxRcNTpDv6","_blank","noopener");return}open({n:"Painel",f:"painel"});return}TAB=t;document.querySelectorAll("#hnav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$("list").hidden=t!=="h";$("hv").hidden=t==="h";$("hbar").hidden=t==="h";$("hpl").hidden=t!=="a";
- if(HM===null){HM=curM();HY=YF(HM)}if(t!=="h"){hsel();hview()}window.scrollTo(0,0)}
+function tab(t){if(t==="b"){if(window.HUBCFG){window.open("https://claude.ai/artifact/7XmTAPhYmz3Ezh434tke4Y","_blank","noopener");return}open({n:"Booker",f:"booker"});return}if(t==="p"){if(window.HUBCFG){window.open("https://claude.ai/artifact/TYWjWAjkE91sdxRcNTpDv6","_blank","noopener");return}open({n:"Painel",f:"painel"});return}TAB=t;document.querySelectorAll("#hnav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$("list").hidden=t!=="h";$("hv").hidden=t==="h"||t==="t";$("hbar").hidden=t==="h"||t==="t";$("hpl").hidden=t!=="a";if($("tv"))$("tv").hidden=t!=="t";
+ if(HM===null){HM=curM();HY=YF(HM)}if(t!=="h"&&t!=="t"){hsel();hview()}if(t==="t"&&window.DROMHT)window.DROMHT();window.scrollTo(0,0)}
 function grid(m,X,td){var y=YF(m),mo=(m-1)%12,F1=new Date(y,mo,1).getDay(),N=new Date(y,mo+1,0).getDate(),h="<h3>"+mLab(m)+'</h3><div class="cal hcal">'+["D","S","T","Q","Q","S","S"].map(x=>"<b>"+x+"</b>").join("")+"<span></span>".repeat(F1);
  for(var d=1;d<=N;d++){var c=X.filter(x=>x[0][19]===m&&x[0][0]===d).length;h+='<button type="button" data-m="'+m+'" data-d="'+d+'" class="'+(c?"hsd ":"")+(HSD&&HSD[0]===m&&HSD[1]===d?"on ":"")+(m===td[0]&&d===td[1]?"td":"")+'">'+d+(c?"<small>"+c+(c===1?" show":" shows")+"</small>":"")+"</button>"}
  h+="</div>";if(HSD&&HSD[0]===m){var sd=X.filter(x=>x[0][19]===m&&x[0][0]===HSD[1]);h+="<h3>"+WD[new Date(y,mo,HSD[1]).getDay()]+" "+p2(HSD[1])+"/"+p2(mo+1)+"</h3>"+(sd.length?sd.map(hcard).join(""):'<p class="mu">Sem shows neste dia.</p>')}return h}

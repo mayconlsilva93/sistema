@@ -15,7 +15,7 @@ function msg(t){var l=$("bkl");if(!l){l=document.createElement("div");l.id="bkl"
 function js(src,text){return new Promise(ok=>{var s=document.createElement("script");if(text!==undefined){s.src=URL.createObjectURL(new Blob([text],{type:"text/javascript"}))}else s.src=src;s.onload=s.onerror=ok;document.body.appendChild(s)})}
 async function go(cfg){$("lk").remove();msg("Carregando…");
  var K=await crypto.subtle.importKey("raw",b64(cfg.bk),"AES-GCM",false,["decrypt"]);
- var r=await Promise.all([fetch("../bk.json",{cache:"no-store"}).then(x=>x.json()),fetch("../a1.json").then(x=>x.json()),fetch("t.json",{cache:"no-store"}).then(x=>x.json())]);
+ var r=await Promise.all([fetch("../bk.json",{cache:"no-store"}).then(x=>x.json()),fetch("../a1.json").then(x=>x.json()),fetch("dv.json",{cache:"no-store"}).then(x=>x.json())]);
  var D=await dec(K,r[0].iv,r[0].ct),A=await dec(K,r[1].iv,r[1].ct),T=await dec(K,r[2].iv,r[2].ct);window.DROMUPD=r[0].up||"";
  msg("");
  await js("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js");await js("https://cdn.jsdelivr.net/npm/jspdf@3.0.1/dist/jspdf.umd.min.js");
