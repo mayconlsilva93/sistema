@@ -12,7 +12,7 @@ ARTS=['Ramonstro','Carloto','Sena','Cenoura','Maneira','Amaro','Josu','Cadu Viei
 PFX={'Ramonstro':'1','Brinquinho':'2','Carloto':'3','Sena':'4','Cenoura':'5','Liquinho':'6','Maneira':'7','Amaro':'8','Josu':'9','Cadu Vieira':'10'}
 def get(**q):
     q['key']=KEY;u=URL+('&' if '?' in URL else '?')+urllib.parse.urlencode(q)
-    r=json.loads(urllib.request.urlopen(u,timeout=300).read())
+    r=json.loads(urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0 (DROM GitHub Action)'}),timeout=300).read())
     if r.get('err'):sys.exit('Apps Script: '+r['err'])
     return r
 def art(folder):
