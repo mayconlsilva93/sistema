@@ -38,7 +38,7 @@ function cmT(S,mi){var L=S.filter(s=>s[19]===mi);if(!L.length)return null;var M0
 
 function custos(cfg){if(!cfg||!cfg.custos)return[];var n=new Date(),now=n.getTime(),m=(n.getFullYear()-B)*12+n.getMonth()+1,S=(window.DROMDATA&&DROMDATA.S)||[],o=[];
  [m-1,m].forEach(mi=>{var c=cmT(S,mi);if(!c||now<c.cr||now>c.due+3*24*H)return;var dd=new Date(c.due);
-  o.push({id:"cm-"+mi,k:"cm",ev:"Shows de "+c.mn+" finalizados!",tx:"Você deve informar os custos até "+p2(dd.getDate())+"/"+p2(dd.getMonth()+1)+" dentro do aplicativo ou em seu grupo financeiro.",due:c.due,rem:{p:3},L:c.L})});return o}
+  o.push({id:"cm-"+mi,mi:mi,k:"cm",ev:"Shows de "+c.mn+" finalizados!",tx:"Você deve informar os custos até "+p2(dd.getDate())+"/"+p2(dd.getMonth()+1)+" dentro do aplicativo ou em seu grupo financeiro.",due:c.due,rem:{p:3},L:c.L})});return o}
 async function load(){var A=await list("tarefas"),cur=A.filter(x=>x&&x.ts).sort((a,b)=>b.ts-a.ts)[0]||{T:[],cfg:{}};
  var ok=await list("tarok");ok.forEach(x=>{if(x&&(x.f===F||String(x.f).endsWith("/"+F)))DONE[x.id]=x.ts});(ls.g("done")||[]).forEach(id=>DONE[id]=DONE[id]||1);
  T=(cur.T||[]).filter(x=>{if(x.x)return false;x._f=(x.to||[]).find(g=>(g===F||g.endsWith("/"+F))&&!(x.xf||[]).includes(g));return !!x._f}).concat(custos(cur.cfg)).filter(x=>!DONE[x.id]).sort((a,b)=>a.due-b.due);
@@ -54,7 +54,7 @@ function pop(x){var seen=ls.g("seen")||{};seen[x.id]=Date.now();ls.s("seen",seen
  m.innerHTML='<div role="dialog" aria-modal="true"><div class="th">'+esc(tn(x))+'</div><div class="tb">'+(x.ev?"<h3>"+esc(x.ev)+"</h3>":"")+'<span class="tz">Prazo: '+esc(pz(x.due,1))+"</span><p>"+esc(x.tx||"")+"</p>"+lst+
   '<div class="tbt"><button class="t0" type="button">'+(cm?"Depois":"Lembrar depois")+'</button><button class="t1" type="button">'+(cm?"Informar custos agora":"Já enviei")+"</button></div></div></div>";
  document.body.appendChild(m);m.onclick=e=>{if(e.target===m)m.remove()};m.querySelector(".t0").onclick=()=>m.remove();
- m.querySelector(".t1").onclick=()=>{if(cm){m.remove();var f=document.querySelector('nav button[data-t="f"]');if(f)f.click();return}conf(x,m)}}
+ m.querySelector(".t1").onclick=()=>{if(cm){m.remove();try{view="m";MO=x.mi;YR=YF(MO);flt="T";selD=null}catch(e){}var f=document.querySelector('nav button[data-t="a"]');if(f)f.click();else try{tab="a";draw()}catch(e){}return}conf(x,m)}}
 function conf(x,pm){var c=document.createElement("div");c.className="tpo cf";c.innerHTML='<div role="dialog" aria-modal="true"><div class="th">Confirmação</div><div class="tb"><p style="font-size:17px;font-weight:600">Confirma o envio das informações solicitadas?</p><div class="tbt"><button class="t0" type="button">Cancelar</button><button class="t1" type="button">Sim, já enviei</button></div></div></div>';
  document.body.appendChild(c);c.querySelector(".t0").onclick=()=>c.remove();
  c.querySelector(".t1").onclick=async()=>{c.remove();pm.remove();DONE[x.id]=Date.now();var d=ls.g("done")||[];d.push(x.id);ls.s("done",d.slice(-100));T=T.filter(y=>y.id!==x.id);bar();

@@ -1,5 +1,5 @@
 /* DROM · DEV Artista Teste — cache offline + notificações push */
-var C="drom-artistateste-v5";
+var C="drom-artistateste-v6";
 self.addEventListener("install",e=>self.skipWaiting());
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;
