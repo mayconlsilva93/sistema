@@ -41,6 +41,12 @@ function tabela_(ss,b,now){var t=ss.getSheetByName("Tabela")||ss.insertSheet("Ta
   t.getRange(1,1,1,H.length).setValues([H]).setFontWeight("bold").setWrap(true);t.setFrozenRows(1);t.setFrozenColumns(1);
   var v=t.getLastRow()>1?t.getRange(2,2,t.getLastRow()-1,1).getValues():[],at=-1;for(var i=0;i<v.length;i++)if(v[i][0]===b.k){at=i+2;break}
   if(at<0)at=t.getLastRow()+1;t.getRange(at,1,1,V.length).setValues([V])}
+/* respostas do encerramento 2025 por artista (notas), para comparar no hub */
+function y25_(){try{var EM={"carlotodj@gmail.com":"carloto","andrecaio1105@gmail.com":"cenoura","bernardosenasilva@gmail.com":"sena","sophia.sshpp@gmail.com":"maneira","ramon_rotava@hotmail.com":"ramonstro"},
+  C={sat:2,ren:3,ind:4,grp:6,cmp:7,app:8,fin:9,qtd:11,cfl:13,cfo:15,c20:17,c30:18,rtc:40,rhs:41,met:45,idv:46,mcm:48,mag:49,msh:50,rsd:52,rsc:53,dsg:62,ags:61},
+  v=SpreadsheetApp.openById("1k2K0MTXnvRY5cqne1fc1ZIgiS-gwFroSNar_a0GtsfY").getSheets()[0].getDataRange().getValues(),o={};
+  for(var i=1;i<v.length;i++){var k=EM[String(v[i][1]).trim().toLowerCase()];if(!k)continue;o[k]={};for(var id in C){var x=v[i][C[id]];if(x===""||x==null)continue;o[k][id]=(typeof x==="number"||/^\d+([.,]\d+)?$/.test(String(x).trim()))?Number(String(x).replace(",",".")):String(x)}}
+  return o}catch(e){return{}}}
 function esc_(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function doGet(e){var p=e.parameter,ss=sh_(),rd=ss.getSheetByName("Rascunhos"),dv=rd?rd.getDataRange().getValues():[];
   if(p.k){var T=JSON.parse(P_("TOKENS")||"{}");if(!T[p.k]||T[p.k]!==p.t)return out_({ok:false});var o={ok:true,clr:P_("CLR_"+p.k)||""};
@@ -49,6 +55,6 @@ function doGet(e){var p=e.parameter,ss=sh_(),rd=ss.getSheetByName("Rascunhos"),d
   if(!p.r||p.r!==P_("READ"))return out_({ok:false});
   var v=ss.getSheetByName("Respostas").getDataRange().getValues(),L=[],R=[];for(var j=1;j<dv.length;j++)R.push({k:dv[j][0],ts:+dv[j][3]||0,a:jn_(dv[j],4)});
   for(var i=1;i<v.length;i++)L.push({k:v[i][0],n:v[i][1],e:v[i][2],em:v[i][3],teste:v[i][4]==="sim",a:jn_(v[i],6),st:(function(){try{return JSON.parse(v[i][5]||"{}")}catch(e){return{}}})()});
-  return out_({ok:true,L:L,R:R,ag:JSON.parse(P_("AGENDA")||"{}")})}
+  return out_({ok:true,L:L,R:R,ag:JSON.parse(P_("AGENDA")||"{}"),y25:y25_()})}
 /* rode uma vez pelo editor para autorizar planilha e e-mail */
 function autorizar(){sh_()}

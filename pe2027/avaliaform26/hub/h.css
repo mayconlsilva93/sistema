@@ -52,3 +52,4 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 .rf svg{display:block}.rf.spin svg{animation:rfs .8s linear infinite}@keyframes rfs{to{transform:rotate(360deg)}}
 .ac.sel{background:var(--bl);border-color:var(--bl)}.ac.sel b,.ac.sel span{color:#fff!important}
 #top .rf{margin-left:auto}
+.cmpl{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px;font-size:12px;color:var(--mu)}.cmpl em{font-style:normal}
