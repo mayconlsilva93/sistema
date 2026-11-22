@@ -33,7 +33,7 @@ window.AVQ=[
  {id:"comc",t:"t",q:"Tem algum comentário sobre a comissão?"}]},
 {s:"Histórico de cachês",i:[
  {id:"cac",d:"tabela",t:"t",q:"Tem comentários gerais sobre os seus cachês em 2026? Onde o cachê precisa subir? Onde dá para segurar o cachê para não perder datas?"}]},
-{s:"Formato dos shows",i:[
+{s:"Duração e shows diários",i:[
  {id:"dId",d:"dur",t:"s",q:"Qual seria a duração ideal para o seu show?",o:["45 min","1 hora","1h30","2 horas","Mais de 2 horas"]},
  {id:"dMx",t:"s",q:"Qual a duração máxima de show que você aceitaria fazer?",o:["1 hora","1h30","2 horas","3 horas","Mais de 3 horas"]},
  {id:"pdia",d:"pdia",t:"s",q:"Quantos shows por dia você aceitaria fazer?",o:["1","2","3","4","5","Quantos forem possíveis"]}]},
@@ -51,7 +51,7 @@ window.AVQ=[
  {id:"msh",t:"n",q:"Material para os seus shows (vídeo de telão, credenciais, adesivos)",m25:9.50},
  {id:"matc",t:"t",q:"Comente as três perguntas anteriores. Tem alguma sugestão de melhoria?"},
  {id:"ags",t:"s",q:"Você considera importante a postagem da arte da sua agenda mensal nos stories?",o:["Sim","Não","Tanto faz"]},
- {id:"dsg",t:"n",q:"Quão satisfeito(a) você está com o designer das artes de agenda mensal?"},
+ {id:"dsg",t:"n",q:"Quão satisfeito(a) você está com o designer das artes de agenda mensal?",m25:9.00},
  {id:"prk",t:"s",q:"Você acredita que um presskit de artista deve ser atualizado com qual frequência?",o:["6 meses","1 ano","2 anos","3 anos"]},
  {id:"mne",t:"t",q:"Tem algum material, além dos atuais, que você considera necessário?"}]},
 {s:"Redes sociais",i:[

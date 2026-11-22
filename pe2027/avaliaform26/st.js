@@ -11,7 +11,9 @@ function rev(s){var m=(s[19]-1)%12+1;return(m===12&&s[0]===31)||(m===1&&s[0]===1
 var CGR=[["Eventos Públicos",[["Casas noturnas","N"],["Bares","B"],["Outdoor","O"],["Label DROM","L"]]],["Eventos Universitários",[["Grande Florianópolis","U1"],["Outras cidades","U2"]]],["Eventos Sociais e Corporativos",[["Formaturas","F"],["Aniversários","A"],["Casamentos","W"],["Particular","P"],["Corporativos","C"]]]];
 window.AVST=function(D,X){X=X||{};var P=X.P||{},CT=X.CT||{},CA=X.CA||{},FIN=X.FIN||null,PC=X.PC||{},hasCT=Object.keys(CT).length>0,
  ky=s=>s[19]+"|"+s[0]+"|"+String(s[3]).replace(/\/SC$/,""),kl=s=>ky(s)+"|"+String(s[2]||"").trim().toLowerCase(),
- cat=s=>CT[kl(s)]||CT[ky(s)]||"",cs=s=>CA[s[3]+"|"+s[2]]||s[2],sub=s=>{var c=cat(s);return c==="U"?(FLO[s[3]]?"U1":"U2"):c};
+ cat0=s=>CT[kl(s)]||CT[ky(s)]||"",
+ /* formaturas e pré-eventos de formatura contam como social mesmo em casa noturna; HH (happy hour universitário) conta como universitário */
+ cat=s=>{var c=cat0(s),n=String(s[1]||"");if(/formatura|pr[ée][- ]?(cl[ií]nico|internato|evento)/i.test(n))return/^[FAWPC]$/.test(c)?c:"F";if(/\bhh\b|hh dos|hh especial/i.test(n)&&!/^[NBOU]$/.test(c))return"U";return c},cs=s=>CA[s[3]+"|"+s[2]]||s[2],sub=s=>{var c=cat(s);return c==="U"?(FLO[s[3]]?"U1":"U2"):c};
  var S=D.S||[],A=yr(S,Y),R=A.filter(ok),F=A.filter(s=>!ok(s)),mon=[];
  for(var i=1;i<=12;i++){var k=M0+i;mon.push({r:R.filter(s=>s[19]===k).length,f:F.filter(s=>s[19]===k).length,p:P[k]||0,y25:yr(S,2025).filter(s=>s[19]===k-12).length})}
  var pj=sum(mon.map(m=>m.p)),pv={};[2023,2024,2025].forEach(y=>pv[y]=yr(S,y).length);
