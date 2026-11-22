@@ -1,3 +1,5 @@
+function SOC(s){return/formatura|pr[ée][- ]?(cl[ií]nico|internato|evento)|meio m[ée]dico|\b\d+ dias\b|ciclo b[áa]sico/i.test((s[21]||"")+" "+(s[2]||""))}
+function CT(s){var c=s[16];if(SOC(s))return"FAWPC".indexOf(c)<0?"F":c;if(/\bhh\b|hh dos|hh especial/i.test((s[21]||"")+" "+(s[2]||""))&&"NBOU".indexOf(c)<0)return"U";return c}
 function PSEG(s){var L=s[29];if(!L||!L.length||L.length<2)return null;var f=x=>{x%=1440;return String(Math.floor(x/60)).padStart(2,"0")+":"+String(x%60).padStart(2,"0")};return{L:L,perm:L[L.length-1][1]-L[0][0],txt:L.map(x=>f(x[0])+" às "+f(x[1])).join(" e "),ini:f(L[0][0]),fim:f(L[L.length-1][1])}}/* show com mais de um horário (campo 29) */
 function VP(s){return s[28]?'<span style="color:#c5221f;font-weight:700">valor pendente</span>':f(s[6]||0)}/* cachê em branco na base */
 
@@ -78,7 +80,7 @@ function fillM(){var c=mctx(MO),D=[...new Set(ALL.filter(s=>s[14]===MO).map(s=>s
  $("fd").innerHTML=opt("","Todos os dias")+D.map(d=>opt(d,c.DS(d))).join("");
  $("gd").innerHTML=D.map(d=>opt(d,c.DS(d))).join("");$("gd").value=D.find(d=>d>=c.T)||D[D.length-1]}
 function arM(n,a){var rc=a.filter(s=>isR(s)&&s[10]),pd=a.filter(s=>isR(s)&&!s[10]);return[n,a.length,sm(a,6),sm(a,8),sm(a,6)-sm(a,7)-sm(a,8),sm(rc,6),sm(pd,6)]}
-var CGR=[["Eventos Públicos",[["Casas noturnas",s=>s[16]==="N"],["Bares",s=>s[16]==="B"],["Outdoor",s=>s[16]==="O"],["Label DROM",s=>s[16]==="L"]]],["Eventos Universitários",[["Grande Florianópolis",s=>s[16]==="U"&&inGF(s)],["Outras cidades",s=>s[16]==="U"&&!inGF(s)]]],["Eventos Sociais e Corporativos",[["Formaturas",s=>s[16]==="F"],["Aniversários",s=>s[16]==="A"],["Casamentos",s=>s[16]==="W"],["Particular",s=>s[16]==="P"],["Corporativos",s=>s[16]==="C"]]]];
+var CGR=[["Eventos Públicos",[["Casas noturnas",s=>CT(s)==="N"],["Bares",s=>CT(s)==="B"],["Outdoor",s=>CT(s)==="O"],["Label DROM",s=>CT(s)==="L"]]],["Eventos Universitários",[["Grande Florianópolis",s=>CT(s)==="U"&&inGF(s)],["Outras cidades",s=>CT(s)==="U"&&!inGF(s)]]],["Eventos Sociais e Corporativos",[["Formaturas",s=>CT(s)==="F"],["Aniversários",s=>CT(s)==="A"],["Casamentos",s=>CT(s)==="W"],["Particular",s=>CT(s)==="P"],["Corporativos",s=>CT(s)==="C"]]]];
 function catHtml(Y,TY){if(!TY)return"<span class='mu'>Sem dados neste filtro.</span>";
  var G=CGR.map(function(g){var a=Y.filter(s=>g[1].some(x=>x[1](s))),subs=g[1].map(x=>{var b=Y.filter(x[1]);return{n:x[0],c:b.length,v:sm(b,6),k:sm(b,8)}}).filter(z=>z.c).sort((p,q)=>q.c-p.c);return{l:g[0],a:a,subs:subs,multi:g[1].length>1,v:sm(a,6)}}).filter(z=>z.a.length).sort((p,q)=>q.a.length-p.a.length),
  tn=(col,i,n)=>n>1?"color-mix(in srgb,"+col+" "+Math.round(100-i*(62/(n-1)))+"%,var(--cd))":col,
