@@ -130,7 +130,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("messag
 
 /* ---------- menu inferior: Início, Agenda, Calendário (Painel e Booker ainda não habilitados) ---------- */
 var TAB="h",HV="m",HM=null,HY=null,HF="P",HSD=null,MNS=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],WD=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-function ALL(){var r=[];CFG.apps.forEach(a=>{var d=DATA[a.f];if(d)d.S.forEach(s=>r.push([s,a]))});return r}
+function ALL(){var r=[];CFG.apps.forEach(a=>{if(a.f==="dev/artistateste")return;/*teste fora das contas*/var d=DATA[a.f];if(d)d.S.forEach(s=>r.push([s,a]))});return r}
 function ini(s){return dromStart(s,B)||new Date(B,s[19]-1,s[0],23,59).getTime()}
 function fim(s){var t=dromStart(s,B);return t?t+(+s[5]||0)*6e4:new Date(B,s[19]-1,s[0]+1,6,0).getTime()}
 var p2=n=>String(n).padStart(2,"0"),hmF=s=>{var i=s[4];if(!i||i==="a definir")return"horário a definir";if(!s[5])return i;var t=+i.slice(0,2)*60+ +i.slice(3)+s[5];return i+" – "+p2(Math.floor(t/60)%24)+":"+p2(t%60)};
