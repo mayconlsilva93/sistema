@@ -53,3 +53,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 .ac.sel{background:var(--bl);border-color:var(--bl)}.ac.sel b,.ac.sel span{color:#fff!important}
 #top .rf{margin-left:auto}
 .cmpl{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px;font-size:12px;color:var(--mu)}.cmpl em{font-style:normal}
+.sc3{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-top:4px}
+.sc3>span{display:flex;flex-direction:column;justify-content:center;border-radius:12px;padding:6px 12px;min-width:92px;line-height:1.15}
+.sc3 .sv{background:var(--bl);color:#fff;align-items:center}.sc3 .sv i{font-style:normal;font-size:26px;font-weight:900}.sc3 .sv small{font-size:10px;opacity:.85}
+.sc3 .sp{background:#fff;border:1px solid var(--ln)}.sc3 .sp small{font-size:11px;color:var(--mu)}.sc3 .sp i{font-style:normal;font-size:18px;font-weight:800;color:var(--ink)}
+.sc3 em{font-style:normal;font-size:12px;font-weight:700}.sc3 em.up{color:#0a8f06}.sc3 em.dn{color:#d93025}.sc3 em.eq{color:var(--mu)}
