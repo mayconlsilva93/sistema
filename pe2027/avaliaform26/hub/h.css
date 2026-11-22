@@ -49,3 +49,4 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 .ac{flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;gap:6px;padding:12px 6px}
 .ac img{width:56px;height:56px}.ac>div{min-width:0;width:100%}.ac b{font-size:14px;line-height:1.2;overflow-wrap:anywhere}.ac span{display:block;margin-top:3px;font-size:11px}
 @media(max-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.ac{padding:10px 4px}.ac img{width:48px;height:48px}.ac b{font-size:13px}}
+.rf svg{display:block}.rf.spin svg{animation:rfs .8s linear infinite}@keyframes rfs{to{transform:rotate(360deg)}}
