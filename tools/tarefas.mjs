@@ -25,7 +25,7 @@ function bd5(y,mo){var D=new Date(y,mo,1);y=D.getFullYear();mo=D.getMonth();var 
  var F=["0-1","3-21","4-1","8-7","9-12","10-2","10-15","10-20","11-25",gf.getMonth()+"-"+gf.getDate()],n=0;
  for(var d=1;d<32;d++){var w=new Date(y,mo,d).getDay();if(w&&w<6&&F.indexOf(mo+"-"+d)<0&&++n===5)return new Date(y,mo,d,23,59).getTime()}}
 function cmT(S,mi){var L=S.filter(s=>s[19]===mi);if(!L.length)return null;var M0=new Date(B,mi-1,1),y=M0.getFullYear(),mo=M0.getMonth(),last=Math.max.apply(null,L.map(s=>s[0]));
- var cr=Math.min(new Date(y,mo,last+2,9).getTime(),new Date(y,mo+1,1,9).getTime());return{mi:mi,L:L,cr:cr,due:bd5(y,mo+1),mn:["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"][mo]}}
+ var P=L.filter(s=>(+s[17]||0)!==0&&(s[16]===null||s[16]===undefined||s[16]===""));if(!P.length)return null;/*todos os custos digitados: tarefa sai do ar*/var cr=Math.min(new Date(y,mo,last+2,9).getTime(),new Date(y,mo+1,1,9).getTime());return{mi:mi,L:P,cr:cr,due:bd5(y,mo+1),mn:["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"][mo]}}
 const lb=t=>t.k==="cm"?TN.cm:(t.k==="ot"&&t.ti?t.ti:TN[t.k]||"Pendência")+(t.ev?" ("+t.ev+")":"");
 const done=(id,f)=>OK.some(x=>x.id===id&&x.f===f);
 /* tarefas por artista */
