@@ -93,24 +93,26 @@ function opCache(S,p,A){
   if(tipo==='total'||tipo==='s30'||tipo==='s50'){
     var st=tipo==='total'?'Pago':tipo==='s30'?'Entrada 30%':'Entrada 50%';
     sh.getRange(r,cR).setValue(st);sh.getRange(r,cA).setValue(st);sh.getRange(r,cP).setValue(quem);sh.getRange(r,cD).setValue(d)}
-  else{ /* outro valor (ou restante): só RECEBIDO POR e DATA RECEBIMENTO "DD/MM/AAAA (R$ 0,00)", somando às entradas existentes */
-    var old=txt(sh.getRange(r,cD).getValue()),nv=p.d+' ('+brl(v)+')';
-    sh.getRange(r,cD).setNumberFormat('@').setValue(old?old+', '+nv:nv);sh.getRange(r,cP).setValue(quem);tipo='parcial';
-    /* 100% pago: soma parcelas "(R$ x)" + entrada já marcada; se cobrir o cachê bruto, vira Pago */
-    var br=+S.get(r,'CACHÊ BRUTO')||0,st0=nh(S.get(r,'CACHÊ RECEBIDO?')),pg=0,m,re=/\(R\$\s*([\d.,]+)\)/g,all=old?old+', '+nv:nv;
-    while((m=re.exec(all)))pg+=parseFloat(m[1].replace(/\./g,'').replace(',','.'))||0;
-    if(!/\(R\$/.test(old)){var pc=/ENTRADA (\d+)%/.exec(st0);if(pc&&old)pg+=br*(+pc[1])/100}
+  else{ /* outro valor (ou restante): só RECEBIDO POR e DATA RECEBIMENTO, uma parcela por linha "DD/MM/AAAA - R$ 0,00", somando às entradas existentes */
+    var old=txt(sh.getRange(r,cD).getValue()).trim(),br=+S.get(r,'CACHÊ BRUTO')||0,st0=nh(S.get(r,'CACHÊ RECEBIDO?')),pc=/ENTRADA (\d+)%/.exec(st0);
+    if(old&&!/R\$/.test(old)&&pc)old=old.split(/[\r\n]+/)[0]+' - '+brl(br*(+pc[1])/100);   /* sinal só com data: vira linha com valor */
+    old=old.replace(/(\d{1,2}\/\d{1,2}\/\d{2,4})\s*\((R\$[^)]*)\)\s*,?\s*/g,'$1 - $2\n').trim();   /* converte o formato antigo do app */
+    var all=old?old+'\n'+parcLine(p.d,v):parcLine(p.d,v);
+    sh.getRange(r,cD).setNumberFormat('@').setValue(all);sh.getRange(r,cP).setValue(quem);tipo='parcial';
+    var pg=parcSum(all);
     if(br>0&&pg>=br-0.01){sh.getRange(r,cR).setValue('Pago');sh.getRange(r,cA).setValue('Pago');tipo='quitado'}}
   S.stamp(r);return {n:+p.n,tipo:tipo}}
 
 /* duplicidade: total com Pago; sinal com Entrada já marcada; parcial repetida (mesma data + valor) ou acima do cachê bruto */
+/* parcelas em DATA RECEBIMENTO: uma por linha "dd/mm/aaaa - R$ 0,00" (padrão da planilha); lê também o formato antigo "dd/mm/aaaa (R$ x)" */
+function parcSum(s){var pg=0,m,re=/R\$\s*([\d.]*\d(?:,\d{1,2})?)/g;while((m=re.exec(s)))pg+=parseFloat(m[1].replace(/\./g,'').replace(',','.'))||0;return pg}
+function parcLine(d,v){return d+' - '+brl(v)}
 function dupCache(S,r,p,v){var st=nh(S.get(r,'CACHÊ RECEBIDO?')),br=+S.get(r,'CACHÊ BRUTO')||0,old=txt(S.sh.getRange(r,S.col('DATA RECEBIMENTO')).getValue());
   if(st==='PAGO')throw new Error('Cachê já está como "Pago" na planilha: nada a registrar');
   if(p.tipo==='total')return;
   if(p.tipo==='s30'||p.tipo==='s50'){if(/^ENTRADA/.test(st))throw new Error('Sinal já registrado na planilha ('+S.get(r,'CACHÊ RECEBIDO?')+'). Para outra parcela use "Outro"');return}
-  var nv=p.d+' ('+brl(v)+')';if(old.indexOf(nv)>=0)throw new Error('Recebimento de '+brl(v)+' em '+p.d+' já está lançado na planilha');
-  var pg=0,m,re=/\(R\$\s*([\d.,]+)\)/g;while((m=re.exec(old)))pg+=parseFloat(m[1].replace(/\./g,'').replace(',','.'))||0;
-  var pc=/ENTRADA (\d+)%/.exec(st);if(pc)pg+=br*(+pc[1])/100;
+  var nv=parcLine(p.d,v);if(old.indexOf(nv)>=0||old.indexOf(p.d+' ('+brl(v)+')')>=0)throw new Error('Recebimento de '+brl(v)+' em '+p.d+' já está lançado na planilha');
+  var pg=parcSum(old),pc=/ENTRADA (\d+)%/.exec(st);if(pc&&!/R\$/.test(old))pg+=br*(+pc[1])/100;
   if(br>0&&pg+v>br+0.01)throw new Error('Valor acima do cachê: já recebido '+brl(pg)+' de '+brl(br)+'; restante '+brl(Math.max(0,br-pg)))}
 
 function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pago" */
