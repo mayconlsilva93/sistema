@@ -8,3 +8,5 @@ html body{overflow-y:auto!important;overflow-x:hidden!important;height:auto!impo
 main{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}
 main{padding-bottom:14px!important}
 @media (max-width:420px){.top{gap:8px!important}.top b{font-size:16px!important;white-space:nowrap}.top .av,.top img.av{width:46px!important;height:46px!important}.top .bell,.top .eye{width:38px!important;height:38px!important}}
+
+/*IOS2*/@supports (-webkit-touch-callout:none){:root{overflow:visible!important;height:auto!important;background:#0000FF!important}html body{position:static!important;overflow:visible!important;height:auto!important;min-height:100%!important;padding-bottom:var(--fh,calc(85.6px + env(safe-area-inset-bottom,0px)))!important}}

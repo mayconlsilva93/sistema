@@ -24,7 +24,7 @@ addEventListener("resize",function(){try{FIT()}catch(e){}});
 /* rolagem só acima do rodapé: o body vira a área de rolagem e termina onde começa a faixa amarela */
 function FH(){var t=innerHeight;["nav",".brand",".tbr"].forEach(function(q){var e=document.querySelector(q);if(e){var b=e.getBoundingClientRect(),r=b.top-(q===".tbr"?8:0);if(b.height>0&&r>0&&r<t)t=r}});document.documentElement.style.setProperty("--fh",Math.max(0,Math.round(innerHeight-t))+"px")}
 FH();addEventListener("resize",FH);setTimeout(FH,300);try{new MutationObserver(function(){requestAnimationFrame(FH)}).observe(document.body,{childList:true})}catch(_){}
-(function(){var o=window.scrollTo.bind(window);window.scrollTo=function(a,b){try{if(typeof a==="object")document.body.scrollTo(a);else document.body.scrollTo(a||0,b||0)}catch(e){o(a,b)}}})();
+(function(){var o=window.scrollTo.bind(window);window.scrollTo=function(a,b){try{if(typeof a==="object")document.body.scrollTo(a);else document.body.scrollTo(a||0,b||0)}catch(e){}try{o(a,b)}catch(e){}}})();
 /* botão no menu, entre Calendário e Financeiro */
 var nav=document.querySelector("nav"),f=nav&&nav.querySelector('button[data-t="f"]');
 if(f&&!nav.querySelector('button[data-t="p"]')){var b=document.createElement("button");b.dataset.t="p";b.title="Propostas";b.setAttribute("aria-label","Propostas");
