@@ -69,4 +69,4 @@ window.AVQ=[
  {id:"reu",t:"g",q:"Marque os dias e horários de preferência para a reunião presencial (até 2 horas), de 07 a 09/12",o:["Seg 07/12 10h","Seg 07/12 11h","Seg 07/12 14h","Seg 07/12 15h","Seg 07/12 18h","Seg 07/12 19h","Seg 07/12 21h","Ter 08/12 10h","Ter 08/12 11h","Ter 08/12 14h","Ter 08/12 15h","Ter 08/12 18h","Ter 08/12 19h","Ter 08/12 21h","Qua 09/12 10h","Qua 09/12 11h","Qua 09/12 14h","Qua 09/12 15h","Qua 09/12 18h","Qua 09/12 19h","Qua 09/12 21h"]},
  {id:"reuo",t:"t",q:"Outro dia e horário? Qual?"}]}
 ];
-window.AVDL=new Date("2026-11-27T12:00:00-03:00").getTime(); /* prazo: sexta 27/11 12h */
+window.AVDL=new Date("2026-11-27T20:00:00-03:00").getTime(); /* prazo: sexta 27/11 20h */

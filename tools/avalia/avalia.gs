@@ -2,7 +2,7 @@
    grava numa planilha da conta DROM (sem e-mail). O hub lê tudo com ?r=<READ>.
    Propriedades do script (Configurações do projeto → Propriedades): TOKENS = JSON {login: token}, READ = chave de leitura do hub.
    Implantar como app da Web: Executar como "Eu", acesso "Qualquer pessoa". */
-var PASTA="1jZU1c-vJMVTa2ABpDdtZ-6PMnpsjyess" /* Meu Drive/DROM/ADMINISTRATIVO/CADASTRO DE ARTISTAS */,DROM_MAIL="contato@dromentretenimento.com",PRAZO=new Date("2026-11-27T12:00:00-03:00");
+var PASTA="1jZU1c-vJMVTa2ABpDdtZ-6PMnpsjyess" /* Meu Drive/DROM/ADMINISTRATIVO/CADASTRO DE ARTISTAS */,DROM_MAIL="contato@dromentretenimento.com",PRAZO=new Date("2026-11-27T20:00:00-03:00");
 function P_(k){return PropertiesService.getScriptProperties().getProperty(k)}
 /* textos sem limite: JSON dividido em pedaços de 45 mil caracteres nas últimas colunas da linha (limite do Sheets é 50 mil por célula) */
 function ch_(t){t=String(t);var L=[];for(var i=0;i<t.length;i+=45000)L.push(t.slice(i,i+45000));return L.length?L:[""]}
@@ -20,7 +20,7 @@ function doPost(e){try{var b=JSON.parse(e.postData.contents),T=JSON.parse(P_("TO
   if(b.agenda){if(b.r!==P_("READ"))return out_({ok:false,err:"não autorizado"});PropertiesService.getScriptProperties().setProperty("AGENDA",JSON.stringify(b.agenda));return out_({ok:true})}
   if(b.clear){if(b.r!==P_("READ")||b.clear!=="teste")return out_({ok:false,err:"não autorizado"});var ss0=sh_(),n=0;["Respostas","Rascunhos","Histórico"].forEach(function(nm){var sh=ss0.getSheetByName(nm);if(!sh)return;var v=sh.getDataRange().getValues();for(var i=v.length-1;i>=1;i--)if(v[i][0]==="teste"){sh.deleteRow(i+1);n++}});PropertiesService.getScriptProperties().setProperty("CLR_teste",String(Date.now()));return out_({ok:true,n:n})}
   if(!b.k||!T[b.k]||T[b.k]!==b.t)return out_({ok:false,err:"login inválido"});
-  if(b.k!=="teste"&&new Date()>=PRAZO)return out_({ok:false,err:"prazo encerrado em 27/11 às 12h"});
+  if(b.k!=="teste"&&new Date()>=PRAZO)return out_({ok:false,err:"prazo encerrado em 27/11 às 20h"});
   var lock=LockService.getScriptLock();lock.waitLock(20000);var ss=sh_();
   /* rascunho: salva enquanto o artista preenche, sem e-mail */
   var rd=ss.getSheetByName("Rascunhos")||ss.insertSheet("Rascunhos");if(rd.getLastRow()<1)rd.appendRow(["login","nome","salvo em","ts","respostas (json)"]);
