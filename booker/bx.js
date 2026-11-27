@@ -1,6 +1,6 @@
 /* DROM Booker — abas Dados/Emissão/Contrato, copiar de/para, semelhantes, sugestões e calculadora.
-   Gravar (Salvar / Nova proposta) só no Artista Teste (planilha falsa), pela escrita do Apps Script (tools/escrita/escrita.gs) quando booker/w.json tem URL;
-   sem URL, salva só neste aparelho. Artistas reais: só leitura (edições valem só nesta tela). */
+   Gravar (Salvar / Nova / Copiar para) em todos os artistas (APPS.booker no escrita.gs), pela escrita do Apps Script (tools/escrita/escrita.gs) quando booker/w.json tem URL;
+   sem URL, salva só neste aparelho. */
 (function(){
 var TA="Artista Teste",HAS=!!BASE[TA];if(!HAS)BASE[TA]={p:[]};
 Object.keys(BASE).forEach(function(a){(BASE[a].p||[]).forEach(function(p){["ev","loc","cid","cont","tel","obs"].forEach(function(k){if(typeof p[k]==="number")p[k]=String(p[k])})})});/* textos numéricos na planilha (ex.: evento "2024") quebravam a lista */
@@ -44,9 +44,9 @@ var TI={nw:'<path d="M12 5v14M5 12h14"/>',cf:'<path d="M12 4v11M7.5 10.5 12 15l4
 function tbar(){var t=$("bktb");if(!t)return;if(!t.firstChild){t.innerHTML=[["nw","Nova","Nova"],["cf","Copiar de…","Copiar de…"],["ct","Copiar para…","Copiar para…"],["sv","Salvar","Salvar"],["ds","Descartar alterações","Descartar"]].map(function(b){return'<button type="button" id="tb'+b[0]+'" class="tb tb'+b[0]+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+TI[b[0]]+'</svg><span class="tl">'+b[1]+'</span><span class="ts">'+b[2]+'</span></button>'}).join("");
   $("tbnw").onclick=function(){guard(newProp)};$("tbcf").onclick=function(){if(cur)copyFrom()};$("tbct").onclick=function(){if(cur)guard(copyTo)};$("tbsv").onclick=function(){if(dirty())save()};$("tbds").onclick=function(){if(dirty())discard()}}
  var c=!!cur,w=c&&WRT(cur.a),d=dirty(),S=function(id,on,tt){var b=$(id);b.disabled=!on;b.title=tt;b.setAttribute("aria-label",tt)};
- S("tbnw",HAS,HAS?"Nova proposta (criada no Artista Teste)":"Nova proposta: indisponível");
+ S("tbnw",1,"Nova proposta");
  S("tbcf",c,c?"Copiar dados de outra proposta para esta":"Copiar de…: escolha uma proposta primeiro");
- S("tbct",c&&HAS,c?"Copiar esta proposta para uma nova (Artista Teste)":"Copiar para…: escolha uma proposta primeiro");
+ S("tbct",c,c?"Copiar esta proposta para uma nova":"Copiar para…: escolha uma proposta primeiro");
  S("tbsv",d,d?"Salvar alterações":!c?"Salvar: escolha uma proposta primeiro":!w?"Somente leitura: disponível quando a gravação for liberada para este artista":"Nada para salvar");
  S("tbds",d,d?"Descartar alterações":"Descartar alterações: nada para descartar");$("tbsv").classList.toggle("dd",d)}
 function bar(){tbar();if(!cur)return;var w=WRT(cur.a),d=dirty();
@@ -83,17 +83,19 @@ document.addEventListener("change",function(e){if(e.target.closest&&e.target.clo
 
 /* ---- nova proposta / copiar ---- */
 var FCOPY=["hn","ev","loc","cid","end_local","cat","hi","hf","ini","dur","eq","rid","hosp","prod","obs","cont","tel","vend","cach","desp","com"];
-function nextN(){var m=0;BASE[TA].p.forEach(function(p){m=Math.max(m,+p.n||0)});return m+1}
-function addProp(o){var p=Object.assign({n:nextN(),st:"Proposta emitida",dprop:TODAY,vend:"Maycon"},o);p.dow=dowOf(p.dt);
+function nextN(a){var m=0;BASE[a||TA].p.forEach(function(p){m=Math.max(m,+p.n||0)});return m+1}
+function addProp(o,a){a=WRT(a)?a:TA;var p=Object.assign({n:nextN(a),st:"Proposta emitida",dprop:TODAY,vend:"Maycon"},o);p.dow=dowOf(p.dt);
  if(WS.on){var f={};Object.keys(p).forEach(function(k){if(k!=="n"&&p[k]!==null&&p[k]!==undefined&&p[k]!=="")f[k]=p[k]});toast("Criando na planilha…");
-  return WS.send("criar",TA,{h:sheetH(f)}).then(function(r){if(!r||!r.ok){wErr(r);return Promise.reject(r)}p.n=r.r.n;f.n=p.n;return addLocal(p,f)},function(e){if(e&&e.err!==undefined)throw e;wErr(null);throw e})}
- return addLocal(p)}
-function addLocal(p,f){BASE[TA].p=BASE[TA].p.filter(function(x){return x.n!==p.n});BASE[TA].p.push(p);NEW.push(CL_(p));SAVED[key(TA,p.n)]={};OV[key(TA,p.n)]={};if(f){var k=key(TA,p.n);WSV[k]={t:Date.now(),h:{},nw:CL_(p)};iput("ws",WSV);NEW.pop()}
- return persist().then(function(){$("flt").value="all";if($("art").value&&$("art").value!==TA){$("art").value=TA;lastArt=TA}fillProps(ovk(TA,p.n));toast("Proposta #"+p.n+" criada"+(f?" na planilha":""))})}
+  return WS.send("criar",a,{h:sheetH(f)}).then(function(r){if(!r||!r.ok){wErr(r);return Promise.reject(r)}p.n=r.r.n;f.n=p.n;return addLocal(p,f,a)},function(e){if(e&&e.err!==undefined)throw e;wErr(null);throw e})}
+ return addLocal(p,null,a)}
+function addLocal(p,f,a){a=a||TA;BASE[a].p=BASE[a].p.filter(function(x){return x.n!==p.n});BASE[a].p.push(p);NEW.push(Object.assign(CL_(p),{_a:a}));SAVED[key(a,p.n)]={};OV[key(a,p.n)]={};if(f){var k=key(a,p.n);WSV[k]={t:Date.now(),h:{},nw:CL_(p)};iput("ws",WSV);NEW.pop()}
+ return persist().then(function(){$("flt").value="all";if($("art").value&&$("art").value!==a){$("art").value=a;lastArt=a}fillProps(ovk(a,p.n));toast("Proposta #"+p.n+" criada"+(f?" na planilha":""))})}
 function newProp(){var d=new Date(Date.now()+30*864e5).toISOString().slice(0,10);
- modal('<b>Nova proposta</b><label class="dvl">Data do show <input type="date" id="nwd" value="'+d+'"></label><label class="dvl">Evento <input id="nwe" placeholder="Nome do evento"></label><label class="dvl">Local <input id="nwl" placeholder="Casa / espaço"></label><div class="dvmb"><button class="c">Cancelar</button><button class="pri y">Criar</button></div>',function(m){
+ var a0=cur&&WRT(cur.a)?cur.a:WRT($("art").value)?$("art").value:TA;
+ modal('<b>Nova proposta</b><label class="dvl">Artista <select id="nwa">'+wArts().map(function(a){return'<option'+(a===a0?" selected":"")+">"+esc(a)+"</option>"}).join("")+'</select></label><label class="dvl">Data do show <input type="date" id="nwd" value="'+d+'"></label><label class="dvl">Evento <input id="nwe" placeholder="Nome do evento"></label><label class="dvl">Local <input id="nwl" placeholder="Casa / espaço"></label><div class="dvmb"><button class="c">Cancelar</button><button class="pri y">Criar</button></div>',function(m){
   m.querySelector(".c").onclick=function(){m.remove()};
-  m.querySelector(".y").onclick=function(){var dt=m.querySelector("#nwd").value;if(!dt){toast("Informe a data");return}m.remove();addProp({dt:dt,ev:m.querySelector("#nwe").value.trim()||null,loc:m.querySelector("#nwl").value.trim()||null}).catch(function(){})}})}
+  m.querySelector(".y").onclick=function(){var dt=m.querySelector("#nwd").value;if(!dt){toast("Informe a data");return}var na=m.querySelector("#nwa").value;m.remove();addProp({dt:dt,ev:m.querySelector("#nwe").value.trim()||null,loc:m.querySelector("#nwl").value.trim()||null},na).catch(function(){})}})}
+function wArts(){var L=ORDER.filter(function(a){return WRT(a)});Object.keys(BASE).forEach(function(a){if(WRT(a)&&L.indexOf(a)<0)L.push(a)});return L}
 function allArts(){return Object.keys(BASE).filter(function(a){return BASE[a]&&BASE[a].p&&BASE[a].p.length})}
 function pickList(title,onPick){var all=0;
  var m=modal('<b>'+title+'</b><div class="dvseg"><button data-v="0" class="on">Artista atual</button><button data-v="1">Todos os artistas</button></div><input id="pkq" type="search" placeholder="Buscar evento, local, cidade, contratante…"><div id="pkl" class="dvpl"></div><div class="dvmb"><button class="c">Fechar</button></div>',function(m){m.querySelector(".c").onclick=function(){m.remove()}});
@@ -106,9 +108,9 @@ function applyFrom(r,src){var k=ck(),o=OV[k]||(OV[k]={}),n=0;FCOPY.forEach(funct
  Object.keys(r).forEach(function(f){if(/^(o_|ct_)/.test(f)){o[f]=r[f];n++}});buildForms();buildOpts();renderSum();renderAll();bar();simil();calcInit();toast(n+" campos copiados de "+src+" — confira e salve")}
 function copyFrom(){pickList("Copiar dados de outra proposta",function(x){applyFrom(x.r,(x.a===cur.a?"#"+x.p.n:x.a)+" ("+brs(x.r.dt)+")")})}
 function copyTo(){var r=cur_();
- modal('<b>Copiar esta proposta para…</b><label class="dvl">Artista <select id="cta">'+[TA].concat(allArts().filter(function(a){return a!==TA})).map(function(a){return'<option'+(a!==TA?" disabled":"")+">"+esc(a)+"</option>"}).join("")+'</select></label><p class="note">Por enquanto só é possível criar propostas no Artista Teste (planilhas reais: só leitura).</p><label class="dvl">Nova data <input type="date" id="ctd" value="'+esc(r.dt||"")+'"></label><div class="dvmb"><button class="c">Cancelar</button><button class="pri y">Criar cópia</button></div>',function(m){
+ modal('<b>Copiar esta proposta para…</b><label class="dvl">Artista <select id="cta">'+wArts().map(function(a){return'<option'+(a===cur.a?" selected":"")+">"+esc(a)+"</option>"}).join("")+'</select></label><label class="dvl">Nova data <input type="date" id="ctd" value="'+esc(r.dt||"")+'"></label><div class="dvmb"><button class="c">Cancelar</button><button class="pri y">Criar cópia</button></div>',function(m){
   m.querySelector(".c").onclick=function(){m.remove()};
-  m.querySelector(".y").onclick=function(){var dt=m.querySelector("#ctd").value;if(!dt){toast("Informe a data");return}m.remove();var o={dt:dt};FCOPY.forEach(function(f){if(r[f]!==undefined&&r[f]!==null&&r[f]!=="")o[f]=r[f]});addProp(o).then(function(){var k=ck(),ov=OV[k];Object.keys(r).forEach(function(f){if(/^(o_|ct_)/.test(f))ov[f]=r[f]});SAVED[k]=CL_(ov);persist();buildForms();buildOpts();renderAll()}).catch(function(){})}})}
+  m.querySelector(".y").onclick=function(){var dt=m.querySelector("#ctd").value;if(!dt){toast("Informe a data");return}var ta=m.querySelector("#cta").value;m.remove();var o={dt:dt};FCOPY.forEach(function(f){if(r[f]!==undefined&&r[f]!==null&&r[f]!=="")o[f]=r[f]});addProp(o,ta).then(function(){var k=ck(),ov=OV[k];Object.keys(r).forEach(function(f){if(/^(o_|ct_)/.test(f))ov[f]=r[f]});SAVED[k]=CL_(ov);persist();buildForms();buildOpts();renderAll()}).catch(function(){})}})}
 
 /* ---- semelhantes ---- */
 var SALL=0;
@@ -203,15 +205,15 @@ function cacheM(r,pv0,pd0,por0){var L=cpaid(r),c=num(r.cach),rv=recv(r),pd=Math.
   var go=function(){var eq=function(a,b){return Math.abs(a-b)<.005},tp=rv>0?"outro":eq(val,c)?"total":eq(val,c*.3)?"s30":eq(val,c*.5)?"s50":"outro",loc={recpor:por};
    if(tp!=="outro"){loc.rec=tp==="total"?"Pago":tp==="s30"?"Entrada 30%":"Entrada 50%";loc.drec=d}
    else{var od=String(r.drec||""),nv=d+" (R$ "+nm2(val)+")";loc.drec=od?od+", "+nv:nv;if(rv+val>=c-.01&&c>0)loc.rec="Pago"}
-   wfin("cache",{v:val,d:d,tipo:tp},loc,"Recebimento de cachê registrado",m)};
-  var tt=rv+val;if(false){var vv=v.value;m.querySelector(".md").innerHTML='<div class="okm"><i style="background:#FF5B1F;font-weight:900">!</i><p class="tt" style="font-size:15px;line-height:1.4">Cachê digitado superior ao existente no sistema. O valor digitado está correto?</p><p class="sb" style="margin:10px 0 0;line-height:1.7">Digitado: <b style="color:#111">R$ '+nm2(tt)+'</b><br>No sistema: <b style="color:#111">R$ '+nm2(c)+'</b></p><div class="bt"><button class="cn">Corrigir</button><button class="ok">OK</button></div></div>';m.querySelector(".cn").onclick=function(){cacheM(r,vv,d,por)};m.querySelector(".ok").onclick=go;return}go()}}
+   wfin("cache",{v:val,d:d,tipo:tp,acima:go.ac?1:0},loc,"Recebimento de cachê registrado",m)};
+  var tt=rv+val;if(c>0&&tt>c+.01){var vv=v.value;m.querySelector(".md").innerHTML='<div class="okm"><i style="background:#FF5B1F;font-weight:900">!</i><p class="tt" style="font-size:15px;line-height:1.4">O valor excede o cachê registrado (R$ '+nm2(c)+'). Confirmar mesmo assim?</p><p class="sb" style="margin:10px 0 0;line-height:1.7">Digitado: <b style="color:#111">R$ '+nm2(tt)+'</b><br>No sistema: <b style="color:#111">R$ '+nm2(c)+'</b></p><div class="bt"><button class="cn">Corrigir</button><button class="ok">Confirmar</button></div></div>';m.querySelector(".cn").onclick=function(){cacheM(r,vv,d,por)};m.querySelector(".ok").onclick=function(){go.ac=1;go()};return}go()}}
 /* mesmo pagamento duas vezes: o escrita.gs recusa; aqui a checagem antecipada com os dados da tela */
 function dupMsg(r,val,d,c,rv){var st=nh(r.rec),eq=function(a,b){return Math.abs(a-b)<.005};
  if(st==="PAGO")return'Cachê já está como "Pago": nada a registrar.';
  var tp=rv>0?"outro":eq(val,c)?"total":eq(val,c*.3)?"s30":eq(val,c*.5)?"s50":"outro";
  if((tp==="s30"||tp==="s50")&&/^ENTRADA/.test(st))return"Sinal já registrado ("+r.rec+"). Para outra parcela use Outro.";
  if(String(r.drec||"").indexOf(d+" (R$ "+nm2(val)+")")>=0)return"Recebimento de R$ "+nm2(val)+" em "+d+" já está lançado.";
- if(c>0&&rv+val>c+.01)return"Valor acima do cachê: já recebido R$ "+nm2(rv)+" de R$ "+nm2(c)+"; restante R$ "+nm2(Math.max(0,c-rv))+".";return""}
+ return""}   /* acima do cachê: pede confirmação em cacheM e manda acima=1 */
 function comissao(r){var pg=cpaid(r),v=comV(r),pc=num(r.com);
  if(pg){var m0=emd('<p class="tt">Comissão paga</p><p class="sb">'+esc(sub(r))+'</p><div class="rs"><div><span>Comissão'+(pc>0&&pc<1?" ("+Math.round(pc*100)+"%)":"")+'</span><b>'+(v?"R$ "+nm2(v):"—")+'</b></div><div style="color:#0a8a07"><span>STATUS COMISSÃO</span><b>✓ Pago</b></div></div><p class="sb">Para desfazer, edite direto na planilha.</p><div class="bt"><button class="ok">Fechar</button></div>',1);m0.querySelector(".ok").onclick=ecl;return}
  var m=emd('<p class="tt">Comissão paga</p><p class="sb">'+esc(sub(r))+'</p><div class="rs"><div><span>Cachê</span><b>R$ '+nm2(r.cach)+'</b></div><div><span>Custos</span><b>R$ '+nm2(r.desp)+'</b></div><div style="color:#0000FF"><span>Comissão'+(pc>0&&pc<1?" ("+Math.round(pc*100)+"%)":"")+'</span><b>'+(v?"R$ "+nm2(v):"—")+'</b></div></div><p class="sb">Marca <b>STATUS COMISSÃO = "Pago"</b> na planilha. Depois disso custos e cachê ficam bloqueados aqui.</p><div class="bt"><button class="cn">Cancelar</button><button class="ok">Confirmar</button></div>');
@@ -239,8 +241,8 @@ document.head.appendChild(fcss);
 var css=document.createElement("style");css.textContent='.dvb{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.dvb button[disabled]{opacity:.45;cursor:default}.dvsep{flex:1}.dvst{font-weight:700;font-size:13px}.dvst.dd{color:#c00}.dvst.ok{color:#188038}.dvro{font-size:12px;color:#666}.dvdev{font-size:11px;background:#FFF602;color:#000;border-radius:6px;padding:2px 8px;font-weight:700}.dvgrid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:14px;align-items:start}@media(max-width:900px){.dvgrid{grid-template-columns:1fr}}.dvside{min-width:0}.dvside .dvcf{grid-template-columns:1fr 1fr!important}.dvside .dvcf label{min-width:0}.dvsi{border-top:1px solid #eee;padding:8px 0;font-size:13px}.dvsi small{display:block;color:#666}.dvsi button{margin-top:4px;font-size:12px;padding:3px 8px}.dvseg{display:inline-flex;border:1px solid #ccc;border-radius:8px;overflow:hidden;margin:4px 0 8px}.dvseg button{border:0;border-radius:0;padding:5px 10px;background:#fff}.dvseg button.on{background:#FF5B1F;color:#fff}.dvm{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px}.dvmc{background:#fff;color:#111;border-radius:14px;padding:18px;width:min(560px,100%);max-height:86vh;overflow:auto;display:flex;flex-direction:column;gap:8px}.dvmb{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}.dvl{display:flex;flex-direction:column;font-size:13px;gap:3px}.dvpl{display:flex;flex-direction:column;gap:4px;max-height:50vh;overflow:auto}.dvpl button{text-align:left;padding:7px 9px;font-size:13px}.dvpl small{display:block;color:#666}#pkq{padding:8px;border-radius:8px;border:1px solid #ccc}.dvsg{display:block;margin-top:3px;font-size:11.5px;padding:2px 8px;border-radius:6px;border:1px dashed #FF5B1F;background:#FFF2EC;color:#a33a00;text-align:left;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.dvsb{margin-top:8px;font-size:13px;background:#FFF2EC;border:1px solid #FFCDB8;border-radius:8px;padding:6px 10px}.dvsb button{margin-left:8px;font-size:12px;padding:3px 8px}.dvch{display:flex;justify-content:space-between;align-items:center}.dvcr{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:15px}.dvcr b{font-size:22px}.dvcr small{color:#666}.dvck{flex-direction:row!important;align-items:center;gap:6px}.dvcf input[type=number],.dvcf select{padding:9px 10px;border:1px solid #d9d9d9;border-radius:9px;width:100%;box-sizing:border-box;font:inherit;background:#fff}';document.head.appendChild(css);
 Promise.all([iget("ov"),iget("new"),iget("ws")]).then(function(v){SAVED=v[0]||{};NEW=v[1]||[];WSV=v[2]||{};
  var wch=0;Object.keys(WSV).forEach(function(k){var x=WSV[k],ut=upT(k);if(ut&&ut>x.t+60e3){delete WSV[k];wch=1;if(SAVED[k])Object.keys(FM).concat(FX).forEach(function(f){delete SAVED[k][f]});return}
-  if(x.nw&&!BASE[TA].p.some(function(y){return y.n===x.nw.n}))BASE[TA].p.push(CL_(x.nw));SAVED[k]=Object.assign(SAVED[k]||{},x.h)});if(wch){iput("ws",WSV);iput("ov",SAVED)}
- NEW.forEach(function(p){if(!BASE[TA].p.some(function(x){return x.n===p.n}))BASE[TA].p.push(CL_(p))});
+  var xa=String(k).split("|")[0];if(x.nw&&BASE[xa]&&!BASE[xa].p.some(function(y){return y.n===x.nw.n}))BASE[xa].p.push(CL_(x.nw));SAVED[k]=Object.assign(SAVED[k]||{},x.h)});if(wch){iput("ws",WSV);iput("ov",SAVED)}
+ NEW.forEach(function(p){var na=BASE[p._a]?p._a:TA,q=CL_(p);delete q._a;if(!BASE[na].p.some(function(x){return x.n===p.n}))BASE[na].p.push(q)});
  Object.keys(SAVED).forEach(function(k){OV[k]=CL_(SAVED[k])});
  var arts=ORDER.filter(function(a){return BASE[a]&&BASE[a].p&&BASE[a].p.length});$("art").innerHTML='<option value="">Todos os artistas</option>'+arts.map(function(a){return'<option value="'+esc(a)+'">'+esc(a)+"</option>"}).join("");$("art").value="";fillProps()})
 

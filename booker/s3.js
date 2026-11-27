@@ -27,8 +27,9 @@ function durCal(d){var m=/^(\d+):(\d+)$/.exec(d||"");return m?(+m[1]*60+ +m[2]):
 function prodFmt(p){if(p===undefined||p===""||p===null)return"";var n=Number(p);if(isNaN(n))return String(p);return n===0?"não acordado":n===1?"1 pessoa":n+" pessoas"}
 function nome(a){return a==="Cadu Vieira"?"Cadu Vieira DJ":(a==="Sena"||a==="Maneira")?a:"DJ "+a}
 var CODE={"Ramonstro":1,"Brinquinho":2,"Carloto":3,"Sena":4,"Cenoura":5,"Liquinho":6,"Maneira":7,"Amaro":8,"Josu":9,"Cadu Vieira":10};
-function ckey(r,a){a=a||(cur&&cur.a);return(CODE[a]||"")+pad(r.n,4)}
-function numero(r,a){return ckey(r,a)+"/"+String(r.dprop||r.dt||"").slice(0,4)}
+function ckey(r,a){a=a||(cur&&cur.a);return(CODE[a]||"")+pad(parseInt(r.n,10)||r.n,4)}
+function yrOf(v){var t=String(v||""),m=/^(\d{4})-\d\d/.exec(t)||/^\d{1,2}\/\d{1,2}\/(\d{4})/.exec(t);return m?m[1]:""}
+function numero(r,a){return ckey(r,a)+"/"+(yrOf(r.dprop)||yrOf(r.dt))}/* nº DROM completo: prefixo + 4 dígitos + /ano (DATA PROPOSTA; sem ela, ano do show) */
 function key(a,n){return a+"|"+n}
 function R(a,p){var o=OV[key(a,p.n)]||{};var r={};for(var k in p)r[k]=p[k];for(var k2 in o)r[k2]=o[k2];if(!r.end_local){var ad=addrFor(r);if(ad)r.end_local=ad}return r}
 var _AI=null;

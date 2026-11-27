@@ -103,7 +103,7 @@ function opCache(S,p,A){
     if(br>0&&pg>=br-0.01){sh.getRange(r,cR).setValue('Pago');sh.getRange(r,cA).setValue('Pago');tipo='quitado'}}
   S.stamp(r);return {n:+p.n,tipo:tipo}}
 
-/* duplicidade: total com Pago; sinal com Entrada já marcada; parcial repetida (mesma data + valor) ou acima do cachê bruto */
+/* duplicidade: total com Pago; sinal com Entrada já marcada; parcial repetida (mesma data + valor) ou acima do cachê bruto (liberado com p.acima=1, após confirmação no app) */
 /* parcelas em DATA RECEBIMENTO: uma por linha "dd/mm/aaaa - R$ 0,00" (padrão da planilha); lê também o formato antigo "dd/mm/aaaa (R$ x)" */
 function parcSum(s){var pg=0,m,re=/R\$\s*([\d.]*\d(?:,\d{1,2})?)/g;while((m=re.exec(s)))pg+=parseFloat(m[1].replace(/\./g,'').replace(',','.'))||0;return pg}
 function parcLine(d,v){return d+' - '+brl(v)}
@@ -113,7 +113,7 @@ function dupCache(S,r,p,v){var st=nh(S.get(r,'CACHÊ RECEBIDO?')),br=+S.get(r,'C
   if(p.tipo==='s30'||p.tipo==='s50'){if(/^ENTRADA/.test(st))throw new Error('Sinal já registrado na planilha ('+S.get(r,'CACHÊ RECEBIDO?')+'). Para outra parcela use "Outro"');return}
   var nv=parcLine(p.d,v);if(old.indexOf(nv)>=0||old.indexOf(p.d+' ('+brl(v)+')')>=0)throw new Error('Recebimento de '+brl(v)+' em '+p.d+' já está lançado na planilha');
   var pg=parcSum(old),pc=/ENTRADA (\d+)%/.exec(st);if(pc&&!/R\$/.test(old))pg+=br*(+pc[1])/100;
-  if(br>0&&pg+v>br+0.01)throw new Error('Valor acima do cachê: já recebido '+brl(pg)+' de '+brl(br)+'; restante '+brl(Math.max(0,br-pg)))}
+  if(br>0&&pg+v>br+0.01&&!(p.acima||p.force))throw new Error('Valor acima do cachê: já recebido '+brl(pg)+' de '+brl(br)+'; restante '+brl(Math.max(0,br-pg)))}
 
 function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pago" */
   var r=S.row(p.n),c=S.sh.getRange(r,S.col('STATUS COMISSÃO'));
