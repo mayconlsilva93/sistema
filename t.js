@@ -39,17 +39,20 @@ function cmT(S,mi){var L=S.filter(s=>s[19]===mi);if(!L.length)return null;var M0
 function custos(cfg){if(!cfg||!cfg.custos)return[];var n=new Date(),now=n.getTime(),m=(n.getFullYear()-B)*12+n.getMonth()+1,S=(window.DROMDATA&&DROMDATA.S)||[],o=[];
  [m-1,m].forEach(mi=>{var c=cmT(S,mi);if(!c||now<c.cr||now>c.due+3*24*H)return;var dd=new Date(c.due);
   o.push({id:"cm-"+mi,mi:mi,k:"cm",ev:"Shows de "+c.mn+" finalizados!",tx:"Você deve informar os custos até "+p2(dd.getDate())+"/"+p2(dd.getMonth()+1)+" dentro do aplicativo ou em seu grupo financeiro.",due:c.due,rem:{p:3},L:c.L})});return o}
-async function load(){var A=await list("tarefas"),cur=A.filter(x=>x&&x.ts).sort((a,b)=>b.ts-a.ts)[0]||{T:[],cfg:{}};
+/* união dos snapshots (igual ao Hub); ed = edição no Hub: popup, sino e faixa voltam a avisar com o texto/prazo novos */
+function mg(A){A=A.filter(x=>x&&x.ts).sort((a,b)=>a.ts-b.ts);var c=A[A.length-1]||{ts:0,cfg:{},T:[]},M={},O=[];A.forEach(s=>(s.T||[]).forEach(t=>{var p=M[t.id];if(!p)O.push(t.id);else if((t.ed||0)<(p.ed||0))return;else if((t.ed||0)===(p.ed||0)){t=Object.assign({},t);var u=(p.xf||[]).concat(t.xf||[]);t.xf=u.filter((f,i)=>u.indexOf(f)===i);if(!t.x&&p.x)t.x=p.x}if(t.xf)t.xf=t.xf.filter(f=>(t.to||[]).indexOf(f)>=0);M[t.id]=t}));return{ts:c.ts,cfg:c.cfg||{},T:O.map(id=>M[id])}}
+var sk=x=>x.id+(x.ed?"@"+x.ed:"");
+async function load(){var cur=mg(await list("tarefas"));
  var ok=await list("tarok");ok.forEach(x=>{if(x&&(x.f===F||String(x.f).endsWith("/"+F)))DONE[x.id]=x.ts});(ls.g("done")||[]).forEach(id=>DONE[id]=DONE[id]||1);
  T=(cur.T||[]).filter(x=>{if(x.x)return false;x._f=(x.to||[]).find(g=>(g===F||g.endsWith("/"+F))&&!(x.xf||[]).includes(g));return !!x._f}).concat(custos(cur.cfg)).filter(x=>!DONE[x.id]).sort((a,b)=>a.due-b.due);
  bar();bell();auto()}
-function bell(){if(!window.DROMNADD)return;var sn=ls.g("bell")||[],L=T.filter(x=>sn.indexOf(x.id)<0);if(!L.length)return;L.forEach(x=>sn.push(x.id));ls.s("bell",sn.slice(-100));DROMNADD(L.map(x=>({t:lb(x),b:"Prazo: "+pz(x.due)})))}
+function bell(){if(!window.DROMNADD)return;var sn=ls.g("bell")||[],L=T.filter(x=>sn.indexOf(sk(x))<0);if(!L.length)return;L.forEach(x=>sn.push(sk(x)));ls.s("bell",sn.slice(-100));DROMNADD(L.map(x=>({t:lb(x),b:"Prazo: "+pz(x.due)})))}
 function auto(){if(document.querySelector(".tpo"))return;var seen=ls.g("seen")||{},now=Date.now();
- var x=T.find(x=>{var s=seen[x.id];if(!s)return true;var rp=x.rem&&"p" in x.rem?x.rem.p:3;if(rp===null)return false;/* em branco no Hub = sem popups repetidos */var p=(rp||3)*H;return red(x)&&now-s>=p});if(x)pop(x)}
-function bar(){var o=document.querySelector(".tbr");if(o)o.remove();var x=T[0];if(!x||sessionStorage.getItem("tbrx"+F)===x.id)return;
+ var x=T.find(x=>{var s=seen[sk(x)];if(!s)return true;var rp=x.rem&&"p" in x.rem?x.rem.p:3;if(rp===null)return false;/* em branco no Hub = sem popups repetidos */var p=(rp||3)*H;return red(x)&&now-s>=p});if(x)pop(x)}
+function bar(){var o=document.querySelector(".tbr");if(o)o.remove();var x=T[0];if(!x||sessionStorage.getItem("tbrx"+F)===sk(x))return;
  var b=document.createElement("div");b.className="tbr"+(red(x)?" rd":"");b.innerHTML="<i>!</i><span>"+esc(lb(x))+". Prazo: <b>"+esc(pz(x.due))+"</b></span><button type=button aria-label=Fechar>✕</button>";
- b.onclick=e=>{if(e.target.tagName==="BUTTON"){sessionStorage.setItem("tbrx"+F,x.id);b.remove();return}pop(x)};document.body.appendChild(b)}
-function pop(x){var seen=ls.g("seen")||{};seen[x.id]=Date.now();ls.s("seen",seen);var cm=x.k==="cm",m=document.createElement("div");m.className="tpo"+(red(x)?" rd":"");
+ b.onclick=e=>{if(e.target.tagName==="BUTTON"){sessionStorage.setItem("tbrx"+F,sk(x));b.remove();return}pop(x)};document.body.appendChild(b)}
+function pop(x){var seen=ls.g("seen")||{};seen[sk(x)]=Date.now();ls.s("seen",seen);var cm=x.k==="cm",m=document.createElement("div");m.className="tpo"+(red(x)?" rd":"");
  var lst=cm&&x.L?'<div class="tl">Shows do mês: <b>'+x.L.length+"</b><ul>"+x.L.slice(0,8).map(s=>"<li>"+esc(W[new Date(B,s[19]-1,s[0]).getDay()].replace(/^./,c=>c.toUpperCase())+" "+p2(s[0])+"/"+p2((s[19]-1)%12+1)+" · "+(s[1]||s[2]||""))+"</li>").join("")+"</ul></div>":"";
  m.innerHTML='<div role="dialog" aria-modal="true"><div class="th">'+esc(tn(x))+'</div><div class="tb">'+(x.ev?"<h3>"+esc(x.ev)+"</h3>":"")+'<span class="tz">Prazo: '+esc(pz(x.due,1))+"</span><p>"+esc(x.tx||"")+"</p>"+lst+
   '<div class="tbt"><button class="t0" type="button">'+(cm?"Depois":"Lembrar depois")+'</button><button class="t1" type="button">'+(cm?"Informar custos agora":"Já enviei")+"</button></div></div></div>";

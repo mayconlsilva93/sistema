@@ -15,7 +15,9 @@ const key=keyOf(APPS[0]);
 async function list(app){try{const r=await fetch(URL+"?app="+app);const l=await r.json(),o=[];for(const x of l){try{o.push(dec(key,x.iv,x.ct))}catch(e){}}return o}catch(e){console.log("tarefas: falha",app,e.message);return null}}
 const A=await list("tarefas"),OK=await list("tarok");
 if(!A||!OK){console.log("tarefas: Apps Script indisponível");process.exit(0)}
-const cur=A.filter(x=>x&&x.ts).sort((a,b)=>b.ts-a.ts)[0]||{T:[],cfg:{}};
+/* união dos snapshots (igual ao Hub e ao t.js): um save do Hub com estado velho não some com tarefas */
+function mg(A){A=A.filter(x=>x&&x.ts).sort((a,b)=>a.ts-b.ts);var c=A[A.length-1]||{ts:0,cfg:{},T:[]},M={},O=[];A.forEach(s=>(s.T||[]).forEach(t=>{var p=M[t.id];if(!p)O.push(t.id);else if((t.ed||0)<(p.ed||0))return;else if((t.ed||0)===(p.ed||0)){t=Object.assign({},t);var u=(p.xf||[]).concat(t.xf||[]);t.xf=u.filter((f,i)=>u.indexOf(f)===i);if(!t.x&&p.x)t.x=p.x}if(t.xf)t.xf=t.xf.filter(f=>(t.to||[]).indexOf(f)>=0);M[t.id]=t}));return{ts:c.ts,cfg:c.cfg||{},T:O.map(id=>M[id])}}
+const cur=mg(A);
 const SF="tools/tarst.json";let ST={};try{ST=JSON.parse(fs.readFileSync(SF))}catch(e){}ST.s=ST.s||{};ST.ok=ST.ok||[];
 const TN={eq:"Envio de equipe",vc:"Vídeo de chamada",ot:"Tarefa",cm:"Custos do mês"},MS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const p2=n=>String(n).padStart(2,"0"),fdt=t=>{const d=new Date(t);return p2(d.getDate())+"/"+p2(d.getMonth()+1)+(d.getHours()===23&&d.getMinutes()===59?"":" "+p2(d.getHours())+":"+p2(d.getMinutes()))};
@@ -37,13 +39,14 @@ if(cur.cfg&&cur.cfg.custos){const n=new Date(),m=(n.getFullYear()-B)*12+n.getMon
       J.push({f,t:{id:"cm-"+mi,k:"cm",ev:"",tx:"Shows de "+c.mn+" finalizados! Você deve informar os custos até "+fdt(c.due)+" dentro do aplicativo ou em seu grupo financeiro.",due:c.due,rem:{h:9,f:2},cr:c.cr}})}}catch(e){}}}
 const out={}; // f -> [msg]
 for(const {t,f} of J){if(done(t.id,f))continue;const sk=t.id+"|"+f,s=ST.s[sk]=ST.s[sk]||{},r=t.rem||{},ph=!("h" in r)||r.h===undefined?9:r.h,fh=!("f" in r)||r.f===undefined?2:r.f/* null = campo em branco no Hub = esse lembrete não é enviado */,hr=new Date().getHours();let why=null;
+  if((t.ed||0)!==(s.e||0)){s.e=t.ed||0;if(s.n){s.n=0;s.u=1;delete s.h;delete s.d}}/* editada no Hub: push com a versão nova e lembretes recalculados */
   if(!s.n){if(now>=(t.cr||0))why="nova"}
   else if(fh!==null&&now>=t.due-fh*H&&now<=t.due+24*H&&hr>=8&&hr<=22&&now-(s.h||0)>=55*60e3&&now-(s.n||0)>=55*60e3)why="hora";
   else if(ph!==null&&hr>=ph&&dk(now)!==s.d&&now>=new Date(new Date(t.due).setHours(0,0,0,0)).getTime()&&now<=t.due+3*24*H&&now-(s.h||0)>=55*60e3)why="dia";
   if(!why)continue;
   const late=now>t.due,b=(late?"Prazo vencido: ":"Prazo: ")+fdt(t.due)+"\n"+t.tx;
-  (out[f]=out[f]||[]).push({t:lb(t),b:b.length>230?b.slice(0,227)+"…":b,tag:"tar-"+t.id,keep:1,f});
-  if(why==="nova")s.n=now;else s.h=now;s.d=dk(now)}
+  (out[f]=out[f]||[]).push({t:(why==="nova"&&s.u?"Atualizada: ":"")+lb(t),b:b.length>230?b.slice(0,227)+"…":b,tag:"tar-"+t.id,keep:1,f});
+  if(why==="nova"){s.n=now;delete s.u}else s.h=now;s.d=dk(now)}
 /* "Já enviei" → aviso no Hub */
 const hubOk=[];for(const x of OK){const k=x.id+"|"+x.f;if(ST.ok.includes(k))continue;ST.ok.push(k);const t=(cur.T||[]).find(y=>y.id===x.id)||(String(x.id).startsWith("cm-")?{k:"cm",ev:""}:null);if(t&&APPS.includes(x.f))hubOk.push({f:x.f,m:{t:lb(t)+" ✓",b:"Enviado",tag:"tar-"+x.id}})}
 ST.ok=ST.ok.slice(-500);
