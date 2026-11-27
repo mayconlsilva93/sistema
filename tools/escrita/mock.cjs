@@ -22,9 +22,11 @@ function lastRow(){let m=0;for(const k in G){const[r]=k.split(",").map(Number);i
 function lastCol(){let m=0;for(const k in G){const[,c]=k.split(",").map(Number);if(G[k].v!==""||G[k].f)m=Math.max(m,c)}return m}
 function Range(r,c,nr=1,nc=1){const it=f=>{for(let i=0;i<nr;i++)for(let j=0;j<nc;j++)f(cell(r+i,c+j),i,j)};const grid=g=>Array.from({length:nr},(_,i)=>Array.from({length:nc},(_,j)=>g(cell(r+i,c+j))));
  const o={getValue:()=>cell(r,c).v,getValues:()=>grid(x=>x.v),getFormula:()=>cell(r,c).f,getNotes:()=>grid(x=>x.n),getDisplayValues:()=>grid(x=>x.v instanceof Date?pad(x.v.getDate())+"/"+pad(x.v.getMonth()+1)+"/"+x.v.getFullYear():String(x.v)),getFormulas:()=>grid(x=>x.f),
-  setValue:v=>{it(x=>{x.v=v;x.f=""});return o},setValues:V=>{it((x,i,j)=>{x.v=V[i][j];x.f=""});return o},setNote:t=>{it(x=>x.n=t);return o},
+  getDataValidation:()=>DVAL(r,c),setValue:v=>{const d=DVAL(r,c);if(d&&v!==""&&!d._l.includes(String(v)))throw new Error("Os dados inseridos na célula violam as regras de validação");it(x=>{x.v=v;x.f=""});return o},setValues:V=>{it((x,i,j)=>{x.v=V[i][j];x.f=""});return o},setNote:t=>{it(x=>x.n=t);return o},
   setNumberFormat:()=>o,clearContent:()=>{it(x=>{x.v="";x.f=""});return o},clearNote:()=>{it(x=>x.n="");return o},
   copyTo:dst=>{it((x,i,j)=>{const y=cell(dst._r+i,dst._c+j);y.v=x.v;y.f=x.f;y.n=x.n})},getRow:()=>r,getLastRow:()=>r+nr-1,getColumn:()=>c,getLastColumn:()=>c+nc-1,getSheet:()=>SH,_r:r,_c:c};return o}
+// validação de dados (como a real): VENDEDOR da planilha do Sena só aceita a lista dele (testa Copiar para outro artista)
+const SENA="1aQHCJ3x0zQyM3HXH8dixSxzonzqmIncYKpCeZcPIHBA",DVAL=(r,c)=>CUR===SENA&&r>4&&c===20?{_l:["Maycon","DROM"],getAllowInvalid:()=>false,getCriteriaType:()=>"VALUE_IN_LIST",getCriteriaValues:()=>[["Maycon","DROM"]]}:null;
 const SH={getName:()=>"PROPOSTAS",getLastRow:lastRow,getLastColumn:lastCol,getRange:(r,c,nr,nc)=>Range(r,c,nr,nc)};
 const IDS=["1_FIaPSZjz7rr1QwDvC7jL6qCXu09Wh1ZsgTTdearxGs","1mwK96YV00hJhxkakXmm05kD-9G70gt_MbrsT6-C0aME","1WFNLEj2kj-DG5AJh1KmXC1HKcmqT9Ng4uTgp_tzKXic","1aQHCJ3x0zQyM3HXH8dixSxzonzqmIncYKpCeZcPIHBA","1nQ-VVeVJ7Wo-p90uaq_cCy8FKBn-tMIilykq6sws8sQ","1Uy_FTxYsXYIXWKChkJR2gK5LcodeOqbmBfqegBwyATU","1jHL-RMG7X0cw34VwBt851ghvRaIoLBSZtv6PwCdEask","1nUbvXrtmzbRb5Ud-DlyfWW6atBGaJfzUaRtBG5a23Oo",CADU,"1BOOFB3GzJh3KdF8-OL9LQklnR94WjSSOpRtcMf-BvIg","1WaHGhR66OIgVLS762ghUWC3XuEShRbRMUpEGCek1zF8"];
 let CUR="";
@@ -37,7 +39,7 @@ const ctx={JSON,Math,Date,String,Number,Object,Array,isNaN,RegExp,Error,
   formatDate:(dt,tz,f)=>f.replace("dd",pad(dt.getDate())).replace("MM",pad(dt.getMonth()+1)).replace("yyyy",dt.getFullYear()).replace("HH",pad(dt.getHours())).replace("mm",pad(dt.getMinutes()))},
  CacheService:{getScriptCache:()=>({get:k=>CACHE[k]||null,put:(k,v)=>{CACHE[k]=v}})},
  LockService:{getScriptLock:()=>({tryLock:()=>true,releaseLock:()=>{}})},
- SpreadsheetApp:{openById:id=>{if(!IDS.includes(id))throw new Error("sem acesso");G=grid(id);CUR=id;return{getSheetByName:n=>n==="PROPOSTAS"?SH:null,getActiveSheet:()=>SH,getName:()=>"planilha "+id.slice(0,6)}},flush:()=>{}},
+ SpreadsheetApp:{DataValidationCriteria:{VALUE_IN_LIST:"VALUE_IN_LIST"},openById:id=>{if(!IDS.includes(id))throw new Error("sem acesso");G=grid(id);CUR=id;return{getSheetByName:n=>n==="PROPOSTAS"?SH:null,getActiveSheet:()=>SH,getName:()=>"planilha "+id.slice(0,6)}},flush:()=>{}},
  ScriptApp:{getProjectTriggers:()=>TRIG,deleteTrigger:t=>{TRIG=TRIG.filter(x=>x!==t)},newTrigger:h=>({forSpreadsheet:id=>({onEdit:()=>({create:()=>TRIG.push({h,id,getHandlerFunction:()=>h})})}),timeBased:()=>({everyHours:n=>({create:()=>TRIG.push({h,every:n,getHandlerFunction:()=>h})})})})},
  Logger:{log:x=>console.log("[gs]",x)}};
 vm.createContext(ctx);vm.runInContext(SRC,ctx);

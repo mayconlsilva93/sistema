@@ -145,8 +145,12 @@ function opCriar(S,p){
     src.copyTo(sh.getRange(r,1,1,lc));   /* formatação, validações e fórmulas da linha anterior */
     F.forEach(function(f,i){if(!f)sh.getRange(r,i+1).clearContent().clearNote()})}
   sh.getRange(r,S.cN).setValue(n);
-  var ign=fal.slice();ks.forEach(function(t,i){var c=sh.getRange(r,C[i]);if(c.getFormula()){ign.push(t);return}c.setValue(val(h[t]))});
+  var ign=fal.slice();ks.forEach(function(t,i){var c=sh.getRange(r,C[i]);if(c.getFormula()||!put(c,val(h[t])))ign.push(t)});
   notas(S,r,h,nk,ign);S.stamp(r);return {n:n,linha:r,ign:ign}}
+/* grava respeitando a validação da célula: valor fora da lista de outra planilha (ex.: Copiar para outro artista) fica em branco e volta em ign, em vez de derrubar a criação */
+function put(c,v){try{var dv=c.getDataValidation&&c.getDataValidation();
+    if(dv&&!dv.getAllowInvalid()&&v!==''&&dv.getCriteriaType()==SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST){var L=dv.getCriteriaValues()[0]||[];if(L.map(String).indexOf(String(v))<0)return false}
+    c.setValue(v);return true}catch(e){try{c.clearContent()}catch(x){}return false}}
 /* "nota:TÍTULO" = nota da célula (ex.: vários horários na nota de INÍCIO DO SHOW); texto vazio apaga a nota */
 function isNota(t){return /^nota:/i.test(t)}
 function notas(S,r,h,nk,ign){var n=0;nk.forEach(function(t){var c=t.slice(5);if(!S.has(c)){ign.push(t);return}S.sh.getRange(r,S.col(c)).setNote(String(h[t]==null?'':h[t]));n++});return n}
