@@ -6,7 +6,7 @@ import os,sys,json,gzip,hashlib,base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 H=os.path.dirname(os.path.abspath(__file__));ENC=H+'/state.enc';SHA=H+'/state.sha'
 F=['lean.py','relay.py','drom_data.py','convert.py','sheets_load.py','lib_apps.py','addr.json','dk.json','urls.json',
-   'contracts.json','blocks.json','state.json','extras.json','log.json','bb.json','notas.json']+['m%02d.txt'%i for i in range(1,11)]
+   'contracts.json','blocks.json','state.json','extras.json','log.json','bb.json','notas.json','dist.json']+['m%02d.txt'%i for i in range(1,11)]
 BK=os.environ.get('DROM_BKK','').strip()
 if not BK: sys.exit('falta o segredo DROM_BKK')
 K=hashlib.sha256(('drom-state:'+BK).encode()).digest()

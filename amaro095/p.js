@@ -15,11 +15,21 @@ function ln(p,cls){if(p[2]==="Show confirmado"){var h0=new Date(Date.now()-216e5
 function fd(v){return v&&/^\d{4}-\d\d-\d\d/.test(v)?v.slice(8,10)+"/"+v.slice(5,7)+"/"+v.slice(0,4):""}
 function prPop(n,st){var p=PR.filter(function(x){return String(x[7])===String(n)})[0];if(!p)return;var s=prS(n),G=function(fn){try{return fn()}catch(e){return""}},L=[],row=function(k,v){if(v!==undefined&&v!==null&&String(v).trim()!==""&&v!=="-")L.push("<dt>"+k+"</dt><dd>"+es(v)+"</dd>")};
  var d=new Date(BB,p[0]-1,p[1]),y=d.getFullYear();st=st||p[2];
+ var z=(p[8]&&typeof p[8]==="object")?p[8]:{},dz=function(v){return v==null?"":/^\d{4}-\d\d-\d\d/.test(String(v))?fd(String(v)):String(v)},mz=function(v){return typeof v==="number"?"R$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}):v};
  row("Status",st);row("Evento",p[3]||(s&&s[1]));row("Local",p[4]||(s&&s[2]));row("Cidade",p[5]||(s&&s[3]));
- row("Data",DW[d.getDay()]+", "+P2(p[1])+"/"+P2(d.getMonth()+1)+"/"+y);
- if(s){var sg=G(function(){return dromSeg(s)});row("Horário",sg?sg.txt:G(function(){return hm(s[4],s[5])}));if(sg)row("Permanência",sg.ini+" – "+sg.fim);row("Duração",G(function(){return du(s[5])}));row("Equipamento",s[6]);row("Rider",s[7]);row("Hospedagem",G(function(){return hp(s)}));row("Produção",s[9]?+s[9]+(+s[9]===1?" pessoa":" pessoas"):"");row("Contratante",[s[10],s[11]].filter(Boolean).join(" · "));row("Observações",s[12]);row("Cachê",s[24]?"valor pendente":s[15]?G(function(){return f(s[15])}):"")}
+ row("Data",DW[d.getDay()]+", "+P2(p[1])+"/"+P2(d.getMonth()+1)+"/"+y);row("Categoria",z.cat);
+ var sg=s?G(function(){return dromSeg(s)}):"";
+ row("Horário do evento",z.hi?(z.hi+(z.hf?" – "+z.hf:"")):"");
+ if(s){row("Horário do show",sg?sg.txt:G(function(){return hm(s[4],s[5])}));if(sg)row("Permanência",sg.ini+" – "+sg.fim);row("Duração",G(function(){return du(s[5])}))}else{row("Início do show",z.ini);row("Duração",z.dur)}
+ row("Equipamento",(s&&s[6])||z.eq);row("Rider",(s&&s[7])||z.rid);row("Hospedagem",(s&&G(function(){return hp(s)}))||z.hosp);
+ var pr=(s&&s[9])||z.prod;row("Produção",pr?(isNaN(+pr)?pr:+pr+(+pr===1?" pessoa":" pessoas")):"");
+ row("Contratante",[(s&&s[10])||z.cont,(s&&s[11])||z.tel].filter(Boolean).join(" · "));row("Vendedor",z.vend);
+ row("Cachê",s&&s[24]?"valor pendente":s&&s[15]?mz(+s[15]):mz(z.cach));
+ row("Despesas",mz(z.desp));row("Cachê líquido",mz(z.liq));row("Comissão",typeof z.com==="number"?(z.com<=1?Math.round(z.com*1000)/10+"%":mz(z.com)):z.com);row("Status da comissão",z.scom);
+ row("Vencimento do sinal",dz(z.dsin));row("Contrato",z.ctr);row("Nota fiscal",z.nf);row("Cachê recebido",z.rec);row("Recebido por",z.recpor);row("Data de recebimento",z.drec?String(dz(z.drec)).split(/\n+/).join(" · "):"");
+ row("Observações",(s&&s[12])||z.obs);
  row("Proposta","nº "+p[7]+"/"+y);
- if(p[6]&&st==="Proposta emitida")row("Data proposta",fd(p[6]));
+ row("Data da proposta (emissão)",z.dprop?dz(z.dprop):(p[6]&&st==="Proposta emitida"?fd(p[6]):""));row("Data de aprovação",dz(z.dapr));
  if(p[6]&&st!=="Show realizado")row("Data do status",fd(p[6]));else if(st==="Show realizado")row("Data do status",P2(p[1])+"/"+P2(d.getMonth()+1)+"/"+y);
  var o=document.createElement("div");o.className="prpop";o.innerHTML='<div class="prpm" role="dialog" aria-modal="true"><button class="prpx" aria-label="Fechar">×</button><b class="prpt">'+es(nm(p))+'</b><dl>'+L.join("")+"</dl></div>";
  o.onclick=function(e){if(e.target===o||e.target.closest(".prpx"))o.remove()};document.body.appendChild(o)}
@@ -91,6 +101,6 @@ window.sgf=function(s){var L=s[21]?[]:PP(s),hv=L.some(function(x){return x[1]});
   return'<em class="bg ok sg sgm">'+(L.length===1?bal("✓ "+ln[0]):ln.map(function(x){return"✓ "+x}).join("<br>"))+"</em>"+(!s[18]&&fl>=1?"<span>"+(fl>=2?"faltam ":"falta ")+f(fl).replace("R$ ","R$\u00a0")+"</span>":"")}
  if(s[18]&&s[18]!=="pago"&&/ e |, /.test(s[18]))return'<em class="bg ok sg sgm">'+bal("✓ pago em "+s[18])+"</em>";return f0(s)};
 window.pgr=function(s){var L=s[21]?[]:PP(s);if(!L.length||(s[18]&&!L.some(function(x){return x[1]})))return p0(s);var t=tot(s),fl=s[15]-t;
- return"<dt>Pagamento</dt><dd>"+L.map(function(x){return'<span class="pcl">✓ '+(x[1]?f(x[1])+" ":"")+"em "+x[0]+(x[2]?" <small>(parcela "+x[2]+")</small>":"")+"</span>"}).join("")+(!s[18]&&t&&fl>=1?'<span class="pcl"><small>'+(fl>=2?"faltam ":"falta ")+f(fl)+"</small></span>":"")+"</dd>"};
+ return"<dt>Pagamento</dt><dd>"+L.map(function(x){return'<span class="pcl">✓ '+(x[1]?f(x[1])+" ":"")+"em "+x[0]+(x[2]==="extra"?" <small>(extra)</small>":x[2]?" <small>(parcela "+x[2]+")</small>":"")+"</span>"}).join("")+(!s[18]&&t&&fl>=1?'<span class="pcl"><small>'+(fl>=2?"faltam ":"falta ")+f(fl)+"</small></span>":"")+"</dd>"};
 try{draw()}catch(e){}})();
 /*NBSP*/(function(){/* R$ nunca separado do valor na quebra de linha */["f","fr"].forEach(function(k){var o=window[k];if(typeof o==="function")window[k]=function(){var r=o.apply(this,arguments);return typeof r==="string"?r.replace(/R\$ /g,"R$ "):r}});try{draw()}catch(e){}})();

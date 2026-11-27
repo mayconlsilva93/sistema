@@ -27,7 +27,7 @@ try:
     _old.update(_nt.fetch(list(TN.values())));json.dump(_old,open(NJ,'w',encoding='utf8'),ensure_ascii=False,sort_keys=True)
 except Exception as e: print('notas: ignoradas (%s)'%e)
 sh(['python3','-I','lean.py','mark'],cwd=W)
-sh(['python3','-I','lean.py','apply',b2,'rows.json'],cwd=W,env=dict(E,DROM_NODEFER='1',DROM_DIFF='1' if E.get('DRY')=='1' else '0'),stdout=subprocess.DEVNULL)
+sh(['python3','-I','lean.py','apply',b2,'rows.json'],cwd=W,env=dict(E,DROM_NODEFER='1',DROM_GEO='0' if E.get('DRY')=='1' else '1',DROM_DIFF='1' if E.get('DRY')=='1' else '0'),stdout=subprocess.DEVNULL)
 gh=json.load(open(W+'/gh.json'));print('mudaram:',', '.join(sorted(gh)) or 'nada')
 rep=open(W+'/report.txt',encoding='utf8').read();print(rep)
 if E.get('GITHUB_STEP_SUMMARY'): open(E['GITHUB_STEP_SUMMARY'],'a').write('```\n'+rep+'\nGitHub: '+(', '.join(sorted(gh)) or 'nada')+'\n```\n')

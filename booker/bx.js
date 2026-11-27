@@ -153,7 +153,7 @@ function pv(t){t=String(t||"").replace(/[^\d,]/g,"");if(!t)return 0;return parse
 function hoje(){var d=new Date();return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
 function nh(s){return String(s||"").trim().toUpperCase()}
 function cpaid(r){return nh(r.scom)==="PAGO"}
-function recv(r){var c=num(r.cach),st=nh(r.rec),t=0,m,re=/\(R\$\s*([\d.,]+)\)/g,dr=String(r.drec||"");if(st==="PAGO")return c;while((m=re.exec(dr)))t+=parseFloat(m[1].replace(/\./g,"").replace(",","."))||0;var pc=/ENTRADA (\d+)%/.exec(st);if(pc)t+=c*(+pc[1])/100;return Math.min(c||t,t)}
+function recv(r){var c=num(r.cach),st=nh(r.rec),t=0,m,re=/R\$\s*([\d.]*\d(?:,\d{1,2})?)/g,dr=String(r.drec||"");if(st==="PAGO")return c;while((m=re.exec(dr)))t+=parseFloat(m[1].replace(/\./g,"").replace(",","."))||0;var pc=/ENTRADA (\d+)%/.exec(st);if(pc&&!/R\$/.test(dr))t+=c*(+pc[1])/100;return Math.min(c||t,t)}
 function comV(r){var b=num(r.cach)-num(r.desp),c=num(r.com);return c>0&&c<1?b*c:c>=1?c:0}
 function finOK(){return !!cur&&WRT(cur.a)}
 function finHTML(){var r=cur_(),c=num(r.cach),rv=recv(r),pg=cpaid(r),w=finOK(),pc=num(r.com);
@@ -201,19 +201,22 @@ function cacheM(r,pv0,pd0,por0){var L=cpaid(r),c=num(r.cach),rv=recv(r),pd=Math.
  m.querySelectorAll(".chs span").forEach(function(s){s.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();s.click()}}});
  var cn=m.querySelector(".cn");if(cn)cn.onclick=ecl;
  m.querySelector(".ok").onclick=function(){if(L)return ecl();var val=pv(v.value),d=dt.value.trim();if(!dok(d)){derr(dt);return}if(!val){v.parentNode.style.borderColor="#c5221f";return}
-  var dup=dupMsg(r,val,d,c,rv);if(dup){ecl();erro(dup);return}
-  var go=function(){var eq=function(a,b){return Math.abs(a-b)<.005},tp=rv>0?"outro":eq(val,c)?"total":eq(val,c*.3)?"s30":eq(val,c*.5)?"s50":"outro",loc={recpor:por};
+  var st0=nh(r.rec),XT=st0==="PAGO"||(c>0&&rv>=c-.005),dup=dupMsg(r,val,d,c,rv);if(dup&&!XT){ecl();erro(dup);return}
+  var go=function(){var eq=function(a,b){return Math.abs(a-b)<.005},tp=go.ex||rv>0?"outro":eq(val,c)?"total":eq(val,c*.3)?"s30":eq(val,c*.5)?"s50":"outro",loc={recpor:por},fl={v:val,d:d,tipo:tp,acima:go.ac?1:0};if(go.rp)fl.repetido=1;if(go.ex)fl.extra=1;
    if(tp!=="outro"){loc.rec=tp==="total"?"Pago":tp==="s30"?"Entrada 30%":"Entrada 50%";loc.drec=d}
-   else{var od=String(r.drec||""),nv=d+" (R$ "+nm2(val)+")";loc.drec=od?od+", "+nv:nv;if(rv+val>=c-.01&&c>0)loc.rec="Pago"}
-   wfin("cache",{v:val,d:d,tipo:tp,acima:go.ac?1:0},loc,"Recebimento de cachê registrado",m)};
-  var tt=rv+val;if(c>0&&tt>c+.01){var vv=v.value;m.querySelector(".md").innerHTML='<div class="okm"><i style="background:#FF5B1F;font-weight:900">!</i><p class="tt" style="font-size:15px;line-height:1.4">O valor excede o cachê registrado (R$ '+nm2(c)+'). Confirmar mesmo assim?</p><p class="sb" style="margin:10px 0 0;line-height:1.7">Digitado: <b style="color:#111">R$ '+nm2(tt)+'</b><br>No sistema: <b style="color:#111">R$ '+nm2(c)+'</b></p><div class="bt"><button class="cn">Corrigir</button><button class="ok">Confirmar</button></div></div>';m.querySelector(".cn").onclick=function(){cacheM(r,vv,d,por)};m.querySelector(".ok").onclick=function(){go.ac=1;go()};return}go()}}
+   else{var od=String(r.drec||""),nv=d+" - R$ "+nm2(val)+(go.ex?" (extra)":"");loc.drec=od?od+"\n"+nv:nv;if(st0!=="PAGO"&&rv+val>=c-.01&&c>0)loc.rec="Pago"}
+   wfin("cache",fl,loc,go.ex?"Pagamento extra registrado":"Recebimento de cachê registrado",m)};
+  var md=m.querySelector(".md"),vv=v.value,ask=function(t,sb,nx){md.innerHTML='<div class="okm"><i style="background:#FF5B1F;font-weight:900">!</i><p class="tt" style="font-size:15px;line-height:1.4">'+t+'</p>'+(sb?'<p class="sb" style="margin:10px 0 0;line-height:1.7">'+sb+"</p>":"")+'<div class="bt"><button class="cn">Corrigir</button><button class="ok">Confirmar</button></div></div>';md.querySelector(".cn").onclick=function(){cacheM(r,vv,d,por)};md.querySelector(".ok").onclick=nx};
+  /* confirmações (o escrita.gs aceita com as flags): cachê Pago -> extra=1; recebimento igual -> repetido=1; acima do cachê -> acima=1 + extra=1 */
+  var c3=function(){var tt=recv(r)+val;if(!go.ex&&c>0&&tt>c+.01)return ask("O valor excede o cachê registrado (R$ "+nm2(c)+"). Registrar pagamento extra?","Digitado: <b style=\"color:#111\">R$ "+nm2(tt)+"</b><br>No sistema: <b style=\"color:#111\">R$ "+nm2(c)+"</b>",function(){go.ac=1;go.ex=1;go()});go()},
+   c2=function(){if(dupRec(r,val,d))return ask("Já existe um recebimento igual ("+d.slice(0,5)+", R$ "+nm2(val)+"). Registrar outro mesmo assim?","",function(){go.rp=1;c3()});c3()};
+  if(XT)return ask("Cachê já está como Pago. Registrar pagamento extra?","Valor: <b style=\"color:#111\">R$ "+nm2(val)+"</b> em "+d,function(){go.ex=1;go.ac=1;c2()});c2()}}
+function dupRec(r,val,d){var o=String(r.drec||"");return o.indexOf(d+" (R$ "+nm2(val)+")")>=0||o.indexOf(d+" - R$ "+nm2(val))>=0}
 /* mesmo pagamento duas vezes: o escrita.gs recusa; aqui a checagem antecipada com os dados da tela */
 function dupMsg(r,val,d,c,rv){var st=nh(r.rec),eq=function(a,b){return Math.abs(a-b)<.005};
- if(st==="PAGO")return'Cachê já está como "Pago": nada a registrar.';
  var tp=rv>0?"outro":eq(val,c)?"total":eq(val,c*.3)?"s30":eq(val,c*.5)?"s50":"outro";
  if((tp==="s30"||tp==="s50")&&/^ENTRADA/.test(st))return"Sinal já registrado ("+r.rec+"). Para outra parcela use Outro.";
- if(String(r.drec||"").indexOf(d+" (R$ "+nm2(val)+")")>=0)return"Recebimento de R$ "+nm2(val)+" em "+d+" já está lançado.";
- return""}   /* acima do cachê: pede confirmação em cacheM e manda acima=1 */
+ return""}   /* Pago, recebimento igual e acima do cachê: confirmação em cacheM (extra=1 / repetido=1 / acima=1) */
 function comissao(r){var pg=cpaid(r),v=comV(r),pc=num(r.com);
  if(pg){var m0=emd('<p class="tt">Comissão paga</p><p class="sb">'+esc(sub(r))+'</p><div class="rs"><div><span>Comissão'+(pc>0&&pc<1?" ("+Math.round(pc*100)+"%)":"")+'</span><b>'+(v?"R$ "+nm2(v):"—")+'</b></div><div style="color:#0a8a07"><span>STATUS COMISSÃO</span><b>✓ Pago</b></div></div><p class="sb">Para desfazer, edite direto na planilha.</p><div class="bt"><button class="ok">Fechar</button></div>',1);m0.querySelector(".ok").onclick=ecl;return}
  var m=emd('<p class="tt">Comissão paga</p><p class="sb">'+esc(sub(r))+'</p><div class="rs"><div><span>Cachê</span><b>R$ '+nm2(r.cach)+'</b></div><div><span>Custos</span><b>R$ '+nm2(r.desp)+'</b></div><div style="color:#0000FF"><span>Comissão'+(pc>0&&pc<1?" ("+Math.round(pc*100)+"%)":"")+'</span><b>'+(v?"R$ "+nm2(v):"—")+'</b></div></div><p class="sb">Marca <b>STATUS COMISSÃO = "Pago"</b> na planilha. Depois disso custos e cachê ficam bloqueados aqui.</p><div class="bt"><button class="cn">Cancelar</button><button class="ok">Confirmar</button></div>');

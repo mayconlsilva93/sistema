@@ -90,30 +90,34 @@ function opCache(S,p,A){
   if(!(v>0))throw new Error('valor inválido');
   var sh=S.sh,quem=(A.rp&&A.rp[p.a])||A.recebidoPor||p.a,tipo=p.tipo;   /* o que a planilha usa em RECEBIDO POR */
   dupCache(S,r,p,v);   /* recusa pagamento já registrado (mesmo cachê marcado duas vezes) */
+  if(p.extra)tipo='outro';   /* pagamento extra (acima do cachê ou com cachê já Pago): nova linha "(extra)" em DATA RECEBIMENTO, sem mexer nos status */
   if(tipo==='total'||tipo==='s30'||tipo==='s50'){
     var st=tipo==='total'?'Pago':tipo==='s30'?'Entrada 30%':'Entrada 50%';
     sh.getRange(r,cR).setValue(st);sh.getRange(r,cA).setValue(st);sh.getRange(r,cP).setValue(quem);sh.getRange(r,cD).setValue(d)}
   else{ /* outro valor (ou restante): só RECEBIDO POR e DATA RECEBIMENTO, uma parcela por linha "DD/MM/AAAA - R$ 0,00", somando às entradas existentes */
     var old=txt(sh.getRange(r,cD).getValue()).trim(),br=+S.get(r,'CACHÊ BRUTO')||0,st0=nh(S.get(r,'CACHÊ RECEBIDO?')),pc=/ENTRADA (\d+)%/.exec(st0);
     if(old&&!/R\$/.test(old)&&pc)old=old.split(/[\r\n]+/)[0]+' - '+brl(br*(+pc[1])/100);   /* sinal só com data: vira linha com valor */
+    else if(old&&!/R\$/.test(old)&&st0==='PAGO'&&br>0)old=old.split(/[\r\n]+/)[0]+' - '+brl(br);   /* Pago só com data: vira linha com o cachê (antes do extra) */
     old=old.replace(/(\d{1,2}\/\d{1,2}\/\d{2,4})\s*\((R\$[^)]*)\)\s*,?\s*/g,'$1 - $2\n').trim();   /* converte o formato antigo do app */
-    var all=old?old+'\n'+parcLine(p.d,v):parcLine(p.d,v);
+    var ln=parcLine(p.d,v)+(p.extra?' (extra)':''),all=old?old+'\n'+ln:ln;
     sh.getRange(r,cD).setNumberFormat('@').setValue(all);sh.getRange(r,cP).setValue(quem);tipo='parcial';
     var pg=parcSum(all);
-    if(br>0&&pg>=br-0.01){sh.getRange(r,cR).setValue('Pago');sh.getRange(r,cA).setValue('Pago');tipo='quitado'}}
+    if(br>0&&pg>=br-0.01&&st0!=='PAGO'){sh.getRange(r,cR).setValue('Pago');sh.getRange(r,cA).setValue('Pago');tipo='quitado'}}
   S.stamp(r);return {n:+p.n,tipo:tipo}}
 
+/* repetido=1: mesma data + valor já lançados, confirmado no app (registra outra linha) · extra=1: pagamento além do cachê ou com Pago (linha "(extra)") */
 /* duplicidade: total com Pago; sinal com Entrada já marcada; parcial repetida (mesma data + valor) ou acima do cachê bruto (liberado com p.acima=1, após confirmação no app) */
 /* parcelas em DATA RECEBIMENTO: uma por linha "dd/mm/aaaa - R$ 0,00" (padrão da planilha); lê também o formato antigo "dd/mm/aaaa (R$ x)" */
 function parcSum(s){var pg=0,m,re=/R\$\s*([\d.]*\d(?:,\d{1,2})?)/g;while((m=re.exec(s)))pg+=parseFloat(m[1].replace(/\./g,'').replace(',','.'))||0;return pg}
 function parcLine(d,v){return d+' - '+brl(v)}
 function dupCache(S,r,p,v){var st=nh(S.get(r,'CACHÊ RECEBIDO?')),br=+S.get(r,'CACHÊ BRUTO')||0,old=txt(S.sh.getRange(r,S.col('DATA RECEBIMENTO')).getValue());
-  if(st==='PAGO')throw new Error('Cachê já está como "Pago" na planilha: nada a registrar');
+  if(st==='PAGO'&&!p.extra)throw new Error('Cachê já está como "Pago" na planilha: nada a registrar (pagamento extra: confirme no app)');
+  if(p.extra)p.tipo='outro';
   if(p.tipo==='total')return;
   if(p.tipo==='s30'||p.tipo==='s50'){if(/^ENTRADA/.test(st))throw new Error('Sinal já registrado na planilha ('+S.get(r,'CACHÊ RECEBIDO?')+'). Para outra parcela use "Outro"');return}
-  var nv=parcLine(p.d,v);if(old.indexOf(nv)>=0||old.indexOf(p.d+' ('+brl(v)+')')>=0)throw new Error('Recebimento de '+brl(v)+' em '+p.d+' já está lançado na planilha');
+  var nv=parcLine(p.d,v);if(!p.repetido&&(old.indexOf(nv)>=0||old.indexOf(p.d+' ('+brl(v)+')')>=0))throw new Error('Recebimento de '+brl(v)+' em '+p.d+' já está lançado na planilha');
   var pg=parcSum(old),pc=/ENTRADA (\d+)%/.exec(st);if(pc&&!/R\$/.test(old))pg+=br*(+pc[1])/100;
-  if(br>0&&pg+v>br+0.01&&!(p.acima||p.force))throw new Error('Valor acima do cachê: já recebido '+brl(pg)+' de '+brl(br)+'; restante '+brl(Math.max(0,br-pg)))}
+  if(br>0&&pg+v>br+0.01&&!(p.acima||p.extra||p.force))throw new Error('Valor acima do cachê: já recebido '+brl(pg)+' de '+brl(br)+'; restante '+brl(Math.max(0,br-pg)))}
 
 function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pago" */
   var r=S.row(p.n),c=S.sh.getRange(r,S.col('STATUS COMISSÃO'));
