@@ -74,3 +74,5 @@ ul{margin:0;padding-left:18px}li{margin:5px 0}
 /*IOSF*/@supports (-webkit-touch-callout:none){html,body{overflow-y:visible!important;overflow-x:clip;height:auto!important;min-height:100%}html{background:#FFF602!important}}
 /*HDF2*/#tl .hdf,.hdf.hdf{background:#EEF1FF!important;color:#3A45B8!important;border:1px solid #C9D0FF!important}
 #tl .hdf .dfb,.hdf.hdf .dfb{background:#DDE3FF!important;border:1.5px dashed #9AA6FF!important}
+
+/*RSV2*/.gr td.xr{position:relative;background-image:linear-gradient(to top,#FFD400 0,#FFD400 30%,transparent 30%)}.gr td .rr{position:absolute;top:0;right:1px;font-size:8px;font-weight:800;line-height:10px;color:#000;background:#FFD400;border-radius:3px;padding:0 2px;vertical-align:baseline}.tl.tlr{margin-top:3px;height:26px}.tl.tlr i{top:2px;bottom:2px;line-height:20px}.tl.tlr span{padding:4px 8px}.tl.tlr .rsvt{margin:1px 0;padding:1px 8px}
