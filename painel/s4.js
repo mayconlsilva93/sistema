@@ -408,8 +408,8 @@ function rTip(el,x,y){if(el.dataset.k==="lu"){var id=+el.dataset.i,ya=+$("ra").v
  if(k==="fat")Math.abs(o.fr-o.fat)>1e-6&&L.push("Realizado: "+f(o.fr)),o.fc&&L.push("A realizar: "+f(o.fc)),L.push("Participação no casting: "+pc(o.fat,CT.fat));
  else if(k==="com")Math.abs(o.cr-o.com)>1e-6&&L.push("Realizada: "+f(o.cr)),o.cc&&L.push("A realizar: "+f(o.cc)),L.push("Comissão/Faturamento: "+pc(o.com,o.fat),"Participação no casting: "+pc(o.com,CT.com));
  else if(k==="qtd")o.nr!==o.qtd&&L.push("Realizados: "+o.nr),o.nc&&L.push("A realizar: "+o.nc),L.push("Participação no casting: "+pc(o.qtd,CT.qtd));
- else if(k==="liq")Math.abs(o.lr-o.liq)>1e-6&&L.push("Realizado: "+f(o.lr)),o.lc&&L.push("A realizar: "+f(o.lc)),L.push("Faturamento: "+f(o.fat),"Custos: "+f(o.cus),"Comissão: "+f(o.com),"Líquido/Faturamento: "+pc(o.liq,o.fat),"Participação no casting: "+pc(o.liq,CT.liq));
- else if(k==="cus")Math.abs(o.ur-o.cus)>1e-6&&L.push("Realizado: "+f(o.ur)),o.uc&&L.push("A realizar: "+f(o.uc)),L.push("Custos/Faturamento: "+pc(o.cus,o.fat),"Custos por show: "+f(o.n_?o.cus/o.n_:0),"Participação no casting: "+pc(o.cus,CT.cus));
+ else if(k==="liq")Math.abs(o.lr-o.liq)>1e-6&&L.push("Realizado: "+f(o.lr)),o.lc&&L.push("A realizar: "+f(o.lc)),L.push("Faturamento: "+f(o.fat),"Custos: "+f(o.cus),"Comissão: "+f(o.com),"Líquido/Faturamento: "+pc(o.liq,o.fat));
+ else if(k==="cus")Math.abs(o.ur-o.cus)>1e-6&&L.push("Realizado: "+f(o.ur)),o.uc&&L.push("A realizar: "+f(o.uc)),L.push("Custos/Faturamento: "+pc(o.cus,o.fat),"Custos por show: "+f(o.n_?o.cus/o.n_:0));
  else if(k==="cme")L.push("Faturamento: "+f(o.fat),"Shows: "+Math.round(o.n_));
  else if(k==="cmm")L.push("Comissão: "+f(o.com),"Shows: "+Math.round(o.n_));
  else{L.push("Shows: "+Math.round(o.ts));Object.keys(o.st).sort((a,b)=>o.st[b]-o.st[a]).forEach(s=>L.push(s+": "+o.st[s]));L.push("Participação no casting: "+pc(o.tot,CT.tot))}
