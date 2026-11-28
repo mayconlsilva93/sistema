@@ -276,7 +276,10 @@ var HRE=/^[ \t]*hor[áa]rios?\s*:[^\n]*\n?/im;
 function segsOf(r){var m=/hor[áa]rios?\s*:\s*([^\n]+)/i.exec(String(r.hn||""))||/hor[áa]rios?\s*:\s*([^\n]+)/i.exec(String(r.obs||""));if(!m)return null;var g=parseH(m[1]);return g.length>=2?g:null}
 var _ic=iniC;iniC=function(r){var g=segsOf(r);return g?fmtSegs(g):_ic(r)};
 var _cx=ctxOf;ctxOf=function(r,a){var X=_cx(r,a),g=segsOf(r);if(g){X.ini=X.iniC=fmtSegs(g);X.dur=durFmt(sumDur(g))+" no total ("+g.length+" entradas)"}return X};
-var _wp=waProposta;waProposta=function(r,a){var t=_wp(r,a);return segsOf(r)?t.replace(/^Horário de início da apresentação: /m,"Horários da apresentação: "):t};
+var _wp=waProposta;waProposta=function(r,a){var t=_wp(r,a),g=segsOf(r),h;
+ if(g)h=fmtSegs(g);else{var m=/^(\d{1,2}):(\d{2})/.exec(String(r.ini||"").trim()),d=/^(\d{1,2})(?::(\d{2}))?/.exec(String(r.dur||"").trim());
+  if(m&&d){var s=+m[1]*60+ +m[2],e=(s+(+d[1])*60+(+(d[2]||0)))%1440,f=function(x){return Math.floor(x/60)+":"+String(x%60).padStart(2,"0")},fe=f(e);h=f(s)+" "+(typeof asH==="function"?asH(fe):(Math.floor(e/60)===1?"à":"às"))+" "+fe}else h="a definir"}
+ return t.replace(/^Horário de início da apresentação: .*$/m,"Horário de apresentação: "+h)};
 var _wa=waArtista;waArtista=function(r,a){var t=_wa(r,a),g=segsOf(r);return g?t.replace(/^Horário de início: .*$/m,"Horários: "+fmtSegs(g)).replace(/^Duração: .*$/m,"Duração: "+durFmt(sumDur(g))+" no total"):t};
 /* show confirmado: o que muda junto */
 function onSt(v){if(v!=="Show confirmado")return;var r=cur_(),a=cur.a,ch=[];
