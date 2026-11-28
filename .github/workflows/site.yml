@@ -1,0 +1,28 @@
+name: DROM · Site (agenda e números)
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["DROM · Planilha → apps"]
+    types: [completed]
+  schedule:
+    - cron: "7 3 * * *"   # 00:07 em Brasília (a agenda muda com o dia)
+permissions:
+  contents: write
+concurrency: {group: site, cancel-in-progress: false}
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TZ: America/Sao_Paulo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node tools/site/pull.mjs && node tools/site/gen.js tools/site/data.js site && rm -f tools/site/data.js
+        env:
+          DROM_BKK: ${{ secrets.DROM_BKK }}
+      - run: |
+          git config user.name "drom-bot"; git config user.email "drom-bot@users.noreply.github.com"
+          git add site
+          git diff --cached --quiet || (git commit -qm "site: agenda e números" && (git push -q || (git pull -q --rebase && git push -q)))
