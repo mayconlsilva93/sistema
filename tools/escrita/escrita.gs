@@ -143,13 +143,18 @@ function opCriar(S,p){
   var h=p.h||{},ks=Object.keys(h);ks.forEach(function(t){if(nh(t)==='Nº')throw new Error('Nº é automático')});
   var nk=ks.filter(isNota);ks=ks.filter(function(t){return !isNota(t)});
   var fal=ks.filter(function(t){return !S.has(t)});ks=ks.filter(function(t){return S.has(t)});var C=ks.map(function(t){return S.col(t)});
-  var L=S.nums(),last=DADOS-1,mx=0;L.forEach(function(x,i){if(x!==''&&!isNaN(+x)){last=DADOS+i;mx=Math.max(mx,+x)}});
-  var sh=S.sh,r=last+1,lc=sh.getLastColumn(),n=mx+1;
-  if(r>sh.getMaxRows())sh.insertRowsAfter(sh.getMaxRows(),Math.max(20,r-sh.getMaxRows()));   /* planilha sem linhas livres: cria mais */
-  if(last>=DADOS){var src=sh.getRange(last,1,1,lc),F=src.getFormulas()[0];
+  /* linhas já numeradas na planilha (Nº preenchido, sem data e sem status) são usadas na ordem: a 1ª livre recebe a proposta com o Nº dela */
+  var L=S.nums(),sh=S.sh,lc=sh.getLastColumn(),cD=S.has('DATA DO SHOW')?S.col('DATA DO SHOW'):0,cS=S.has('STATUS')?S.col('STATUS'):0,
+      D=cD?sh.getRange(DADOS,cD,Math.max(L.length,1),1).getDisplayValues():[],T=cS?sh.getRange(DADOS,cS,Math.max(L.length,1),1).getDisplayValues():[],
+      last=DADOS-1,mx=0,free=-1;
+  L.forEach(function(x,i){if(x===''||isNaN(+x))return;var vazia=!String((D[i]||[''])[0]).trim()&&!String((T[i]||[''])[0]).trim();
+    if(vazia){if(free<0)free=i}else{last=DADOS+i;mx=Math.max(mx,+x)}});
+  var r,n;if(free>=0){r=DADOS+free;n=+L[free]}else{r=last+1;n=mx+1}
+  if(r>sh.getMaxRows())sh.insertRowsAfter(sh.getMaxRows(),1);   /* só cria 1 linha se realmente não houver nenhuma */
+  if(free<0&&last>=DADOS){var src=sh.getRange(last,1,1,lc),F=src.getFormulas()[0];
     src.copyTo(sh.getRange(r,1,1,lc));   /* formatação, validações e fórmulas da linha anterior */
     F.forEach(function(f,i){if(!f)sh.getRange(r,i+1).clearContent().clearNote()})}
-  sh.getRange(r,S.cN).setValue(n);
+  if(free<0)sh.getRange(r,S.cN).setValue(n);
   var ign=fal.slice();ks.forEach(function(t,i){var c=sh.getRange(r,C[i]);if(c.getFormula()||!put(c,val(h[t])))ign.push(t)});
   notas(S,r,h,nk,ign);SpreadsheetApp.flush();confPend(S,r,h);S.stamp(r);return {n:n,linha:r,ign:ign}}
 /* grava respeitando a validação da célula: valor fora da lista de outra planilha (ex.: Copiar para outro artista) fica em branco e volta em ign, em vez de derrubar a criação */
