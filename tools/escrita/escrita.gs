@@ -220,10 +220,17 @@ function prop(k){return PropertiesService.getScriptProperties().getProperty(k)}
 /* rotina (de hora em hora). Cada parte só roda se a propriedade do script estiver = 1:
    AUTO_REALIZADO=1 -> "Show confirmado" vira "Show realizado" quando início + duração já passou
    AUTO_CONTRATO=1  -> PDF "[assinado]" em "Contratos com Contratantes" marca CONTRATO = "Sim" na proposta */
+/* AUTO_ORDENAR=1: mantém as propostas classificadas por DATA DO SHOW (linhas com data; as numeradas vazias ficam no fim, como estão) */
+function ordenar(id){var S=Sheet(id),sh=S.sh,cD=S.col('DATA DO SHOW'),n=sh.getLastRow()-DADOS+1;if(n<2)return 0;
+  var D=sh.getRange(DADOS,cD,n,1).getValues(),k=0;D.forEach(function(r,i){if(r[0]!==''&&r[0]!==null)k=i+1});if(k<2)return 0;
+  var ok=true;for(var i=1;i<k;i++){var a=D[i-1][0],b=D[i][0];if(a instanceof Date&&b instanceof Date&&a>b){ok=false;break}}if(ok)return 0;
+  sh.getRange(DADOS,1,k,sh.getLastColumn()).sort([{column:cD,ascending:true},{column:S.cN,ascending:true}]);return 1}
+function autoOrdenar(){var t=0;CARIMBO.forEach(function(id){try{t+=ordenar(id)}catch(e){}});return t}
 function rotina(){var L=[];
   if(prop('AUTO_REALIZADO')==='1')try{L.push('realizados: '+autoRealizado(new Date()))}catch(e){L.push('realizados: erro '+e)}
   if(prop('AUTO_DESCARTE')==='1')try{L.push('descartadas: '+resumoDesc(autoDescarte(new Date(),true)))}catch(e){L.push('descartadas: erro '+e)}
   if(prop('AUTO_CONTRATO')==='1')try{L.push('contratos: '+autoContrato())}catch(e){L.push('contratos: erro '+e)}
+  if(prop('AUTO_ORDENAR')==='1')try{L.push('planilhas reordenadas: '+autoOrdenar())}catch(e){L.push('ordenar: erro '+e)}
   Logger.log(L.join(' · ')||'rotina: nada ligado (AUTO_REALIZADO / AUTO_CONTRATO)');return L}
 
 /* hora "HH:MM" (texto, Date de célula de hora ou fração do dia) -> minutos; null se não for hora (ex.: "a definir") */
