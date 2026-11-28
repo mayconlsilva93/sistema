@@ -125,6 +125,10 @@ function opComissao(S,p){   /* booker: comissão paga -> STATUS COMISSÃO = "Pag
   if(nh(c.getValue())==='PAGO')return {n:+p.n,ja:1};
   c.setValue('Pago');S.stamp(r);return {n:+p.n,scom:'Pago'}}
 
+/* show confirmado: CACHÊ RECEBIDO?, STATUS ARTISTA e STATUS COMISSÃO vazios viram Pendente; comissão 0 = Pago */
+function confPend(S,r,h){var st=Object.keys(h).filter(function(t){return nh(t)==='STATUS'})[0];if(!st||nh(h[st])!=='SHOW CONFIRMADO')return;
+  [['CACHÊ RECEBIDO?','Pendente'],['STATUS ARTISTA','Pendente'],['STATUS COMISSÃO',null]].forEach(function(x){if(!S.has(x[0]))return;var c=S.sh.getRange(r,S.col(x[0]));if(c.getFormula()||String(c.getDisplayValue()).trim())return;
+    var v=x[1];if(v===null){var cm=S.has('COMISSÃO')?parseFloat(String(S.sh.getRange(r,S.col('COMISSÃO')).getValue()).replace(/[^\d,.-]/g,'').replace(/\.(?=\d{3})/g,'').replace(',','.'))||0:0;v=cm===0?'Pago':'Pendente'}put(c,v)})}
 function opEditar(S,p){
   var r=S.row(p.n),h=p.h||{},ks=Object.keys(h);if(!ks.length)throw new Error('nada para gravar');
   ks.forEach(function(t){if(nh(t)==='Nº')throw new Error('Nº não pode ser alterado')});
@@ -133,7 +137,7 @@ function opEditar(S,p){
   var C=ks.map(function(t){return S.col(t)}),n=0;   /* tudo verificado antes de gravar */
   n+=notas(S,r,h,nk,ign);
   ks.forEach(function(t,i){var c=S.sh.getRange(r,C[i]);if(c.getFormula()){ign.push(t);return}c.setValue(val(h[t]));n++});   /* célula com fórmula nunca é sobrescrita */
-  S.stamp(r);return {n:+p.n,campos:n,ign:ign}}
+  confPend(S,r,h);S.stamp(r);return {n:+p.n,campos:n,ign:ign}}
 
 function opCriar(S,p){
   var h=p.h||{},ks=Object.keys(h);ks.forEach(function(t){if(nh(t)==='Nº')throw new Error('Nº é automático')});
@@ -146,7 +150,7 @@ function opCriar(S,p){
     F.forEach(function(f,i){if(!f)sh.getRange(r,i+1).clearContent().clearNote()})}
   sh.getRange(r,S.cN).setValue(n);
   var ign=fal.slice();ks.forEach(function(t,i){var c=sh.getRange(r,C[i]);if(c.getFormula()||!put(c,val(h[t])))ign.push(t)});
-  notas(S,r,h,nk,ign);S.stamp(r);return {n:n,linha:r,ign:ign}}
+  notas(S,r,h,nk,ign);SpreadsheetApp.flush();confPend(S,r,h);S.stamp(r);return {n:n,linha:r,ign:ign}}
 /* grava respeitando a validação da célula: valor fora da lista de outra planilha (ex.: Copiar para outro artista) fica em branco e volta em ign, em vez de derrubar a criação */
 function put(c,v){try{var dv=c.getDataValidation&&c.getDataValidation();
     if(dv&&!dv.getAllowInvalid()&&v!==''&&dv.getCriteriaType()==SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST){var L=dv.getCriteriaValues()[0]||[];if(L.map(String).indexOf(String(v))<0)return false}
