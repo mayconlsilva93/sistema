@@ -145,6 +145,7 @@ function opCriar(S,p){
   var fal=ks.filter(function(t){return !S.has(t)});ks=ks.filter(function(t){return S.has(t)});var C=ks.map(function(t){return S.col(t)});
   var L=S.nums(),last=DADOS-1,mx=0;L.forEach(function(x,i){if(x!==''&&!isNaN(+x)){last=DADOS+i;mx=Math.max(mx,+x)}});
   var sh=S.sh,r=last+1,lc=sh.getLastColumn(),n=mx+1;
+  if(r>sh.getMaxRows())sh.insertRowsAfter(sh.getMaxRows(),Math.max(20,r-sh.getMaxRows()));   /* planilha sem linhas livres: cria mais */
   if(last>=DADOS){var src=sh.getRange(last,1,1,lc),F=src.getFormulas()[0];
     src.copyTo(sh.getRange(r,1,1,lc));   /* formatação, validações e fórmulas da linha anterior */
     F.forEach(function(f,i){if(!f)sh.getRange(r,i+1).clearContent().clearNote()})}
